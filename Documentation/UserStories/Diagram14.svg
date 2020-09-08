@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="40cm" height="24cm" viewBox="45 29 792 462" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #90ee90" x="200.6" y="30.5" width="635" height="460"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 4; stroke: #000000" x="200.6" y="30.5" width="635" height="460"/>
+  </g>
+  <text font-size="16.9333" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="472.6" y="62.5">
+    <tspan x="472.6" y="62.5">Master</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="369.6" y="77.5" width="206.65" height="43"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="369.6" y="77.5" width="206.65" height="43"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="472.925" y="102.881">
+      <tspan x="472.925" y="102.881">Wait for REQ/REP connection</tspan>
+    </text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="473.834,156.164 570.067,209.305 473.834,262.446 377.6,209.305 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="473.834,156.164 570.067,209.305 473.834,262.446 377.6,209.305 "/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="473.834" y="205.186">
+      <tspan x="473.834" y="205.186">Does Channel</tspan>
+      <tspan x="473.834" y="221.186">Exist?</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="396.276" y1="394.5" x2="166.072" y2="393.519"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="173.857,388.552 163.836,393.51 173.815,398.552 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="223.6" y="386.5">
+    <tspan x="223.6" y="386.5">Return channel port</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="472.924" y1="120.5" x2="473.72" y2="151.693"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="468.524,144.059 473.777,153.928 478.52,143.804 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="166.602" y1="98" x2="365.128" y2="98.978"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="357.339,103.94 367.364,98.989 357.389,93.9398 "/>
+  </g>
+  <text font-size="16.9333" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="46.5" y="93.05">
+    <tspan x="46.5" y="93.05">Pub/Sub Node</tspan>
+    <tspan x="46.5" y="114.217">REQ</tspan>
+  </text>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="229.6" y="91.5">
+    <tspan x="229.6" y="91.5">Port request</tspan>
+  </text>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="462.6" y="249.5">
+    <tspan x="462.6" y="249.5">Yes</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="381.8" y="299.5" width="184.6" height="38"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="381.8" y="299.5" width="184.6" height="38"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="474.1" y="322.381">
+      <tspan x="474.1" y="322.381">Look up port information</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="473.834" y1="262.446" x2="474.068" y2="295.028"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="469.012,287.3 474.084,297.264 479.012,287.228 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="536.6" y="213.5">
+    <tspan x="536.6" y="213.5">No</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="621.6" y="140.5" width="122" height="141"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="621.6" y="140.5" width="122" height="141"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="682.6" y="182.881">
+      <tspan x="682.6" y="182.881">Fork new</tspan>
+      <tspan x="682.6" y="198.881">forwarder</tspan>
+      <tspan x="682.6" y="214.881">process</tspan>
+      <tspan x="682.6" y="230.881">w/specified</tspan>
+      <tspan x="682.6" y="246.881">name/ports</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="570.068" y1="209.304" x2="617.13" y2="210.853"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="609.206,215.595 619.365,210.926 609.535,205.6 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="396.276" y="375.5" width="158.65" height="38"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="396.276" y="375.5" width="158.65" height="38"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="475.601" y="398.381">
+      <tspan x="475.601" y="398.381">Package up port data</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="474.1" y1="337.5" x2="475.424" y2="371.031"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="470.121,363.471 475.512,373.266 480.113,363.076 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="629.6" y="367" width="106" height="54"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="629.6" y="367" width="106" height="54"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="682.6" y="389.881">
+      <tspan x="682.6" y="389.881">Record in</tspan>
+      <tspan x="682.6" y="405.881">database</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="682.6" y1="281.5" x2="682.6" y2="362.528"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="677.6,354.764 682.6,364.764 687.6,354.764 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="629.6" y1="394" x2="559.398" y2="394.47"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="567.128,389.418 557.162,394.485 567.195,399.418 "/>
+  </g>
+  <text font-size="16.9333" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="45.5" y="381.05">
+    <tspan x="45.5" y="381.05">Pub/Sub Node</tspan>
+    <tspan x="45.5" y="402.217">REP</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="475.6,413.5 476.6,464.5 793.6,463.5 794.6,98.5 580.722,98.9898 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="588.475,93.972 578.486,98.9949 588.497,103.972 "/>
+  </g>
+</svg>

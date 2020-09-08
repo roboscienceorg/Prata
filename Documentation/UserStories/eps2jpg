@@ -1,0 +1,255 @@
+#!/bin/sh
+#
+# The eps2jpg script converts eps files to jpg via Ghostscript.
+#
+# Copyright (c) 2003,2004,2005,2006,2007,2008,2009,2010,2011,2013,2015
+# Wouter Kager
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+program=`basename $0`
+version=2015/08/01
+gsopts="-q -dSAFER -dNOPAUSE -dBATCH"
+psfile=/dev/null
+force=n
+hres=300
+vres=300
+fixbb=n
+hires=
+mode=
+gaa="-dGraphicsAlphaBits=4"
+taa="-dTextAlphaBits=4"
+qual=
+angle=0
+xscale=1
+yscale=1
+width=
+height=
+outdir=
+
+echo "$program $version by Wouter Kager"
+
+# Scan command line options.
+while getopts :a:Bcd:fgh:Ho:q:r:s:w: optionkey $*; do
+	case $optionkey in
+		a)	gaa=`echo $OPTARG,$OPTARG | cut -d , -f 1`
+			taa=`echo $OPTARG,$OPTARG | cut -d , -f 2`
+			if [ $gaa = 1 -o $gaa = 2 -o $gaa = 4 ]; then
+				gaa="-dGraphicsAlphaBits=$gaa"
+			else
+				gaa=
+			fi
+			if [ $taa = 1 -o $taa = 2 -o $taa = 4 ]; then
+				taa="-dTextAlphaBits=$taa"
+			else
+				taa=
+			fi ;;
+		B)	fixbb=y ;;
+		c)	mode=cmyk ;;
+		d)	hres=`echo $OPTARG,$OPTARG | cut -d , -f 1`
+			vres=`echo $OPTARG,$OPTARG | cut -d , -f 2` ;;
+		f)	force=y ;;
+		g)	mode=gray ;;
+		h)	height=`echo "$OPTARG" | sed 's/[0-9\.]*/& /'` ;;
+		H)	hires=HiRes ;;
+		o)	outdir="$OPTARG" ;;
+		q)	qual="-dJPEGQ=$OPTARG" ;;
+		r)	angle=$OPTARG ;;
+		s)	xscale=`echo $OPTARG,$OPTARG | cut -d , -f 1`
+			yscale=`echo $OPTARG,$OPTARG | cut -d , -f 2` ;;
+		w)	width=`echo "$OPTARG" | sed 's/[0-9\.]*/& /'` ;;
+		:)	echo "$program: the option -$OPTARG requires an argument!"
+			echo "$program: run $program without arguments for help"
+			exit 1 ;;
+		?)	echo "$program: the option -$OPTARG is illegal!"
+			echo "$program: run $program without arguments for help"
+			exit 1 ;;
+	esac
+done
+
+shift `expr $OPTIND - 1`
+
+# Check if there are any input files.
+if [ ${#} -eq 0 ]; then
+	cat <<-EOF
+
+		Usage: $program [options] [psfile] epsfile(s)
+		
+		The valid options are:
+		 -a aa        antialiasing, aa can be 0,1,2,4 (default=4)
+		 -a gaa,taa   sets aa values for graphics,text separately
+		 -B           use Ghostscript to correct the Bounding Box
+		 -c           sets color space of the output file to CMYK
+		 -d res       specify image resolution (dpi), default=300
+		 -d hres,vres sets horizontal & vertical resolution (dpi)
+		 -f           force files to be overwritten if they exist
+		 -g           sets color space of the output file to gray
+		 -h height    scale image to desired height (cm/mm/in/px)
+		 -H           use HiResBoundingBox instead of BoundingBox
+		 -o dir       set directory where output files are stored
+		 -q quality   set quality level from 0 to 100, default=75
+		 -r angle     rotate counter-clockwise by angle (degrees)
+		 -s scale     scale image by the requested scaling factor
+		 -s hsc,vsc   sets horizontal,vertical scaling separately
+		 -w width     scale image to specific width (cm/mm/in/px)
+		EOF
+	exit 0
+fi
+
+#--------------------------- Function definitions ---------------------------
+
+# find_bbox scans $1 for the bounding box.
+find_bbox ()
+{
+	if [ $fixbb = y ]; then
+		# try to capture parts of the image at negative coordinates too.
+		set -- `gs $gsopts -sDEVICE=bbox -r100 -g1000000x1000000 \
+			-c "999 999 translate" -f "$1" 2>&1 |
+			awk '/HiRes/ { print $4-$2,$5-$3,$2-999,$3-999 }'`
+	else
+		# tr translates CR to NL to convert dos/mac fileformats to unix; awk
+		# grabs either the first or the last (atend) BoundingBox line.
+		set -- `cat "$1" | tr -s "\r" "\n" |
+			sed -n 's/^%%'$hires'BoundingBox: //p' |
+			awk 'BEGIN {w=0; h=0; x=0; y=0}
+			/-?[0-9\.]+ -?[0-9\.]+ -?[0-9\.]+ -?[0-9\.]+/ {
+				w=$3-$1; h=$4-$2; x=$1; y=$2; if (NR==1) {exit}}
+			END {print w,h,x,y}'`
+	fi
+
+	wd=$1; ht=$2; bx=$3; by=$4
+}
+
+# set_pscode sets the PostScript code passed on to Ghostscript.
+set_pscode ()
+{
+	pscode=
+	if [ -n "$width$height" -o $xscale$yscale != 11 -o $angle != 0 ]; then
+		pscode="/!{def}def/in{72 mul}!/cm{2.54 div in}!/mm{25.4 div in}!"
+
+		if [ -n "$width" ]; then
+			pscode="$pscode/px{$hres div in}! $width $wd div"
+			if [ -n "$height" ]; then
+				pscode="$pscode/px{$vres div in}! $height $ht div"
+			else
+				pscode="$pscode dup"
+			fi
+		else
+			if [ -n "$height" ]; then
+				pscode="$pscode/px{$vres div in}! $height $ht div dup"
+			else
+				pscode="$pscode $xscale $yscale"
+			fi
+		fi
+
+		pscode="$pscode 2 copy exch $wd mul exch $ht mul add dup translate"
+		pscode="$pscode $angle rotate scale $bx neg $by neg translate"
+
+		# find coordinates of the new bounding box.
+		drawbb="0 setlinewidth $bx $by $wd $ht rectstroke showpage"
+		set -- `gs $gsopts -sDEVICE=bbox -c "$pscode $drawbb" 2>&1 |
+				awk '/HiRes/ { print $4-$2,$5-$3,$2,$3 }'`
+
+		wd=$1; ht=$2; bx=$3; by=$4
+	fi
+
+	pscode="5 dict begin $bx neg $by neg translate $pscode end"
+	pscode="<</PageSize [$wd $ht]>>setpagedevice $pscode"
+}
+
+# distill converts $1 to $base.jpg via Ghostscript.
+distill ()
+{
+	set_pscode
+	log=`gs $gsopts -sDEVICE=jpeg$mode -sOutputFile="$outbase.jpg" $gaa $taa \
+		-r$hres"x"$vres $qual -c "$pscode" -f - "$1" < "$psfile" 2>/dev/null`
+
+	if [ $? -ne 0 ]; then
+		echo [error]
+		echo "$program: Ghostscript says:"
+		echo
+		echo "$log"
+		continue
+	fi
+}
+
+# check_file verifies whether $1 exists and is readable.
+check_file ()
+{
+	if [ ! -f "$1" ]; then
+		echo "$program: file $1: no such file (skipping)"
+		continue
+	fi
+	if [ ! -r "$1" ]; then
+		echo "$program: file $1: not readable (skipping)"
+		continue
+	fi
+}
+
+#------------------------- End of function definitions ----------------------
+
+# Loop through all files specified on the command line.
+for file
+do
+
+OK=y
+echo
+
+# Prepend ps file.
+base=`echo "$file" | sed 's/\.ps$//'`
+if [ "$file" = "$base.ps" ]; then
+	check_file "$file"
+	echo "$program: prepending file $file"
+	psfile="$file"
+	continue
+fi
+
+# Process eps file.
+base=`echo "$file" | sed 's/\.eps$//'`
+outbase="$base"
+if [ -n "$outdir" ]; then
+	outbase="$outdir/`basename $base`"
+fi
+check_file "$base.eps"
+echo "$program: processing file $base.eps"
+
+# Find bounding box.
+find_bbox "$base.eps"
+if [ $wd = 0 -o $ht = 0 ]; then
+	echo "$program: no $hires Bounding Box found (skipping)"
+	continue
+fi
+
+# Overwrite existing jpg file only if user agrees.
+if [ -w "$outbase.jpg" -a $force = n ]; then
+	echo "$program: warning, the file $outbase.jpg exists!"
+	printf "$program: should I overwrite it (y/n)? "
+	read OK
+fi
+
+# Perform conversion or skip file.
+if [ "$OK" = y ]; then
+	printf "$program: $base.eps -> $outbase.jpg "
+	distill "$base.eps"
+	echo [ok]
+else
+	echo "$program: file $base.eps skipped [ok]"
+fi
+
+done

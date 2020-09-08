@@ -1,0 +1,274 @@
+#!/bin/sh
+#
+# The eps2pdf script converts eps files to pdf via Ghostscript.
+#
+# Copyright (c) 2003,2004,2005,2006,2007,2008,2009,2010,2011,2013,2015
+# Wouter Kager
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+program=`basename $0`
+version=2015/08/01
+gsopts="-q -dSAFER -dNOPAUSE -dBATCH"
+psfile=/dev/null
+force=n
+dres=
+fixbb=n
+hires=
+level=1.3
+model=
+qual=
+angle=0
+xscale=1
+yscale=1
+width=
+height=
+outdir=
+
+echo "$program $version by Wouter Kager"
+
+# Scan command line options.
+while getopts :Bd:fh:Hj:l:m:o:r:s:w: optionkey $*; do
+	case $optionkey in
+		B)	fixbb=y ;;
+		d)	dres=$OPTARG ;;
+		f)	force=y ;;
+		h)	height=`echo "$OPTARG" | sed 's/[0-9\.]*/& /'` ;;
+		H)	hires=HiRes ;;
+		j)	qual=`expr 100 - $OPTARG` ;;
+		l)	level=$OPTARG ;;
+		m)	model="-dProcessColorModel=/Device$OPTARG"
+			model="$model -dColorConversionStrategy=/$OPTARG" ;;
+		o)	outdir="$OPTARG" ;;
+		r)	angle=$OPTARG ;;
+		s)	xscale=`echo $OPTARG,$OPTARG | cut -d , -f 1`
+			yscale=`echo $OPTARG,$OPTARG | cut -d , -f 2` ;;
+		w)	width=`echo "$OPTARG" | sed 's/[0-9\.]*/& /'` ;;
+		:)	echo "$program: the option -$OPTARG requires an argument!"
+			echo "$program: run $program without arguments for help"
+			exit 1 ;;
+		?)	echo "$program: the option -$OPTARG is illegal!"
+			echo "$program: run $program without arguments for help"
+			exit 1 ;;
+	esac
+done
+
+shift `expr $OPTIND - 1`
+
+# Check if there are any input files.
+if [ ${#} -eq 0 ]; then
+	cat <<-EOF
+
+		Usage: $program [options] [psfile] epsfile(s)
+		
+		The valid options are:
+		 -B           use Ghostscript to correct the Bounding Box
+		 -d res       set distiller and sampling resolution (dpi)
+		 -f           force files to be overwritten if they exist
+		 -h height    scale image to desired height (in cm/mm/in)
+		 -H           use HiResBoundingBox instead of BoundingBox
+		 -j quality   use JPEG compression, quality from 1 to 100
+		 -l level     set PDF level to 1.2, 1.3 (default), or 1.4
+		 -m model     set color model to either RGB, CMYK or Gray
+		 -o dir       set directory where output files are stored
+		 -r angle     rotate counter-clockwise by angle (degrees)
+		 -s scale     scale image by the requested scaling factor
+		 -s hsc,vsc   sets horizontal,vertical scaling separately
+		 -w width     scale image to specific width (in cm/mm/in)
+		EOF
+	exit 0
+fi
+
+#--------------------------- Function definitions ---------------------------
+
+# find_bbox scans $1 for the bounding box.
+find_bbox ()
+{
+	if [ $fixbb = y ]; then
+		# try to capture parts of the image at negative coordinates too.
+		set -- `gs $gsopts -sDEVICE=bbox -r100 -g1000000x1000000 \
+			-c "999 999 translate" -f "$1" 2>&1 |
+			awk '/HiRes/ { print $4-$2,$5-$3,$2-999,$3-999 }'`
+	else
+		# tr translates CR to NL to convert dos/mac fileformats to unix; awk
+		# grabs either the first or the last (atend) BoundingBox line.
+		set -- `cat "$1" | tr -s "\r" "\n" |
+			sed -n 's/^%%'$hires'BoundingBox: //p' |
+			awk 'BEGIN {w=0; h=0; x=0; y=0}
+			/-?[0-9\.]+ -?[0-9\.]+ -?[0-9\.]+ -?[0-9\.]+/ {
+				w=$3-$1; h=$4-$2; x=$1; y=$2; if (NR==1) {exit}}
+			END {print w,h,x,y}'`
+	fi
+
+	wd=$1; ht=$2; bx=$3; by=$4
+}
+
+# set_pscode sets the PostScript code passed on to Ghostscript.
+set_pscode ()
+{
+	pscode=
+	if [ -n "$width$height" -o $xscale$yscale != 11 -o $angle != 0 ]; then
+		pscode="/!{def}def/in{72 mul}!/cm{2.54 div in}!/mm{25.4 div in}!"
+
+		if [ -n "$width" ]; then
+			pscode="$pscode $width $wd div"
+			if [ -n "$height" ]; then
+				pscode="$pscode $height $ht div"
+			else
+				pscode="$pscode dup"
+			fi
+		else
+			if [ -n "$height" ]; then
+				pscode="$pscode $height $ht div dup"
+			else
+				pscode="$pscode $xscale $yscale"
+			fi
+		fi
+
+		pscode="$pscode 2 copy exch $wd mul exch $ht mul add dup translate"
+		pscode="$pscode $angle rotate scale $bx neg $by neg translate"
+
+		# find coordinates of the new bounding box.
+		drawbb="0 setlinewidth $bx $by $wd $ht rectstroke showpage"
+		set -- `gs $gsopts -sDEVICE=bbox -c "$pscode $drawbb" 2>&1 |
+				awk '/HiRes/ { print $4-$2,$5-$3,$2,$3 }'`
+
+		wd=$1; ht=$2; bx=$3; by=$4
+	fi
+
+	pscode="5 dict begin $bx neg $by neg translate $pscode end"
+	pscode="<</PageSize [$wd $ht]>>setpagedevice $pscode"
+}
+
+# set_dp sets the distiller compression and resampling parameters.
+set_dp ()
+{
+	gsres=
+	dp="systemdict/setdistillerparams known{<<"
+	dp="$dp/EmbedAllFonts true/SubsetFonts true"
+	dp="$dp/AutoFilterColorImages false/AutoFilterGrayImages false"
+	dp="$dp/AntiAliasColorImages true/AntiAliasGrayImages true"
+
+	if [ -n "$qual" ]; then
+		dp="$dp/ColorImageFilter/DCTEncode/GrayImageFilter/DCTEncode"
+		dp="$dp/ColorImageDict<</QFactor 0.$qual/ColorTransform 1"
+		dp="$dp/Blend 1/HSamples [1 1 1 1]/VSamples [1 1 1 1]>>"
+		dp="$dp/GrayImageDict<</QFactor 0.$qual/ColorTransform 1"
+		dp="$dp/Blend 1/HSamples [1 1 1 1]/VSamples [1 1 1 1]>>"
+	else
+		dp="$dp/ColorImageFilter/FlateEncode/GrayImageFilter/FlateEncode"
+	fi
+
+	if [ -n "$dres" ]; then
+		dp="$dp/DownsampleColorImages true/ColorImageResolution $dres"
+		dp="$dp/ColorImageDownsampleThreshold 1.0"
+		dp="$dp/DownsampleGrayImages true/GrayImageResolution $dres"
+		dp="$dp/GrayImageDownsampleThreshold 1.0"
+		dp="$dp/DownsampleMonoImages true/MonoImageResolution $dres"
+		dp="$dp/MonoImageDownsampleThreshold 1.0"
+		gsres="-r$dres"
+	fi
+
+	dp="$dp>>setdistillerparams}if"
+}
+
+# distill converts $1 to $base.pdf via Ghostscript.
+distill ()
+{
+	set_pscode
+	log=`gs $gsopts -sDEVICE=pdfwrite -sOutputFile="$outbase.pdf" $gsres \
+		-dPDFSETTINGS=/prepress -dCompatibilityLevel=$level $model \
+		-c ".setpdfwrite $dp $pscode" -f - "$1" < "$psfile" 2>/dev/null`
+
+	if [ $? -ne 0 ]; then
+		echo [error]
+		echo "$program: Ghostscript says:"
+		echo
+		echo "$log"
+		continue
+	fi
+}
+
+# check_file verifies whether $1 exists and is readable.
+check_file ()
+{
+	if [ ! -f "$1" ]; then
+		echo "$program: file $1: no such file (skipping)"
+		continue
+	fi
+	if [ ! -r "$1" ]; then
+		echo "$program: file $1: not readable (skipping)"
+		continue
+	fi
+}
+
+#------------------------- End of function definitions ----------------------
+
+# Set the distiller parameters.
+set_dp
+
+# Loop through all files specified on the command line.
+for file
+do
+
+OK=y
+echo
+
+# Prepend ps file.
+base=`echo "$file" | sed 's/\.ps$//'`
+if [ "$file" = "$base.ps" ]; then
+	check_file "$file"
+	echo "$program: prepending file $file"
+	psfile="$file"
+	continue
+fi
+
+# Process eps file.
+base=`echo "$file" | sed 's/\.eps$//'`
+outbase="$base"
+if [ -n "$outdir" ]; then
+	outbase="$outdir/`basename $base`"
+fi
+check_file "$base.eps"
+echo "$program: processing file $base.eps"
+
+# Find bounding box.
+find_bbox "$base.eps"
+if [ $wd = 0 -o $ht = 0 ]; then
+	echo "$program: no $hires Bounding Box found (skipping)"
+	continue
+fi
+
+# Overwrite existing pdf file only if user agrees.
+if [ -w "$outbase.pdf" -a $force = n ]; then
+	echo "$program: warning, the file $outbase.pdf exists!"
+	printf "$program: should I overwrite it (y/n)? "
+	read OK
+fi
+
+# Perform conversion or skip file.
+if [ "$OK" = y ]; then
+	printf "$program: $base.eps -> $outbase.pdf "
+	distill "$base.eps"
+	echo [ok]
+else
+	echo "$program: file $base.eps skipped [ok]"
+fi
+
+done

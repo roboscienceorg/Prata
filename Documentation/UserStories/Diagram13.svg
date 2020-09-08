@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="24cm" height="13cm" viewBox="45 29 477 243" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #add8e6" x="46.5" y="30.5" width="474.4" height="240.7"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="46.5" y="30.5" width="474.4" height="240.7"/>
+  </g>
+  <g>
+    <rect style="fill: #90ee90" x="206.232" y="42.76" width="154" height="38"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="206.232" y="42.76" width="154" height="38"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="283.232" y="65.6412">
+      <tspan x="283.232" y="65.6412">Master</tspan>
+    </text>
+  </g>
+  <g>
+    <ellipse style="fill: #ffc0cb" cx="128.812" cy="230.196" rx="47.3124" ry="18.1164"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="128.812" cy="230.196" rx="47.3124" ry="18.1164"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="128.812" y="234.078">
+      <tspan x="128.812" y="234.078">Pub1</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #d69ffe" x="246.674" y="212.26" width="88.1" height="38"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="246.674" y="212.26" width="88.1" height="38"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="290.724" y="235.141">
+      <tspan x="290.724" y="235.141">Channel A</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="176.125" y1="230.2" x2="242.202" y2="231.193"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="234.364,236.076 244.438,231.226 234.514,226.077 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="199.897" y="224.66">
+    <tspan x="199.897" y="224.66">Pub</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #fda0b3" cx="128.812" cy="158.876" rx="47.3124" ry="18.1164"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="128.812" cy="158.876" rx="47.3124" ry="18.1164"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="128.812" y="162.758">
+      <tspan x="128.812" y="162.758">Pub2</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="176.125" y1="158.88" x2="243.108" y2="209.562"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="233.899,208.864 244.891,210.911 239.933,200.89 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="203.5" y="172.6">
+    <tspan x="203.5" y="172.6">Pub</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #ffde00" cx="440.813" cy="136.615" rx="47.4126" ry="18.1548"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="440.813" cy="136.615" rx="47.4126" ry="18.1548"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="440.813" y="140.496">
+      <tspan x="440.813" y="140.496">Sub2</tspan>
+    </text>
+  </g>
+  <g>
+    <ellipse style="fill: #f4fa53" cx="441.305" cy="231.655" rx="47.4126" ry="18.1548"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="441.305" cy="231.655" rx="47.4126" ry="18.1548"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="441.305" y="235.536">
+      <tspan x="441.305" y="235.536">Sub1</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="334.774" y1="231.26" x2="389.42" y2="231.63"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="381.622,236.577 391.656,231.645 381.69,226.577 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="343.394" y="226.74">
+    <tspan x="343.394" y="226.74">Sub</tspan>
+  </text>
+  <g>
+    <rect style="fill: #af7ffc" x="243.35" y="117.02" width="87.4" height="38"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="243.35" y="117.02" width="87.4" height="38"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="287.05" y="139.901">
+      <tspan x="287.05" y="139.901">Channel B</tspan>
+    </text>
+  </g>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="283.7" y1="150.85" x2="283.7" y2="150.85"/>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="330.75" y1="136.02" x2="388.928" y2="136.577"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="381.117,141.503 391.164,136.599 381.212,131.503 "/>
+  </g>
+</svg>

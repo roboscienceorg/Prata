@@ -1,0 +1,18 @@
+[package]
+name = "TALA"
+version = "0.1.0"
+edition = "2018"
+authors = ["Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>", ""]
+
+[dependencies]
+pyo3 = "0.12.1"
+zmq = "0.9"
+libc = "0.2.77"
+
+[lib]
+name = "TALA"
+crate-type = ["cdylib"]
+
+[features]
+# We must make this feature optional to build binaries such as the profiling crate
+default = ["zmq/vendored", "pyo3/extension-module"]

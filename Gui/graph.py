@@ -5,6 +5,14 @@ HEIGHT = 700
 WIDTH = 800
 root = tk.Tk()
 
+pub1 = np.array(["192.168.1.1","192.168.1.3","192.168.1.2"])
+pub2 = np.array(["192.168.1.3","192.168.1.4","192.168.1.5","192.168.2.3","192.168.2.4","192.168.2.5"])
+sub1 = np.array(["192.168.2.1","192.168.2.2","192.168.2.3"])
+cords = [400,90]
+channel1 = np.array([pub1,sub1,cords])
+channel2 = np.array([pub2,sub1,cords])
+channels = {"channel1":channel1,"channel2":channel2}
+
 class ResizingCanvas(tk.Canvas):
     def __init__(self,parent,**kwargs):
         tk.Canvas.__init__(self,parent,**kwargs)
@@ -23,36 +31,57 @@ class ResizingCanvas(tk.Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all",0,0,wscale,hscale)
 
-def seperateData():
-	pub1 = np.array(["192.168.1.1","192.168.1.2","192.168.1.3"])
-	pub2 = np.array(["192.168.1.3","192.168.1.4","192.168.1.5"])
-	sub1 = np.array(["192.168.2.1","192.168.2.2","192.168.2.2"])
-	pubs = np.array([pub1,pub2])
-	subs = np.array([sub1])
-	publishers = np.array([])
-	channels = np.array(["192.168.3.1"])
-	subscribers = np.array([])
+class graphing(tk.Canvas):
+    def __init__(self,parent,**kwargs):
+        tk.Canvas.__init__(self,parent,**kwargs)
 
-	for x in range(0,len(pubs)):
-		for y in pubs[x]:
-			if y not in publishers:
-				publishers = np.append(publishers, y)
+    def plotPoint(self,canvas,dic,type):
 
-	for x in range(0,len(subs)):
-		for y in subs[x]:
-			if y not in subscribers:
-				subscribers = np.append(subscribers, y)
+        canvas.create_oval(dic[0], dic[1], dic[0]+20, \
+            dic[1]+20, fill="black")
+        canvas.create_text(dic[0]-15, dic[1],  text=str(type), anchor='e')
+    
+    def drawArrow(self,canvas,start,end):
+        canvas.create_line(start[0]+10, start[1]+10, end[0]+10, end[1]+10, arrow=tk.LAST)
 
-	return publishers, channels, subscribers
+    def createGraph(self,channels,canvas):
+        publishers = {}
+        subscribers = {}
+        channel_count = 0
+        x_channel = int(WIDTH / 2)
+        y_channel = int(HEIGHT / (len(channels)*2))
 
-def plot(publishers,canvas,x_offset,y_offset,type):
-	y = int(HEIGHT / (len(publishers)*2))
-	x = int(WIDTH / 6)
-	for i in range(len(publishers)):
-		canvas.create_oval(x+x_offset, y*i+y_offset, x+x_offset+20, \
-			y*i+y_offset+20, fill="black")
-		canvas.create_text(x+x_offset, y*i+y_offset-15,  text=str(type)+str(i), anchor='n')
+        for channel in channels:
+            for pubs in channels[channel][0]:
+                if pubs not in publishers:
+                    publishers[pubs] = [0,0]
 
+            for subs in channels[channel][1]:
+                if subs not in subscribers:
+                    subscribers[subs] = [0,0]
+
+            channels[channel][2] = [x_channel, y_channel * channel_count + 20]
+            graph.plotPoint(canvas,channels[channel][2],channel)
+            channel_count += 1
+
+    
+        graph.calculatePoint(publishers,6)
+        graph.calculatePoint(subscribers,1)
+
+        for channel in channels:
+            for pubs in channels[channel][0]:
+                graph.drawArrow(canvas,publishers[pubs],channels[channel][2])
+            for subs in channels[channel][1]:
+                graph.drawArrow(canvas,channels[channel][2],subscribers[subs])
+
+    def calculatePoint(self,object_dic,x_offset):
+        x_pub = int(WIDTH / x_offset)
+        y_pub = int(HEIGHT / (len(object_dic)*2))
+        object_count = 0
+        for ip in object_dic:
+            object_dic[ip] = [x_pub,y_pub*object_count+20]
+            graph.plotPoint(canvas,object_dic[ip],ip)
+            object_count += 1
 
 
 
@@ -61,10 +90,7 @@ myframe.pack(fill="both", expand=True)
 canvas = ResizingCanvas(myframe,width=850, height=400, bg="white", highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 
-publishers,channels,subscribers = seperateData()	
-
-plot(publishers,canvas,50,50,"Pub")
-plot(channels,canvas,325,50,"channel")
-plot(subscribers,canvas,650,50,"Sub")
+graph = graphing(canvas)
+publihsers = graph.createGraph(channels,canvas)
 
 root.mainloop()

@@ -37,6 +37,7 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     m.add_wrapped(wrap_pyfunction!(host))?;
     m.add_wrapped(wrap_pyfunction!(subscriber))?;
+    m.add_wrapped(wrap_pyfunction!(installTest))?;
 
     m.add_class::<Master>()?;
     m.add_class::<Subscriber>()?;
@@ -46,6 +47,11 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
 }
 
 //Python connectors
+
+#[pyfunction]
+fn installTest(_py: Python){
+  println!("The Test succeeded you can now use TALA");
+}
 
 //Python Host Master
 #[pyfunction]

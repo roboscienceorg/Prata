@@ -3,6 +3,8 @@ import tkinter as tk
 # pip install pillow
 from PIL import Image, ImageTk
 
+#   Window(tk.Frame)
+#   Starting window with connection and creation options 
 class Window(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)

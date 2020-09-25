@@ -13,6 +13,10 @@ channel1 = np.array([pub1,sub1,cords])
 channel2 = np.array([pub2,sub1,cords])
 channels = {"channel1":channel1,"channel2":channel2}
 
+
+# Resizingcanvas 
+# A TK Canvas class that resizes a canvas and 
+# its elements when a user resizes a window.
 class ResizingCanvas(tk.Canvas):
     def __init__(self,parent,**kwargs):
         tk.Canvas.__init__(self,parent,**kwargs)
@@ -31,11 +35,45 @@ class ResizingCanvas(tk.Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all",0,0,wscale,hscale)
 
-class graphing(tk.Canvas):
+
+# Graphing
+# A class that will take the current channel,
+# publishers, and subscriber and graph them into 
+# a new window. 
+#
+# Function:
+#   calculatePoints(self,canvas,object_dic,x_offset,color)
+#     Takes in a canvas, a dictionary, the x offset and the color
+#     of the nodes in the graph. With this information it calculates
+#     the spacing of the graph and calls plotPoint to plot the points to 
+#     a canvas.
+
+#   createGraph(self,channels,canvas)
+#       Takes in a dictionary of channels and a canvas.It then 
+#       Seperates out the publishers and subscribers and creates a
+#       new dictionary for each that contains all the channels they are
+#       connected to and an array for the x and y position on the graph.
+#       It then calls calculatrePoint passing in the publisher and subsciber
+#       Dictionaries. After, it then draws arrows from the publishers to channels
+#       and the Channels to the subscribers 
+
+#   drawArror(self,canvas,start,end)
+#   Takes in a canvas and the start and end points of the arror.
+#   Then draws an arrow from the starting point to the ending point.
+
+#   plotPoint(self,canvas,dic,text,color)
+#   Takes in a canvas, a dictionary, the text, and the color of the node
+#   It then draws ovals of diameter 20 on the x and y coordinates of the 
+#   dictionary.
+class Graphing(tk.Canvas):
     def __init__(self,parent,**kwargs):
         tk.Canvas.__init__(self,parent,**kwargs)
 
-
+    #   calculatePoints(self,canvas,object_dic,x_offset,color)
+    #     Takes in a canvas, a dictionary, the x offset and the color
+    #     of the nodes in the graph. With this information it calculates
+    #     the spacing of the graph and calls plotPoint to plot the points to 
+    #     a canvas.
     def calculatePoint(self,canvas,object_dic,x_offset,color):
         x_pub = int(WIDTH / x_offset)
         y_pub = int(HEIGHT / (len(object_dic)*2))
@@ -44,6 +82,14 @@ class graphing(tk.Canvas):
             object_dic[ip] = [x_pub,y_pub*object_count+20]
             self.plotPoint(canvas,object_dic[ip],ip,color)
             object_count += 1
+#   createGraph(self,channels,canvas)
+#       Takes in a dictionary of channels and a canvas.It then 
+#       Seperates out the publishers and subscribers and creates a
+#       new dictionary for each that contains all the channels they are
+#       connected to and an array for the x and y position on the graph.
+#       It then calls calculatrePoint passing in the publisher and subsciber
+#       Dictionaries. After, it then draws arrows from the publishers to channels
+#       and the Channels to the subscribers
 
     def createGraph(self,channels,canvas):
         publishers = {}
@@ -75,16 +121,21 @@ class graphing(tk.Canvas):
             for subs in channels[channel][1]:
                 self.drawArrow(canvas,channels[channel][2],subscribers[subs])
 
-
+#   drawArror(self,canvas,start,end)
+#   Takes in a canvas and the start and end points of the arror.
+#   Then draws an arrow from the starting point to the ending point.
     def drawArrow(self,canvas,start,end):
         canvas.create_line(start[0]+20, start[1]+10, end[0], end[1]+10, arrow=tk.LAST)
 
    
-
-    def plotPoint(self,canvas,dic,type,color):
+#   plotPoint(self,canvas,dic,text,color)
+#   Takes in a canvas, a dictionary, the text, and the color of the node
+#   It then draws ovals of diameter 20 on the x and y coordinates of the 
+#   dictionary.
+    def plotPoint(self,canvas,dic,text,color):
             canvas.create_oval(dic[0], dic[1], dic[0]+20, \
                 dic[1]+20, fill=color)
-            canvas.create_text(dic[0]-15, dic[1],  text=str(type), anchor='e')
+            canvas.create_text(dic[0]-15, dic[1],  text=str(text), anchor='e')
 
 def show_frame(self, page_name):
     '''Show a frame for the given page name'''
@@ -97,10 +148,11 @@ def myframe():
 	canvas = ResizingCanvas(myframe,width=850, height=400, bg="white", highlightthickness=0)
 	canvas.pack(fill="both", expand=True)
 	myframe.tkraise()
-	graph = graphing(canvas)
+	graph = Graphing(canvas)
 	publihsers = graph.createGraph(channels,canvas)
 	root.mainloop()
 
 
 
 
+myframe()

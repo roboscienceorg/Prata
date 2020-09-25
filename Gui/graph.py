@@ -3,7 +3,7 @@ import tkinter as tk
 
 HEIGHT = 700
 WIDTH = 800
-root = tk.Tk()
+root = tk.Toplevel()
 
 pub1 = np.array(["192.168.1.1","192.168.1.3","192.168.1.2"])
 pub2 = np.array(["192.168.1.3","192.168.1.4","192.168.1.5","192.168.2.3","192.168.2.4","192.168.2.5"])
@@ -147,12 +147,11 @@ def myframe():
 	myframe.pack(fill="both", expand=True)
 	canvas = ResizingCanvas(myframe,width=850, height=400, bg="white", highlightthickness=0)
 	canvas.pack(fill="both", expand=True)
-	myframe.tkraise()
 	graph = Graphing(canvas)
-	publihsers = graph.createGraph(channels,canvas)
+    graph.createGraph(channels,canvas)
 	root.mainloop()
 
 
 
 
-myframe()
+# myframe()

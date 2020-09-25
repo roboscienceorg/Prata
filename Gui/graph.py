@@ -86,19 +86,21 @@ class graphing(tk.Canvas):
                 dic[1]+20, fill=color)
             canvas.create_text(dic[0]-15, dic[1],  text=str(type), anchor='e')
 
+def show_frame(self, page_name):
+    '''Show a frame for the given page name'''
+    frame = self.frames[page_name]
+    frame.tkraise()
 
 def myframe():
 	myframe = tk.Frame(root)
 	myframe.pack(fill="both", expand=True)
 	canvas = ResizingCanvas(myframe,width=850, height=400, bg="white", highlightthickness=0)
 	canvas.pack(fill="both", expand=True)
-
+	myframe.tkraise()
 	graph = graphing(canvas)
 	publihsers = graph.createGraph(channels,canvas)
-
 	root.mainloop()
 
 
 
 
-myframe()

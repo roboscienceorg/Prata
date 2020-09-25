@@ -35,14 +35,15 @@ class graphing(tk.Canvas):
     def __init__(self,parent,**kwargs):
         tk.Canvas.__init__(self,parent,**kwargs)
 
-    def plotPoint(self,canvas,dic,type):
 
-        canvas.create_oval(dic[0], dic[1], dic[0]+20, \
-            dic[1]+20, fill="black")
-        canvas.create_text(dic[0]-15, dic[1],  text=str(type), anchor='e')
-    
-    def drawArrow(self,canvas,start,end):
-        canvas.create_line(start[0]+10, start[1]+10, end[0]+10, end[1]+10, arrow=tk.LAST)
+    def calculatePoint(self,canvas,object_dic,x_offset,color):
+        x_pub = int(WIDTH / x_offset)
+        y_pub = int(HEIGHT / (len(object_dic)*2))
+        object_count = 0
+        for ip in object_dic:
+            object_dic[ip] = [x_pub,y_pub*object_count+20]
+            self.plotPoint(canvas,object_dic[ip],ip,color)
+            object_count += 1
 
     def createGraph(self,channels,canvas):
         publishers = {}
@@ -61,36 +62,43 @@ class graphing(tk.Canvas):
                     subscribers[subs] = [0,0]
 
             channels[channel][2] = [x_channel, y_channel * channel_count + 20]
-            graph.plotPoint(canvas,channels[channel][2],channel)
+            self.plotPoint(canvas,channels[channel][2],channel,"#1ecbe1")
             channel_count += 1
 
     
-        graph.calculatePoint(publishers,6)
-        graph.calculatePoint(subscribers,1)
+        self.calculatePoint(canvas,publishers,6,"#d926b6")
+        self.calculatePoint(canvas,subscribers,1,"#26D949")
 
         for channel in channels:
             for pubs in channels[channel][0]:
-                graph.drawArrow(canvas,publishers[pubs],channels[channel][2])
+                self.drawArrow(canvas,publishers[pubs],channels[channel][2])
             for subs in channels[channel][1]:
-                graph.drawArrow(canvas,channels[channel][2],subscribers[subs])
-
-    def calculatePoint(self,object_dic,x_offset):
-        x_pub = int(WIDTH / x_offset)
-        y_pub = int(HEIGHT / (len(object_dic)*2))
-        object_count = 0
-        for ip in object_dic:
-            object_dic[ip] = [x_pub,y_pub*object_count+20]
-            graph.plotPoint(canvas,object_dic[ip],ip)
-            object_count += 1
+                self.drawArrow(canvas,channels[channel][2],subscribers[subs])
 
 
+    def drawArrow(self,canvas,start,end):
+        canvas.create_line(start[0]+20, start[1]+10, end[0], end[1]+10, arrow=tk.LAST)
 
-myframe = tk.Frame(root)
-myframe.pack(fill="both", expand=True)
-canvas = ResizingCanvas(myframe,width=850, height=400, bg="white", highlightthickness=0)
-canvas.pack(fill="both", expand=True)
+   
 
-graph = graphing(canvas)
-publihsers = graph.createGraph(channels,canvas)
+    def plotPoint(self,canvas,dic,type,color):
+            canvas.create_oval(dic[0], dic[1], dic[0]+20, \
+                dic[1]+20, fill=color)
+            canvas.create_text(dic[0]-15, dic[1],  text=str(type), anchor='e')
 
-root.mainloop()
+
+def myframe():
+	myframe = tk.Frame(root)
+	myframe.pack(fill="both", expand=True)
+	canvas = ResizingCanvas(myframe,width=850, height=400, bg="white", highlightthickness=0)
+	canvas.pack(fill="both", expand=True)
+
+	graph = graphing(canvas)
+	publihsers = graph.createGraph(channels,canvas)
+
+	root.mainloop()
+
+
+
+
+myframe()

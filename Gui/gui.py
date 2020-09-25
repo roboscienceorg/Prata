@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from graph import *
 
 HEIGHT = 700
 WIDTH = 800

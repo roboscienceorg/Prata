@@ -8,6 +8,7 @@ authors = ["Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>", ""]
 pyo3 = "0.12.1"
 zmq = "0.9"
 libc = "0.2.77"
+splay = "0.1"
 
 [lib]
 name = "TALA"

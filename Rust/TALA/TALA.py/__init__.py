@@ -1,4 +1,4 @@
 from .TALA import *
-#from GUI import *
+from gui import *
 
 print("TALA Loaded!")

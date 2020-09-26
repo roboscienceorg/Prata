@@ -16,18 +16,35 @@ function __init__()
 end
 
 
-function host()
+function connect(IP, port)
     py"""
-    TALA.host()
+    TALA.connect(IP, port)
     """
 end
 
-function installTest()
+function disconnect(master)
     py"""
-    TALA.installTest()
+    TALA.disconnect(master)
     """
 end
 
+function subscriber(channel, master)
+    py"""
+    TALA.subscriber(channel, master)
+    """
+end
+
+function publisher(channel, master)
+    py"""
+    TALA.publisher(channel, master)
+    """
+end
+
+function gui(master)
+    py"""
+    TALA.gui(master)
+    """
+end
 
 
 end # module

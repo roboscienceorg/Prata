@@ -18,12 +18,12 @@ use serde_json::Value as JsonValue;
 
 /**
  * Represents Channel mode
- * Whitelist - ip's and ports added to the channel are the only ones allowed to talk
- * Blacklist - ip's and ports added to the channel are banned
- * Standard - No white or blacklist
  * 
- * Defaults to STANDARD mode
+ * STANDARD  - No white or blacklist
+ * BLACKLIST - ip's and ports added to the channel are banned
+ * WHITELIST - ip's and ports added to the channel are the only ones allowed to talk
  * 
+ * Defaults to STANDARD
  */
 pub enum ChannelMode
 {
@@ -258,6 +258,15 @@ impl Channel
                ChannelMode::BLACKLIST =>
                {
                     let ports = (self.addressBook.get(&ip)).unwrap();
+                    //CRASH?? if none
+                    /*
+                    if ports == None
+                    {
+
+                         //ip was not in addressbook
+                         return true;
+                    }
+                    */
                     if ports.fullRange == true
                     {
                          return false;
@@ -267,6 +276,14 @@ impl Channel
                ChannelMode::WHITELIST =>
                {
                     let ports = (self.addressBook.get(&ip)).unwrap();
+                    //CRASH?? if none
+                    /*
+                    if ports == None
+                    {
+                         //ip was not in addressbook
+                         return false;
+                    }
+                    */
                     if ports.fullRange == true
                     {
                          return true;

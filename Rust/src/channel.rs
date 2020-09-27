@@ -160,12 +160,12 @@ impl Channel
                let res = serde_json::from_str(data);
 
                //json deserialized stored inside p value
-               let p: ImboundMessage = res.unwrap();
-               if  p.messageType == 'd'
+               let inbound: ImboundMessage = res.unwrap();
+               if  inbound.messageType == 'd'
                {
-                   // self.info.add((msg.as_str().unwrap());
+                   self.info.add(p.message);
                }
-               if  p.messageType == 'r'
+               if  inbound.messageType == 'r'
                {
                     let temp = self.info.get();
                     let m = OutboundMessage { message: temp };
@@ -174,7 +174,7 @@ impl Channel
                     let serial_message: String = res.unwrap();
                     responder.send(&serial_message, 0).unwrap();
                }
-               if  p.messageType == 's'
+               if  inbound.messageType == 's'
                {
                     let temp = String::from("STATUS REQUEST: Not Avalilible");
                     let m = OutboundMessage { message: temp };

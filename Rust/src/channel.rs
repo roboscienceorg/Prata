@@ -1,11 +1,17 @@
 
 
+extern crate serde_json;
+extern crate serde;
+//#[macro_use]
+extern crate serde_derive;
 
-//use std::collections::Ve
 use splay::SplayMap;
 use splay::SplaySet;
 use std::thread;
 use std::time::Duration;
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
+use serde_json::Value as JsonValue;
 
 #[derive(Debug)]
 
@@ -21,22 +27,7 @@ impl Default for ChannelMode
      fn default() -> Self {ChannelMode::STANDARD}
 }
 
-/*
-pub struct MinMax
-{
-    pub min: u16,
-    pub max: u16,
-}
-impl Default for MinMax
-{
-    fn default() -> MinMax 
-    {
-        //sets the min to min and max to max
-        MinMax { min: u16::MIN, max: u16::MAX}
-    }
 
-}
-*/
 pub struct Ports
 {
      pub fullRange: bool,
@@ -54,6 +45,30 @@ impl Default for Ports
      }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ImboundMessage
+{
+     pub messageType: char,           
+     pub ip: u32,
+     pub port: u16,
+     pub message: String,
+
+}
+#[derive(Serialize, Deserialize)]
+pub struct OutboundMessage
+{
+     pub message: String,
+}
+impl Default for OutboundMessage
+{
+     fn default() -> OutboundMessage 
+     {
+          OutboundMessage
+          {
+               message: String::from(""),
+          }
+     }
+}
 
 pub struct Channel
 {
@@ -64,8 +79,6 @@ pub struct Channel
      //maps an ip to its port range
      pub addressBook : SplayMap<i32,Ports>,  //blacklist stuff
      
-
-
 }
 impl Default for Channel
 {
@@ -85,7 +98,7 @@ impl ToString for Channel
 {
      fn to_string(&self) -> String
      {
-        return format!("Name:{} Mode:{:?}",self.name, self.mode);
+        return format!("Name:{}\nMode:{:?}\n",self.name, self.mode);
      }
 }
 impl Channel
@@ -110,65 +123,79 @@ impl Channel
           self.addressBook.insert(ip, ports );
      
      }
-
-     pub fn decode(&mut self, message: String)
+     pub fn recieveDataOnly(&mut self, message: String)
      {
-          /* stack overflow code convert string to binary
-
-          let name = "Jake".to_string();
-          let mut name_in_binary = "".to_string();
-      
-          // Call into_bytes() which returns a Vec<u8>, and iterate accordingly
-          // I only called clone() because this for loop takes ownership
-          for character in name.clone().into_bytes() {
-              name_in_binary += &format!("0{:b} ", character);
-          }
-          println!("\"{}\" in binary is {}", name, name_in_binary);
-          */
-          let messageType = message.chars().next().unwrap();
-
-          if (messageType == 'b')
-          {
-               println!("\"{}\" at index {} in binary is {:?}", message, 0, messageType);
-          }
-               /*
-          let mut index = 0;
-          let mut name_in_binary = "".to_string();
-          for character in message.clone().into_bytes() {
-               name_in_binary = format!("0{:b} ", character);
-               println!("\"{}\" at index {} in binary is {}", message, index, name_in_binary);
-               index = index + 1;
-          }
-          */
+          self.info.add(message);
+          return;
      }
+
+     
      pub fn main(&mut self)
      {
-          println!("sup");
+
           let context = zmq::Context::new();
           let responder = context.socket(zmq::REP).unwrap();
 
           let mut str1 = String::from("tcp://*:");
           let str_with_port = self.port.to_string();
           let address = [str1, str_with_port].concat();
+
+
           println!("value of s is {:?}", address);
-          let temp = String::from("abcdef");
-          self.decode(temp);
-          return;
+
           
           assert!(responder.bind(&address).is_ok());
       
           let mut msg = zmq::Message::new();
-          loop {
-              responder.recv(&mut msg, 0).unwrap();
-              println!("Received {}", msg.as_str().unwrap());
-              thread::sleep(Duration::from_millis(1000));
-              responder.send("World", 0).unwrap();
+
+          
+          loop 
+          {
+               responder.recv(&mut msg, 0).unwrap();
+               //println!("Received {}", msg.as_str().unwrap());
+               //inound is the deserialized struct 
+
+               //data as string
+               let data = msg.as_str().unwrap();
+               let res = serde_json::from_str(data);
+
+               //json deserialized stored inside p value
+               let p: ImboundMessage = res.unwrap();
+               if  p.messageType == 'd'
+               {
+                   // self.info.add((msg.as_str().unwrap());
+               }
+               if  p.messageType == 'r'
+               {
+                    let temp = self.info.get();
+                    let m = OutboundMessage { message: temp };
+
+                    let res = serde_json::to_string(&m);
+                    let serial_message: String = res.unwrap();
+                    responder.send(&serial_message, 0).unwrap();
+               }
+               if  p.messageType == 's'
+               {
+                    let temp = String::from("STATUS REQUEST: Not Avalilible");
+                    let m = OutboundMessage { message: temp };
+
+                    let res = serde_json::to_string(&m);
+                    let serial_message: String = res.unwrap();
+                    responder.send(&serial_message, 0).unwrap();
+               }
+               thread::sleep(Duration::from_millis(1000));
+               
 
 
 
           }
      }
-
+     fn crop_letters(s: &str, pos: usize) -> &str {
+          match s.char_indices().skip(pos).next() {
+              Some((pos, _)) => &s[pos..],
+              None => "",
+          }
+     }
 
 }
 
@@ -190,6 +217,20 @@ mod data
           pub fn add(&mut self, bytes: String)
           {
                self.info.push_back(bytes);
+          }
+     }
+     impl Information
+     {
+          pub fn get(&mut self) -> String
+          {
+               let mut retval = String::from("");
+               for i in &self.info
+               {
+                    retval.push_str(i);
+                    //retval = [retval, i].concat();
+               }
+               self.info.clear();
+               return retval;
           }
      }
      impl Information

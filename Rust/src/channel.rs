@@ -186,6 +186,14 @@ impl ToString for Channel
 }
 impl Channel
 {
+     /**
+      * CONSTRUCTOR
+      *
+      */
+     pub fn new(port_: u16) -> Channel
+     {
+          return Channel { port: port_, ..Default::default() };
+     }
     /**
      * adds ip address to addressbook with default port range 0-max
      * 
@@ -211,14 +219,14 @@ impl Channel
      
      pub fn addWithPorts(&mut self, ip: u32, min: u16, max: u16 )
      {
-          let mut ss: SplaySet<u16>;
+          let mut ss = SplaySet::<u16>::new();
  
 
           for x in min..max
           {
-               //&ss.clear();
+              ss.insert(x);
           }
-          let mut ports = Ports { fullRange: false, ..Default::default() };
+          let mut ports = Ports { fullRange: false, portRange: ss };
           self.addressBook.insert(ip, ports );
      
      }
@@ -443,4 +451,6 @@ mod data
                return Information { info: VecDeque::new()};
           }
      }
+
 }
+

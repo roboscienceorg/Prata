@@ -18,11 +18,11 @@ impl Master
       mp.start();
    }
 
-   /* Connect to a remote master process
-      Return a credential object */
-   pub fn connect(ip: String)
+   /* Saves the credentials for the remote master process*/
+   pub fn connect( mut self, ip: String, port: u16 )
    {
-      //is this necessary?
+      self.port = port;
+      self.ipAddress = ip;
    }
 
    /* Launch gui for current master 

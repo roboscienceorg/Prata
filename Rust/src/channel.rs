@@ -139,6 +139,7 @@ impl Default for OutboundMessage
  *        if the speed measured is slow on larger scales
  * 
  * 
+ * 
  */
 pub struct Channel
 {
@@ -379,7 +380,7 @@ impl Channel
                }
                else if inbound.messageType == 'T'
                {
-                    //terminate channel and return to caller
+                    //terminate channel listening and return to caller
                     return;
                }
 

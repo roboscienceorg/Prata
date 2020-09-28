@@ -14,13 +14,14 @@ class ManageFrames(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Tala")
         tk.Tk.iconbitmap(self, default = "ansuz.ico")
+        self.geometry("1300x800")
         frame_container = tk.Frame(self)
         self.frames = {}
 
 
         frame_container.grid_rowconfigure(0, weight=1)
         frame_container.grid_columnconfigure(0, weight=1)
-        frame_container.place(relx = .5, rely = 0.05, relwidth = 1, relheight = 1,anchor = 'n')
+        frame_container.place(relx = .5, rely = 0.5, relwidth = 1, relheight = 1,anchor = 'center')
 
 
         for page in (Window,Graph):
@@ -52,7 +53,6 @@ class Window(tk.Frame):
         canvas = tk.Canvas(self, width = img.width(), height = img.height())      
         canvas.place(relx = .5, rely = .45, relwidth = 1, relheight = 1,anchor = 'center')
 
-        img = ImageTk.PhotoImage(file="ansuz.png")    
         parent.one = img  
         canvas.create_image(0,0, anchor='nw', image=img)
 
@@ -61,10 +61,10 @@ class Window(tk.Frame):
 
         
         create_label = tk.Label(self, text = "Create new Host", bg = "white")
-        create_label.place(x = img.width()/2, rely = .45, relwidth = .3, relheight = .05 ,anchor = 'n')
+        create_label.place(x = img.width()/2, rely = .45, relwidth = .1, relheight = .05 ,anchor = 'n')
 
         create_bot = tk.Button(self, text = "Create")
-        create_bot.place(x = img.width()/2, rely = .5, relwidth = .2, relheight = .05,anchor = 'n')
+        create_bot.place(x = img.width()/2, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
 
         canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,
                         text="TALA")
@@ -73,10 +73,10 @@ class Window(tk.Frame):
         connect_label.place(x = img.width()/2, rely = .65, width = 100, height = 25 ,anchor = 'n')
 
         host_entry = tk.Entry(self, bg = 'white')
-        host_entry.place(x = img.width()/2, rely = .7, relwidth = .2, relheight = .05,anchor = 'n')
+        host_entry.place(x = img.width()/2, rely = .7, relwidth = .1, relheight = .05,anchor = 'n')
 
         connect_bot = ttk.Button(self, text = "Connect", command=lambda: controller.topFrame(Graph))
-        connect_bot.place(x = img.width()/2, rely = .75, relwidth = .2, relheight = .05,anchor = 'n')
+        connect_bot.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
         
 
 

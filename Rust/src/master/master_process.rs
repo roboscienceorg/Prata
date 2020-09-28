@@ -135,10 +135,10 @@ impl MasterProcess
    fn newChannel(ipAddress: String, channelName: String) -> ChannelInfo
    {
 
-      /* TODO: get the port used for this channel, already know ip because its the same machine  */
+      //pass assigned port into new channel
       let port = request_open_port().unwrap_or(0);
       thread::spawn(move || {
-         let mut c = channel::Channel { mode: channel::ChannelMode::BLACKLIST, /*name: String::from("c1"),*/ ..Default::default()};
+         let mut c = channel::Channel::new(port);
       });
 
       let contactInfo: AddressPort = ( ipAddress, port );

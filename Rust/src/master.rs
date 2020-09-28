@@ -41,13 +41,13 @@ impl Master
    /* Return a subscriber object */
    pub fn subscriber()
    {
-
+      //just need subscriber constructor
    }
 
    /* Return a publisher object */
    pub fn publisher()
    {
-
+      //just need publisher constructor
    }
    
 }

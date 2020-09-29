@@ -9,6 +9,9 @@ pyo3 = "0.12.1"
 zmq = "0.9"
 libc = "0.2.77"
 port_scanner = "*"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_derive = "1.0"
 
 [lib]
 name = "TALA"

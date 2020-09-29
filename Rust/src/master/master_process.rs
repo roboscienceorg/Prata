@@ -1,9 +1,14 @@
+//mod channel;
+
 use std::collections::HashMap;
 use zmq::Socket;
 use std::clone::Clone;
 use port_scanner::request_open_port;
 use std::thread;
 use std::time::Duration;
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
+use serde_json::Value as JsonValue;
 
 /* tuple to hold the address as a string, port as a number */
 type AddressPort = (String, u16);
@@ -17,6 +22,16 @@ pub struct ChannelInfo
    publishers: Vec<AddressPort>,
    subscribers: Vec<AddressPort>,
 }
+
+/* universal message format */
+#[derive(Serialize, Deserialize)] 
+pub struct Message 
+{     
+   pub messageType: char,            
+   pub ip: String,  
+   pub port: u16, 
+   pub message: String, 
+} 
 
 pub struct MasterProcess
 {
@@ -33,18 +48,17 @@ impl MasterProcess
    {
       //set up the socket so we can connect to publishers and subscribers
       let context = zmq::Context::new();
-      let subSocket = context.socket(zmq::SUB).unwrap();
-      subSocket
+      let repSocket = context.socket(zmq::REP).unwrap();
+      let port = request_open_port().unwrap_or(0);
+      repSocket
+        // .connect( &("tcp://0.0.0.0:".to_owned() + &port.to_string()) )
          .connect("tcp://0.0.0.0:7000")
-         .expect("failed connecting subscriber");
-      subSocket
-         .set_subscribe(b"H")
-         .expect("failed setting subscription");
-      println!("subSocket connected and subscribed");
+         .expect("failed binding socket");
+      println!("repSocket bound");
       thread::sleep(Duration::from_millis(1));
 
       //get the port that we are bound to
-      let lastEndpoint = match subSocket.get_last_endpoint()
+      let lastEndpoint = match repSocket.get_last_endpoint()
       {
          Ok(lastEndpoint) => {
             match lastEndpoint {
@@ -61,68 +75,50 @@ impl MasterProcess
       loop 
       {
          //wait for a message to come in from a subscriber or publisher
-         let msg_bytes = match subSocket.recv_bytes(0) 
-         {
-            Ok(msg_bytes) => msg_bytes,
-            Err(_e) => Vec::new(),
-         }; 
+         let mut msg = zmq::Message::new();
+         repSocket.recv(&mut msg, 0).unwrap();      
+      
+         //get package as a string
+         let msg_data = msg.as_str().unwrap();
+         let msg_string = serde_json::from_str(msg_data);
+   
+         //deserialize into message struct
+         let msg: Message = msg_string.unwrap();
 
-         //the message has to be at least 9 bytes, assuming that we don't allow empty channel names
-         if msg_bytes.len() > 8 
+         println!("Mode: {}", msg.messageType);
+         println!("IP: {}", msg.ip);
+         let channelName = msg.message;
+         let nodeIP = msg.ip;
+         let nodePort = msg.port;
+         let reqType = msg.messageType;
+
+         //if the channel doesn't already exist, create it
+         if self.channels.contains_key(&channelName) == false
          {
+            self.channels.insert(channelName.clone(), MasterProcess::newChannel( self.ipAddress.clone(), channelName.clone() )) ;
+         }
+
+         //get the channel information
+         let channelInfo = &self.channels[&channelName].clone();
+
+         //convert the ip address of the channel to a byte array
+         let channelIP = &channelInfo.info.0.as_bytes();
+         let channelPort = &channelInfo.info.1.to_be_bytes();
          
-            //parse the message
-            let mut mode = 0;
-            let mut channelName: String = "".to_string();
-            let mut nodeIP: String = "".to_string();
-            let mut port: u16 = 0;
-            MasterProcess::parseMessage(&msg_bytes, &mut nodeIP, &mut port, &mut mode, &mut channelName);
+      
+         //send data back to node
+         let msg = Message { 
+            messageType: 'M',
+            ip: nodeIP,  
+            port: nodePort, 
+            message: channelName, 
 
-            println!("Mode: {}", mode);
-            println!("IP: {}", nodeIP);
-            println!("Port: {}", port);
-            println!("Channel Name: {}", channelName); 
-   
-            //if the channel doesn't already exist, create it
-            if self.channels.contains_key(&channelName) == false
-            {
-               self.channels.insert(channelName.clone(), MasterProcess::newChannel( self.ipAddress.clone(), channelName.clone() )) ;
-            }
-   
-            //get the channel information
-            let channelInfo = &self.channels[&channelName].clone();
-   
-            //convert the ip address of the channel to a byte array
-            let channelIP = &channelInfo.info.0.as_bytes();
-            let channelPort = &channelInfo.info.1.to_be_bytes();
-          
-            let mut returnMessage: Vec<u8> = Vec::new();
-            let ipLen = channelIP.len();
-   
-            for i in 0..( channelIP.len() + 2 )
-            {
-               if i < ipLen
-               {
-                  returnMessage.push(channelIP[i]);
-               }
-               else
-               {
-                  returnMessage.push(channelPort[i - ipLen]);
-               }
-            }
-   
-            //bind to temporary socket on the node and send the data back
-            //can't really do this with publish because we only want it to go to one node
-           /* let returnSocket = context.socket(zmq::PAIR).unwrap(); 
-            returnSocket.connect( &("tcp://".to_owned() + &nodeIP + ":" + &port.to_string()) );
-            returnSocket.send(returnMessage,0); */
-   
-            /* if we want to exit, call break; */
-         }
-         else
-         {
-            println!("Received invalid message...");
-         }
+          };
+         let msg_str = serde_json::to_string(&msg);
+         let serial_message: String = msg_str.unwrap();
+         repSocket.send(&serial_message, 0).unwrap();
+
+         /* if we want to exit, call break; */
       }; 
          
 
@@ -138,7 +134,8 @@ impl MasterProcess
       //pass assigned port into new channel
       let port = request_open_port().unwrap_or(0);
       thread::spawn(move || {
-         let mut c = channel::Channel::new(port);
+         //let mut c = channel::Channel::new(port);
+         //c.main();
       });
 
       let contactInfo: AddressPort = ( ipAddress, port );

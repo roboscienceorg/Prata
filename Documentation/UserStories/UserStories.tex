@@ -631,6 +631,7 @@ Open source aspects (host, license, etc)
 \item  Separate process
 \item  Channel setup
 \item  Tracks nodes in the Tala cluster
+\item  Nodes and topics use unix filesystem naming (inherit channel properties)
 \item  Tracks channels in the Tala cluster
 \item  Answers requests for node communication data
 \begin{itemize}
@@ -641,14 +642,9 @@ Open source aspects (host, license, etc)
 \end{itemize}
 \item  Internal database for network graph
 \item  API for GUI management
+\item  Launch file - can launch a Tala process cluster
 \end{itemize}
 
-\item GUI Management
-\begin{itemize}
-\item  Launch master
-\item  Runtime config
-\item  Port ranges
-\end{itemize}
 
 \end{itemize}
 \end{frame}
@@ -661,6 +657,14 @@ Open source aspects (host, license, etc)
   \frametitle{Requirements cont.}
 
 \begin{itemize}
+\item GUI Management
+\begin{itemize}
+\item  Launch master
+\item  Runtime config
+\item  Port ranges
+\end{itemize}
+
+
 \item Language APIs
 \begin{itemize}
 \item Languages: Julia, Python, C/C++, Rust, Java
@@ -674,9 +678,28 @@ Open source aspects (host, license, etc)
 \item Process sync functions
 \end{itemize}
 
+\end{itemize}
+\end{frame}
+
+
+
+
+
+%----------- slide --------------------------------------------------%
+\begin{frame}[fragile]
+  \frametitle{Requirements cont.}
+
+\begin{itemize}
 \item Graph tool
 \begin{itemize}
 \item Present the node-topic graph
+\begin{itemize}
+\item Nodes are ellipses
+\item Channels are rectangles
+\item Connected by lines with arrows
+\end{itemize}
+\item Auto layout
+\item Drag nodes and channels
 \item Show nodes and select for node data
 \item Show channels and select for channel data
 \item Tap a channel and watch traffic
@@ -684,8 +707,6 @@ Open source aspects (host, license, etc)
 \end{itemize}
 \end{itemize}
 \end{frame}
-
-
 
 
 %----------- slide --------------------------------------------------%

@@ -530,10 +530,28 @@ print(tl.unpack(message))
 There are configuration aspects (in a config file and dynamic).
 \begin{itemize}
 \item Message queue size.
+\begin{itemize}
+\item What is the basic message size limit?
+\item How many messages?
+\end{itemize}
+
 \item Message removal behavior and if multiple buffers required.
+\begin{itemize}
+\item Does one subscriber get the message or all?
+\item How do you manage this with multiple pubs and subs?
+\end{itemize}
+
 \item Full FIFO behavior.
 \item Message data types.
+\begin{itemize}
+\item Messages are tex/binary, strings/floats, arrays?
+\end{itemize}
+
 \item Message data marshalling.
+\begin{itemize}
+\item Pack up into a documented format?
+\end{itemize}
+
 \end{itemize}
 
 \end{frame}
@@ -574,10 +592,13 @@ Much of the user stories are the same, just the change in the location of the FI
 \begin{itemize}
 \item Binding languages:  Julia, Python, Rust
 \item Language for master (Rust or C++)
-\item Threading architecture
+\item Threading architecture 
+\item Broker vs. Brokerless
 \item Communication lib (0MQ vs Sockets)
 \item Communication architecture
 \item FIFO architecture
+\item Performance (speed, latency, ...)
+\item Shared memory hook
 \end{itemize}
 
 \end{frame}
@@ -608,33 +629,60 @@ Open source aspects (host, license, etc)
 \item Directory service 
 \begin{itemize}
 \item  Separate process
-\item  Tracks nodes in the compute cluster
+\item  Tracks nodes in the Tala cluster
+\item  Tracks channels in the Tala cluster
 \item  Answers requests for node communication data
+\begin{itemize}
+\item Pub/Sub
+\item Req/Rep
+\item Send/Recv
+\item Signal / Sync
+\end{itemize}
 \item  Internal database for network graph
 \item  API for GUI management
 \end{itemize}
-\item Python \& Julia APIs
-\begin{itemize}
-\item Node registration 
-\item Pub/sub/req/rep setup functions
-\item Push/pop/send/receive functions
-\item Node exit and admin functions
-\end{itemize}
+
 \item GUI Management
 \begin{itemize}
 \item  Launch master
 \item  Runtime config
 \item  Port ranges
 \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+
+
+
+%----------- slide --------------------------------------------------%
+\begin{frame}[fragile]
+  \frametitle{Requirements cont.}
+
+\begin{itemize}
+\item Language APIs
+\begin{itemize}
+\item Languages: Julia, Python, C/C++, Rust, Java
+\item Node registration 
+\item Node Communication setup functions
+\item Pub/sub/req/rep  functions
+\item Push/pop/send/receive functions
+\item Signal functions
+\item Node exit
+\item Admin functions
+\item Process sync functions
+\end{itemize}
+
 \item Graph tool
 \begin{itemize}
 \item Present the node-topic graph
+\item Show nodes and select for node data
+\item Show channels and select for channel data
+\item Tap a channel and watch traffic
+\item Place triggers on channels for callbacks
 \end{itemize}
 \end{itemize}
-
-
 \end{frame}
-
 
 
 
@@ -645,7 +693,7 @@ Open source aspects (host, license, etc)
 
 \begin{itemize}
 \item A prototype of the directory service - aka master.
-\item An initial API module for Python and Julia for calling Tala.
+\item An  API module for calling Tala in the target languages.
 \item A prototype of the GUI management tool.
 \item A prototype of the network graph tool.
 \item Some sample programs to illustrate Tala.

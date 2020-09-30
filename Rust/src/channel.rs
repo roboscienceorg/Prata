@@ -11,6 +11,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use serde_json::Value as JsonValue;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 
@@ -76,7 +77,8 @@ impl Default for Ports
  *                       D for data push
  *                       S for status pull
  *                       R for data pull
- * ip (u32) - what ip is sending the message
+ *                       T for terminate loop
+ * ip (String) - what ip is sending the message
  * port (u16) - what port is sending the message
  * message (String) - the message recieved
  * 
@@ -84,39 +86,17 @@ impl Default for Ports
  * 
  * 
  */
-#[derive(Serialize, Deserialize)]
-pub struct InboundMessage
-{
-     pub messageType: char,           
-     pub ip: u32,
-     pub port: u16,
-     pub message: String,
-}
+#[derive(Serialize, Deserialize)] 
+pub struct Message 
+{     
+     pub messageType: char,            
+     pub ip: String,  
+     pub port: u16, 
+     pub message: String, 
+} 
 
 
-/**
- * Represents an outbound message to publishers and subscribers
- * message (String) - the message to send back
- * 
- * Defaults to message = ""
- * 
- * 
- */
-#[derive(Serialize, Deserialize)]
-pub struct OutboundMessage
-{
-     pub message: String,
-}
-impl Default for OutboundMessage
-{
-     fn default() -> OutboundMessage 
-     {
-          OutboundMessage
-          {
-               message: String::from(""),
-          }
-     }
-}
+
 
 /**
  * Holds channel information
@@ -141,15 +121,18 @@ impl Default for OutboundMessage
  * 
  * 
  */
+
 pub struct Channel
 {
-     pub mode: ChannelMode,             
-     pub name: String,                  
+
+     pub mode: ChannelMode,
+     pub name: String,
+     pub ip: String,   
      pub port: u16,                     
      pub info: self::data::Information, 
      pub protocol: String,
      //maps an ip to its port range
-     pub addressBook : SplayMap<u32,Ports>,  
+     pub addressBook : HashMap<String,Ports>,  //STRING
      
 }
 impl Default for Channel
@@ -158,12 +141,14 @@ impl Default for Channel
     {
         Channel
         {
-            mode: ChannelMode::STANDARD,
-            name: String::from("NoName"),
-            port: 55555,
-            info: self::data::Information::new(),
-            protocol: String::from("tcp"),
-            addressBook: SplayMap::new()
+
+               mode: ChannelMode::STANDARD,
+               name: String::from("NoName"),
+               ip: String::from("ImplementChannelIP"),
+               port: 55555,
+               info: self::data::Information::new(),
+               protocol: String::from("tcp"),
+               addressBook: HashMap::new()
         }
     }
 }
@@ -173,7 +158,6 @@ impl Default for Channel
 /**
  * String override to:
  * "
- * Name: NoName
  * Mode: STANDARD
  * Port: 55555
  * "
@@ -182,7 +166,7 @@ impl ToString for Channel
 {
      fn to_string(&self) -> String
      {
-        return format!("\nName: {}\nMode: {:?}\nPort: {}\n",self.name, self.mode, self.port);
+        return format!("\nName: {}\nMode: {:?}\nPort: {}\nProtocol: {}\n",self.name, self.mode, self.port, self.protocol);
      }
 }
 impl Channel
@@ -203,7 +187,7 @@ impl Channel
      * return void
      * 
      * */
-    pub fn add(&mut self, ip: u32 )
+    pub fn add(&mut self, ip: String )
     {
         self.addressBook.insert(ip, Default::default() );
     }
@@ -218,7 +202,7 @@ impl Channel
      * return void
      */
      
-     pub fn addWithPorts(&mut self, ip: u32, min: u16, max: u16 )
+     pub fn addWithPorts(&mut self, ip: String, min: u16, max: u16 )
      {
           let mut ss = SplaySet::<u16>::new();
  
@@ -241,12 +225,20 @@ impl Channel
           return void
 
       */
-     pub fn recieveDataOnly(&mut self, message: String)
+     pub fn receiveDataOnly(&mut self, message: String)
      {
           self.info.add(message);
           return;
      }
 
+     pub fn getListed(&mut self) -> Vec<String>
+     {
+          let mut vec = Vec::new();
+          for key in self.addressBook.keys() {
+               vec.push(key.to_string());
+           }
+           return vec;
+     }
 
      /**
       * Validates an ip address and port
@@ -258,7 +250,7 @@ impl Channel
       * return false - invalid credentials to receive from
       *
       */
-     pub fn validAddress(&mut self, ip: u32, port: u16) -> bool
+     pub fn validAddress(&mut self, ip: String, port: u16) -> bool
      {
           
           //blacklist
@@ -326,13 +318,13 @@ impl Channel
           let str1 = String::from("://*:");
           let str_with_port = self.port.to_string();
           let address = [protocol, str1, str_with_port].concat();
-
+          //tcp://*:25565
 
           println!("value of s is {:?}", address);
 
           
           assert!(responder.bind(&address).is_ok());
-      
+          //ERROR if assert fails break
           let mut msg = zmq::Message::new();
 
           
@@ -340,13 +332,14 @@ impl Channel
           {
                //read inbound messages
                responder.recv(&mut msg, 0).unwrap();
+               //Can never return none cause it waits
 
                //data as string
                let data = msg.as_str().unwrap();
                let res = serde_json::from_str(data);
 
                //json deserialized stored inside p value
-               let inbound: InboundMessage = res.unwrap();
+               let inbound: Message = res.unwrap();
 
                //white/black list check for valid credentials
                if self.validAddress(inbound.ip, inbound.port) == false
@@ -356,13 +349,14 @@ impl Channel
                else if  inbound.messageType == 'D'
                {
                     //add data
+                    //use CLASS ADD FUNCTION
                     self.info.add(inbound.message);
                }
                else if  inbound.messageType == 'R'
                {
                     //send data
                     let temp = self.info.get();
-                    let m = OutboundMessage { message: temp };
+                    let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: temp };
 
                     let res = serde_json::to_string(&m);
                     let serial_message: String = res.unwrap();
@@ -372,9 +366,10 @@ impl Channel
                {
                     //send status
                     let temp = String::from("STATUS REQUEST: Not Avalilible");
-                    let m = OutboundMessage { message: temp };
+                    let m = Message { messageType: 'S', ip: self.ip.to_string(), port: self.port,  message: temp };
 
                     let res = serde_json::to_string(&m);
+                    //let res = serde_json::to_string(&self.status);
                     let serial_message: String = res.unwrap();
                     responder.send(&serial_message, 0).unwrap();
                }

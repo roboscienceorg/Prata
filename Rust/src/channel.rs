@@ -4,13 +4,13 @@ extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
 
-use splay::SplayMap;
+//use splay::SplayMap;
 use splay::SplaySet;
 use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use serde_json::Value as JsonValue;
+//use serde_json::Result;
+//use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -53,6 +53,7 @@ impl Default for ChannelMode
  * 
  * 
  */
+#[derive(Clone)]
 pub struct Ports
 {
      pub fullRange: bool,
@@ -67,6 +68,22 @@ impl Default for Ports
                fullRange: true,
                portRange: SplaySet::new()
           }
+     }
+}
+impl Ports
+{
+     pub fn remove(&mut self, port: u16)
+     {
+          self.fullRange = false;
+          self.portRange.remove(&port);
+     }
+     pub fn insert(&mut self, port: u16)
+     {
+          self.portRange.insert(port);
+     }
+     pub fn count(&mut self) -> usize
+     {
+          return self.portRange.len();
      }
 }
 
@@ -192,6 +209,10 @@ impl Channel
         self.addressBook.insert(ip, Default::default() );
     }
 
+    pub fn remove(&mut self, ip: String )
+    {
+        self.addressBook.remove(&ip);
+    }
     /**
      * Adds ip to list with port range
      * 
@@ -215,7 +236,26 @@ impl Channel
           self.addressBook.insert(ip, ports );
      
      }
+     pub fn getPorts(&mut self, ip: String) -> &Ports
+     {
 
+          return (self.addressBook.get(&ip)).unwrap();
+     }
+     pub fn addPort(&mut self, ip: String, port: u16)
+     {
+          let  ports = (self.addressBook.get_mut(&ip)).unwrap();
+          ports.insert(port);
+          let y = ports.clone();
+          self.addressBook.insert(ip, y);
+     }
+
+     pub fn removePort(&mut self, ip: String, port: u16)
+     {
+          let ports = (self.addressBook.get_mut(&ip)).unwrap();
+          ports.remove(port);
+          let y = ports.clone();
+          self.addressBook.insert(ip, y);
+     }
      /**
       * 
           Adds data to internal info
@@ -225,10 +265,15 @@ impl Channel
           return void
 
       */
-     pub fn receiveDataOnly(&mut self, message: String)
+     pub fn addData(&mut self, message: String)
      {
           self.info.add(message);
           return;
+     }
+
+     pub fn getData(&mut self) -> String
+     {
+          return self.info.get();
      }
 
      pub fn getListed(&mut self) -> Vec<String>
@@ -238,6 +283,11 @@ impl Channel
                vec.push(key.to_string());
            }
            return vec;
+     }
+
+     pub fn count(&mut self) -> usize
+     {
+          return self.getListed().len();
      }
 
      /**
@@ -250,7 +300,7 @@ impl Channel
       * return false - invalid credentials to receive from
       *
       */
-     pub fn validAddress(&mut self, ip: String, port: u16) -> bool
+     fn validAddress(&mut self, ip: String, port: u16) -> bool
      {
           
           //blacklist

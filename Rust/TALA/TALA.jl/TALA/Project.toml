@@ -1,7 +1,0 @@
-name = "TALA"
-uuid = "c384e743-4b1b-4894-a8ec-df6e762e98bd"
-authors = ["Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>", ""]
-version = "0.1.0"
-
-[deps]
-PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"

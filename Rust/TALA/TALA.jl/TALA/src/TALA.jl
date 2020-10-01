@@ -1,50 +1,24 @@
 module TALA
 
-using PyCall
 
-function __init__()
+    function __init__()
+        try
+            using PyCall
+        catch err
+            println("PyCall MUST be installed prior to installing TALA")
+        end
 
-    try
-        py"""
-        import TALA
-        """
-    catch
-        pip = pyimport("pip")
-        pip.main(["install", "TALA"])
+        try
+            TALA = pyimport("TALA")
+        catch err
+            println("Please enter location of TALA wheel file: ")
+            pip = pyimport("pip")
+            pip.main(["install", readline()])
+            TALA = pyimport("TALA")
+        end
+
     end
 
-end
-
-
-function connect(IP, port)
-    py"""
-    TALA.connect(IP, port)
-    """
-end
-
-function disconnect(master)
-    py"""
-    TALA.disconnect(master)
-    """
-end
-
-function subscriber(channel, master)
-    py"""
-    TALA.subscriber(channel, master)
-    """
-end
-
-function publisher(channel, master)
-    py"""
-    TALA.publisher(channel, master)
-    """
-end
-
-function gui(master)
-    py"""
-    TALA.gui(master)
-    """
-end
 
 
 end # module

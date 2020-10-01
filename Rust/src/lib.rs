@@ -100,3 +100,4 @@ fn pubJoin(_py: Python, pb: Publisher, chan: String) -> PyResult<()>{
 fn subJoin(_py: Python, sb: Subscriber, chan: String) -> PyResult<()>{
     sb.connect(chan);
 }
+

@@ -134,8 +134,8 @@ impl MasterProcess
       //pass assigned port into new channel
       let port = request_open_port().unwrap_or(0);
       thread::spawn(move || {
-         //let mut c = channel::Channel::new(port);
-         //c.main();
+         let mut c = channel::Channel::new(port);
+         c.main();
       });
 
       let contactInfo: AddressPort = ( ipAddress, port );

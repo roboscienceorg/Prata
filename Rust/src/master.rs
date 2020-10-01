@@ -1,6 +1,8 @@
-mod master_process;
-use master_process::MasterProcess;
+#[path = "master_process.rs"] mod master_process;
+//mod master_process::MasterProcess;
 use std::collections::HashMap;
+
+#[derive(Debug)]
 
 
 pub struct Master
@@ -8,13 +10,28 @@ pub struct Master
    pub ipAddress: String,
    pub port: u16,
 }
+impl Default for Master
+{
+     fn default() -> Master 
+     {
+         Master
+          {
+               ipAddress: "192.test".to_string(),
+               port: 25565,
+          }
+     }
+}
 
 impl Master
 {
+   pub fn new() -> Master
+   {
+      return Master {..Default::default()}
+   }
    /* Starts a host process in this thread. */
    pub fn host(self)
    {
-      let mp = MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress, port: self.port };
+      let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress, port: self.port };
       mp.start();
    }
 

@@ -56,3 +56,4 @@ fn gui(py: Python, ms: Master) -> PyResult<()>{
     ms.gui();
     Ok(())
 }
+

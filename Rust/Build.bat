@@ -14,7 +14,6 @@ maturin --version >nul 2>&1 || (
 
 mkdir  Build
 mkdir .\Build\Wheels
-mkdir .\Build\Julia
 
 cargo build --release
 maturin build
@@ -22,7 +21,7 @@ maturin build
 copy .\target\release\TALA.dll .\Build\TALA.dll
 copy .\Build\TALA.dll .\Build\TALA.pyd
 copy .\target\wheels\* .\Build\wheels\
-xcopy .\TALA\TALA.jl\* .\Build\Julia\TALA.jl\ /E
+copy .\Julia\TALA\src\TALA.jl .\Build\
 
 
 pause

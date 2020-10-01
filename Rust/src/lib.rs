@@ -8,24 +8,24 @@ extern crate serde_derive;
 
 mod channel;
 mod master;
-mod publisher;
-mod subscriber;
+//mod publisher;
+//mod subscriber;
 
 use pyo3::prelude::*;
-use pyo3::wrap_pyfunction;
+//use pyo3::wrap_pyfunction;
 
 // use std::str;
 // use std::ffi::CStr;
 // use std::os::raw::c_char;
 
-use splay::SplayMap;
-use splay::SplaySet;
-use std::thread;
-use std::time::Duration;
-use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use serde_json::Value as JsonValue;
-use std::collections::HashMap;
+//use splay::SplayMap;
+//use splay::SplaySet;
+//use std::thread;
+//use std::time::Duration;
+//use serde::{Deserialize, Serialize};
+//use serde_json::Result;
+//use serde_json::Value as JsonValue;
+//use std::collections::HashMap;
 
 
 use master::Master;
@@ -57,11 +57,13 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(ms)
     }
 
+    /*
     #[pyfn(m, "subscriber")]
     fn subscriber(py: Python, chn: String, ms: Master) -> Py<Subscriber>{
         Py::new(py, ms.subscriber(chn)).unwrap()
     }
-
+    */
+    /*
     #[pyfn(m, "publisher")]
     fn publisher(py: Python, chn: String, ms: Master) -> Py<Publisher>{
         Py::new(py, ms.publisher(chn)).unwrap()
@@ -79,6 +81,7 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(sb)
     }
 
+
     #[pyfn(m, "pubJoin")]
     fn pubJoin(_py: Python, pb: Publisher, chan: String) -> PyResult<Publisher>{
         pb.connect(chan);
@@ -91,10 +94,10 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
         Ok(sb)
     }
 
-
+*/
     m.add_class::<master::Master>()?;
-    m.add_class::<Subscriber>()?;
-    m.add_class::<Publisher>()?;
+   // m.add_class::<Subscriber>()?;
+   // m.add_class::<Publisher>()?;
 
     Ok(())
 }

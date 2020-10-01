@@ -347,7 +347,7 @@ impl Channel
                }
           }
 
-          return true;
+          //return true;
      }
      
      /**

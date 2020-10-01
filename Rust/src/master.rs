@@ -1,37 +1,30 @@
 #[path = "master_process.rs"] mod master_process;
 //mod master_process::MasterProcess;
 use std::collections::HashMap;
+use pyo3::prelude::*;
 
-#[derive(Debug)]
 
 
+#[pyclass]
+#[derive(Clone)]
 pub struct Master
 {
    pub ipAddress: String,
    pub port: u16,
 }
-impl Default for Master
-{
-     fn default() -> Master 
-     {
-         Master
-          {
-               ipAddress: "192.test".to_string(),
-               port: 25565,
-          }
-     }
-}
+
 
 impl Master
 {
    pub fn new() -> Master
    {
-      return Master {..Default::default()}
+      return Master {ipAddress: "192.test".to_string(), port: 25565};
    }
    /* Starts a host process in this thread. */
-   pub fn host(self)
+   pub fn host(&self)
    {
-      let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress, port: self.port };
+
+      let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress.to_string(), port: self.port };
       mp.start();
    }
 
@@ -44,25 +37,25 @@ impl Master
 
    /* Launch gui for current master 
       Return error if no master */
-   pub fn gui()
+   pub fn gui( self)
    {
       //gui launch
    }
 
    /* Disconnect from master */
-   pub fn disconnect()
+   pub fn disconnect( &self)
    {
 
    }
 
    /* Return a subscriber object */
-   pub fn subscriber()
+   pub fn subscriber( self)
    {
       //just need subscriber constructor
    }
 
    /* Return a publisher object */
-   pub fn publisher()
+   pub fn publisher( self)
    {
       //just need publisher constructor
    }

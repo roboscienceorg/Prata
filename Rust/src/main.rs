@@ -1,7 +1,10 @@
 
+#![allow(non_snake_case)]
 mod TEST_Channel;
 mod channel;
 mod master;
+
+
 
 fn main() {
     //println!("ChannelTests");

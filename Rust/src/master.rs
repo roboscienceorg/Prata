@@ -26,6 +26,7 @@ impl Master
 
       let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress.to_string(), port: self.port };
       mp.start();
+
    }
 
    /* Saves the credentials for the remote master process*/

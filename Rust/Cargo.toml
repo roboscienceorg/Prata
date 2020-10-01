@@ -2,23 +2,22 @@
 name = "TALA"
 version = "0.1.0"
 edition = "2018"
-authors = ["Ayden Drabek <Ayden.Drabek@mines.sdsmt.edu>", "Brennen Lamoreaux <Brennen.Lamoreaux@mines.sdsmt.edu>", "Ethan Steidl <Ethan.Steidl@mines.sdsmt.edu>", "Ryan Shell <Ryan.Shell@mines.sdsmt.edu>", "Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>"]
+authors = ["Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>", ""]
 
 [dependencies]
 pyo3 = "0.12.1"
 zmq = "0.9"
 libc = "0.2.77"
 port_scanner = "*"
-splay = "0.1"
-serde = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_derive = "1.0"
+splay = "0.1"
 
-
-[lib]
-name = "TALA"
-crate-type = ["cdylib"]
+#[lib]
+#name = "TALA"
+#crate-type = ["cdylib"]
 
 [features]
 # We must make this feature optional to build binaries such as the profiling crate
-default = ["zmq/vendored", "pyo3/extension-module", "serde/derive"]
+default = ["zmq/vendored", "pyo3/extension-module"]

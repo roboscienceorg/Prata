@@ -28,8 +28,7 @@ use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 
 
-use master::*;
-use channel::*;
+use master::Master;
 
 
 #[pymodule]
@@ -37,67 +36,65 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
 
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
 
-    m.add_function(wrap_pyfunction!(connect, m)?)?;
-    m.add_function(wrap_pyfunction!(disconnect, m)?)?;
-    m.add_function(wrap_pyfunction!(host, m)?)?;
-    m.add_function(wrap_pyfunction!(subscriber, m)?)?;
-    m.add_function(wrap_pyfunction!(publisher, m)?)?;
-    m.add_function(wrap_pyfunction!(pubLeave, m)?)?;
-    m.add_function(wrap_pyfunction!(subLeave, m)?)?;
-    m.add_function(wrap_pyfunction!(pubJoin, m)?)?;
-    m.add_function(wrap_pyfunction!(subJoin, m)?)?;
+    // m.add_function(wrap_pyfunction!(connect, m)?)?;
+    // m.add_function(wrap_pyfunction!(disconnect, m)?)?;
 
-    m.add_class::<Master>()?;
+
+    #[pyfn(m, "host")]
+    fn host(_py: Python, ms: Master) -> PyResult<Master>{
+        ms.host();
+        Ok(ms)
+    }
+
+    #[pyfn(m, "connect")]
+    fn connect(py: Python, IP: String, p: u16) -> Py<Master>{
+        Py::new(py, Master{ipAddress: IP, port: p}).unwrap()
+    }
+
+    #[pyfn(m, "disconnect")]
+    fn disconnect(_py: Python, ms: Master) -> PyResult<Master>{
+        ms.disconnect();
+        Ok(ms)
+    }
+
+    #[pyfn(m, "subscriber")]
+    fn subscriber(py: Python, chn: String, ms: Master) -> Py<Subscriber>{
+        Py::new(py, ms.subscriber(chn)).unwrap()
+    }
+
+    #[pyfn(m, "publisher")]
+    fn publisher(py: Python, chn: String, ms: Master) -> Py<Publisher>{
+        Py::new(py, ms.publisher(chn)).unwrap()
+    }
+
+    #[pyfn(m, "pubLeave")]
+    fn pubLeave(_py: Python, pb: Publisher, chan: String) -> PyResult<Publisher>{
+        pb.disconnect(chan);
+        Ok(pb)
+    }
+
+    #[pyfn(m, "subLeave")]
+    fn subLeave(_py: Python, sb: Subscriber, chan: String) -> PyResult<Subscriber>{
+        sb.disconnect(chan);
+        Ok(sb)
+    }
+
+    #[pyfn(m, "pubJoin")]
+    fn pubJoin(_py: Python, pb: Publisher, chan: String) -> PyResult<Publisher>{
+        pb.connect(chan);
+        Ok(pb)
+    }
+
+    #[pyfn(m, "subJoin")]
+    fn subJoin(_py: Python, sb: Subscriber, chan: String) -> PyResult<Subscriber>{
+        sb.connect(chan);
+        Ok(sb)
+    }
+
+
+    m.add_class::<master::Master>()?;
     m.add_class::<Subscriber>()?;
     m.add_class::<Publisher>()?;
 
     Ok(())
 }
-
-#[pyfunction]
-fn connect(py: Python, IP: String, p: u16) -> Py<Master>{
-    Py::new(py, Master{ipAddress: IP, port: p}).unwrap()
-}
-
-#[pyfunction]
-fn host(_py: Python, ms: Master) -> PyResult<()>{
-    ms.host();
-    Ok(())
-}
-
-#[pyfunction]
-fn disconnect(_py: Python, ms: Master) -> PyResult<()>{
-    ms.disconnect();
-    Ok(())
-}
-
-#[pyfunction]
-fn subscriber(py: Python, chn: String, ms: Master) -> Py<Subscriber>{
-    Py::new(py, ms.subscriber(chn)).unwrap()
-}
-
-#[pyfunction]
-fn publisher(py: Python, chn: String, ms: Master) -> Py<Publisher>{
-    Py::new(py, ms.publisher(chn)).unwrap()
-}
-
-#[pyfunction]
-fn pubLeave(_py: Python, pb: Publisher, chan: String) -> PyResult<()>{
-    pb.disconnect(chan);
-}
-
-#[pyfunction]
-fn subLeave(_py: Python, sb: Subscriber, chan: String) -> PyResult<()>{
-    sb.disconnect(chan);
-}
-
-#[pyfunction]
-fn pubJoin(_py: Python, pb: Publisher, chan: String) -> PyResult<()>{
-    pb.connect(chan);
-}
-
-#[pyfunction]
-fn subJoin(_py: Python, sb: Subscriber, chan: String) -> PyResult<()>{
-    sb.connect(chan);
-}
-

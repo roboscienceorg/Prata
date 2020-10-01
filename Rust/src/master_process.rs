@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 mod channel;
 
 use std::collections::HashMap;
@@ -135,7 +136,17 @@ impl MasterProcess
       let port = request_open_port().unwrap_or(0);
       thread::spawn(move || {
          let mut c = channel::Channel::new(port);
-         c.main();
+         //c.setMode(channel::ChannelMode::BLACKLIST);
+         let mut terminate = false;
+         while(!terminate)
+         {
+            c.main();
+            //catch channel terminate
+            //add to BLACKLIST or WHITELIST mid execution
+            terminate = true;
+
+         }
+         
       });
 
       let contactInfo: AddressPort = ( ipAddress, port );

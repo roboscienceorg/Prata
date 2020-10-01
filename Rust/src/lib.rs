@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-
+#[allow(dead_code)]
 extern crate pyo3;
 extern crate zmq;
 extern crate serde_json;

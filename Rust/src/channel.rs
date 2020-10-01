@@ -1,5 +1,5 @@
 
-
+#[allow(dead_code)]
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
@@ -347,9 +347,13 @@ impl Channel
                }
           }
 
-          //return true;
+          //return true;s
      }
      
+     pub fn setMode(&mut self, m: ChannelMode)
+     {
+          self.mode = m;
+     }
      /**
       * Main loop for channel. Runs nessesary processes
       *

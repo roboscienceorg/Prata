@@ -1,13 +1,14 @@
 from .TALA import *
+import gui as g
+import json
 #from GUI import *
 
 print("TALA Loaded!")
 
-def masterConnect(IP):
-    return masterConnectPy(IP)
+def gui(m)
 
-def masterDisconnect(IP):
-    return masterConnectPy(IP)
+    g.gui(json.loads(m.serialize()))#st is a json of master_process object
 
-def subscribe(subscriber, channelName):
-    return subscriberPy(subscriber, channelName)
+
+
+

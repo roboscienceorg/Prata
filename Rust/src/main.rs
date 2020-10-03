@@ -8,6 +8,7 @@ mod master;
 
 fn main() {
     //println!("ChannelTests");
+
     TEST_Channel::test();
     let m = master::Master::new();
     m.host();

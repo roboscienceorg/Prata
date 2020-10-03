@@ -79,6 +79,9 @@ class Window(tk.Frame):
         connect_bot.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
         
 
-
-app = ManageFrames()
-app.mainloop()
+def gui(json_object)
+    #parse json DATA
+    print("In gui.gui listing json:")
+    print(json_object)
+    app = ManageFrames()
+    app.mainloop()

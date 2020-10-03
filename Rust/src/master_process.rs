@@ -75,6 +75,7 @@ impl MasterProcess
       //start main loop
       loop 
       {
+
          //wait for a message to come in from a subscriber or publisher
          let mut msg = zmq::Message::new();
          repSocket.recv(&mut msg, 0).unwrap();      
@@ -92,6 +93,18 @@ impl MasterProcess
          let nodeIP = msg.ip;
          let nodePort = msg.port;
          //let reqType = msg.messageType;
+
+         /*
+         HANDLE ALL LETTERS
+          HANDLE the J message
+            
+            convert MasterProcess struct to json
+            let msg_string = serde_json::from_str(&self);
+            let serial_message: String = msg_str.unwrap();
+            repSocket.send(&serial_message, 0).unwrap();
+
+         */
+
 
          //if the channel doesn't already exist, create it
          if self.channels.contains_key(&channelName) == false

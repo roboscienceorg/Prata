@@ -91,10 +91,46 @@ impl MasterProcess
          println!("Mode: {}", msg.messageType);
          println!("IP: {}", msg.ip);
          let channelName = msg.message;
-         let nodeIP = msg.ip;
+         let nodeIP = msg.ip.to_string();
          let nodePort = msg.port;
          //let reqType = msg.messageType;
 
+         if  msg.messageType == 'T'
+         {
+            //terminate host
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let res = serde_json::to_string(&m);
+            let serial_message: String = res.unwrap();
+            repSocket.send(&serial_message, 0).unwrap();
+
+            //terminate by returning this thread
+            return;
+         }
+         else if  msg.messageType == 'D'
+         {
+            //publisher disconnect
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let res = serde_json::to_string(&m);
+            let serial_message: String = res.unwrap();
+            repSocket.send(&serial_message, 0).unwrap();
+
+            //take off internal list
+            //message is string of channel name
+            
+            //get channelInfo obj
+            //let temp_s = msg.message.to_string();
+            let chan_info = (self.channels.get_mut(&channelName)).unwrap();
+            let addr_prt: AddressPort = (msg.ip.to_string(), nodePort);
+
+            let index = chan_info.publishers.iter().position(|x| *x == addr_prt).unwrap();
+            chan_info.publishers.remove(index);
+
+
+         }
+         else if msg.messageType == 'P'
+         {
+            //publisher requesting connection to channel
+         }
          /*
          HANDLE ALL LETTERS
           HANDLE the J message

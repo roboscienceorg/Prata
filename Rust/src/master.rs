@@ -75,13 +75,17 @@ impl Master
       return Master {ipAddress: addr, port: p};
    }
    /* Starts a host process in this thread. */
-   pub fn host(self)
+   pub fn host(&self)
    {
-      thread::spawn(move || {
+      let s = self.ipAddress.to_string();
+      let p = self.port;
+      //let p = self.port;
+      
+      thread::spawn( move || {
 
          
 
-         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress.to_string(), port: self.port };
+         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
          mp.start();
       });
 

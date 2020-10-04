@@ -10,12 +10,14 @@ fn main() {
     //println!("ChannelTests");
 
     TEST_Channel::test();
+
+
     let m = master::Master::new();
 
     let sub_ = m.subscriber();
     let pub_ = m.publisher();
 
-    m = m.host();
+    m.host();
 
     //code
 

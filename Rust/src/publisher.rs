@@ -1,7 +1,7 @@
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
-
+use std::time::Duration;
 //use std::collections::HashMap;
 use std::collections::HashMap;
 //use std::thread;
@@ -61,34 +61,48 @@ impl Publisher{
         //check the currently stored channels to see if it is stored there
         if  self.channelInfo.contains_key(&Name)
         {
+            return;
         }
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
         else
         {
-         // setup the socket for the client
-        let context = zmq::Context::new();
-        let client = context.socket(zmq::REQ).unwrap();
+            //set up the socket so we can connect to publishers and subscribers
+            let mut full_address = "tcp://".to_string();
+            full_address.push_str(&self.masterip);
+            full_address.push_str(&":");
+            full_address.push_str(&self.masterport.to_string());
+            let context = zmq::Context::new();
+            let reqSocket = context.socket(zmq::REQ).unwrap();
+            //let port = request_open_port().unwrap_or(0);
+            reqSocket
+            .connect( &(full_address) )
+            //.connect("tcp://0.0.0.0:7000")
+            .expect("failed binding socket");
+            println!("repSocket bound");
+            //thread::sleep(Duration::from_millis(1));
 
-        //serialize message for transmission
-        let messageSent = Message{messageType: 'c',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
-        let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
+            //get the port that we are bound to
+            let lastEndpoint = match reqSocket.get_last_endpoint()
+            {
+            Ok(lastEndpoint) => {
+            match lastEndpoint {
+                Ok(lastEndpoint) => lastEndpoint,
+                Err(_e) => String::new(),
+            }
+            },
+            Err(_e) => "failed".to_string(),
+            };
 
-        //concatenate "tcp://" "IP" ":" "PORT" together
+        println!("publisher on {}", lastEndpoint);
 
-        let mut a = "tcp://".to_string();
-        a.push_str(&self.masterip.to_string());
-        a.push_str(&":");
-        a.push_str(&self.masterport.to_string());
-
-        //connect to the master object
-        client.connect(&a);
-
-        //send the message that has been serialized to the master
-        client.send(&serialMessage,0).unwrap();
+        let m = Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+        let res = serde_json::to_string(&m);
+        let serial_message: String = res.unwrap();
+        reqSocket.send(&serial_message, 0).unwrap();
 
         //wait for the response from master so that I can store the message into the message object
         let mut msg = zmq::Message::new();
-        client.recv(&mut msg,0).unwrap();
+        reqSocket.recv(&mut msg,0).unwrap();
 
         //deserialize the information
 

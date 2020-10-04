@@ -4,11 +4,11 @@ extern crate serde_derive;
 
 //use std::collections::HashMap;
 use std::collections::HashMap;
-use std::thread;
-use std::time::Duration;
+//use std::thread;
+//use std::time::Duration;
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use serde_json::Value as JsonValue;
+//use serde_json::Result;
+//use serde_json::Value as JsonValue;
 use pyo3::prelude::*;
 
 //#[derive(Debug)]
@@ -70,7 +70,7 @@ impl Publisher{
         let client = context.socket(zmq::REQ).unwrap();
 
         //serialize message for transmission
-        let messageSent = Message{messageType: 'P',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
+        let messageSent = Message{messageType: 'c',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
         let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
 
         //concatenate "tcp://" "IP" ":" "PORT" together
@@ -112,7 +112,7 @@ impl Publisher{
         let client = context.socket(zmq::REQ).unwrap();
 
         //serialize message for transmission
-        let messageSent = Message{messageType: 'D',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
+        let messageSent = Message{messageType: 'd',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
         let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
 
         //concatenate "tcp://" "IP" ":" "PORT" together

@@ -17,6 +17,7 @@ type AddressPort = (String, u16);
 
 /* struct to hold channel information */
 #[derive(Clone)]
+#[derive(Serialize, Deserialize)] 
 pub struct ChannelInfo
 {
    name: String,
@@ -35,6 +36,7 @@ pub struct Message
    pub message: String, 
 } 
 
+#[derive(Serialize, Deserialize)] 
 pub struct MasterProcess
 {
    //hash by channel name, store channel objects
@@ -55,7 +57,7 @@ impl MasterProcess
       full_address.push_str(&self.port.to_string());
       let context = zmq::Context::new();
       let repSocket = context.socket(zmq::REP).unwrap();
-      let port = request_open_port().unwrap_or(0);
+      //let port = request_open_port().unwrap_or(0);
       repSocket
          .connect( &(full_address) )
          //.connect("tcp://0.0.0.0:7000")
@@ -92,11 +94,7 @@ impl MasterProcess
          //deserialize into message struct
          let msg: Message = msg_string.unwrap();
 
-         println!("Mode: {}", msg.messageType);
-         println!("IP: {}", msg.ip);
-         let channelName = msg.message;
-         let nodeIP = msg.ip.to_string();
-         let nodePort = msg.port;
+
          //let reqType = msg.messageType;
 
          if  msg.messageType == 'T'
@@ -112,9 +110,10 @@ impl MasterProcess
             println!("Terminating master_process");
             return;
          }
-         else if  msg.messageType == 'D'
+         else if  msg.messageType == 'D' || msg.messageType == 'd'
          {
             //publisher disconnect
+            //d is for publisher D is for subscriber
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
@@ -125,34 +124,74 @@ impl MasterProcess
             
             //get channelInfo obj
             //let temp_s = msg.message.to_string();
-            let chan_info = (self.channels.get_mut(&channelName)).unwrap();
-            let addr_prt: AddressPort = (msg.ip.to_string(), nodePort);
+            let chan_info = (self.channels.get_mut(&msg.message)).unwrap();
+            let addr_prt: AddressPort = (msg.ip.to_string(), msg.port);
+            if msg.messageType == 'D'
+            {
+               let index = chan_info.subscribers.iter().position(|x| *x == addr_prt).unwrap();
+               chan_info.subscribers.remove(index);
+            }
+            else if msg.messageType == 'd'
+            {
+               let index = chan_info.publishers.iter().position(|x| *x == addr_prt).unwrap();
+               chan_info.publishers.remove(index);
+            }
 
-            let index = chan_info.publishers.iter().position(|x| *x == addr_prt).unwrap();
-            chan_info.publishers.remove(index);
 
 
          }
-         else if msg.messageType == 'P'
+         else if msg.messageType == 'C' || msg.messageType == 'c'
          {
             //publisher requesting connection to channel
+            //check if channel exists
+            let mut channel_port: u16 = 0;
+            let channel_exists = self.channels.contains_key(&msg.message);
+            if channel_exists == true
+            {
+               let chan_info = (self.channels.get_mut(&msg.message)).unwrap();
+               if msg.messageType == 'c'
+               {
+                  chan_info.publishers.push( (msg.ip.to_string(), msg.port) );
+               }
+               else if msg.messageType == 'C'
+               {
+                  chan_info.subscribers.push( (msg.ip.to_string(), msg.port) );
+               }
+               channel_port = chan_info.info.1;
+            }
+            else
+            {
+               //get port
+               channel_port = request_open_port().unwrap_or(0);
+               //make channel and insert it into hash map
+               let mut chan_info = MasterProcess::newChannel(self.ipAddress.to_string(), channel_port, msg.message.to_string());
+               if msg.messageType == 'c'
+               {
+                  chan_info.publishers.push(  (msg.ip.to_string(), msg.port) );
+               }
+               else if msg.messageType == 'C'
+               {
+                  chan_info.subscribers.push(  (msg.ip.to_string(), msg.port) );
+               }
+               self.channels.insert(msg.message.to_string(), chan_info);
+
+            }
+
+
+            //set correct addresses
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: channel_port,  message: "".to_string() };
+            let res = serde_json::to_string(&m);
+            let serial_message: String = res.unwrap();
+            repSocket.send(&serial_message, 0).unwrap();
          }
          else if msg.messageType == 'J'
          {
             //handle returning a json in message
-         }
-         /*
-         HANDLE ALL LETTERS
-          HANDLE the J message
-            
-            convert MasterProcess struct to json
-            let msg_string = serde_json::from_str(&self);
-            let serial_message: String = msg_str.unwrap();
+            let res = serde_json::to_string(&self);
+            let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
-
-         */
-
-
+         }
+/*
          //if the channel doesn't already exist, create it
          if self.channels.contains_key(&channelName) == false
          {
@@ -178,7 +217,7 @@ impl MasterProcess
          let msg_str = serde_json::to_string(&msg);
          let serial_message: String = msg_str.unwrap();
          repSocket.send(&serial_message, 0).unwrap();
-
+*/
          /* if we want to exit, call break; */
       }; 
          
@@ -189,16 +228,16 @@ impl MasterProcess
    /********************** PRIVATE ******************/
 
    /* Creates a new channel process */
-   fn newChannel(ipAddress: String, channelName: String) -> ChannelInfo
+   fn newChannel(ipAddress: String, port: u16, channelName: String) -> ChannelInfo
    {
 
       //pass assigned port into new channel
-      let port = request_open_port().unwrap_or(0);
+
       thread::spawn(move || {
          let mut c = channel::Channel::new(port);
          //c.setMode(channel::ChannelMode::BLACKLIST);
          let mut terminate = false;
-         while(!terminate)
+         while terminate == false
          {
             c.main();
             //catch channel terminate

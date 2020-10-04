@@ -6,8 +6,8 @@ extern crate serde_derive;
 
 //use splay::SplayMap;
 use splay::SplaySet;
-use std::thread;
-use std::time::Duration;
+//use std::thread;
+//use std::time::Duration;
 use serde::{Deserialize, Serialize};
 //use serde_json::Result;
 //use serde_json::Value as JsonValue;
@@ -372,21 +372,33 @@ impl Channel
       #[allow(dead_code)]
      pub fn main(&mut self)
      {
-
+          //set up the socket so we can connect to publishers and subscribers
+          let mut full_address = "tcp://".to_string();
+          full_address.push_str(&self.ip);
+          full_address.push_str(&":");
+          full_address.push_str(&self.port.to_string());
           let context = zmq::Context::new();
           let responder = context.socket(zmq::REP).unwrap();
+          responder
+               .connect( &(full_address) )
+               //.connect("tcp://0.0.0.0:7000")
+               .expect("failed binding socket");
+          println!("Channel Socket bound");
+          //thread::sleep(Duration::from_millis(1));
 
-          let protocol = self.protocol.to_string();
-          let str1 = String::from("://*:");
-          let str_with_port = self.port.to_string();
-          let address = [protocol, str1, str_with_port].concat();
-          //tcp://*:25565
+          //get the port that we are bound to
+          let lastEndpoint = match responder.get_last_endpoint()
+          {
+               Ok(lastEndpoint) => {
+               match lastEndpoint {
+               Ok(lastEndpoint) => lastEndpoint,
+               Err(_e) => String::new(),
+               }
+               },
+               Err(_e) => "failed".to_string(),
+          };
 
-          println!("value of s is {:?}", address);
-
-          
-          assert!(responder.bind(&address).is_ok());
-          //ERROR if assert fails break
+          println!("Channel on {}", lastEndpoint);
           let mut msg = zmq::Message::new();
 
           
@@ -441,7 +453,7 @@ impl Channel
                     return;
                }
 
-               thread::sleep(Duration::from_millis(1000));
+               //thread::sleep(Duration::from_millis(1000));
                
           }
      }

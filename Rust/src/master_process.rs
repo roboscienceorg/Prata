@@ -17,7 +17,7 @@ type AddressPort = (String, u16);
 
 /* struct to hold channel information */
 #[derive(Clone)]
-#[derive(Serialize, Deserialize)] 
+#[derive(Serialize, Deserialize)]
 pub struct ChannelInfo
 {
    name: String,
@@ -27,16 +27,16 @@ pub struct ChannelInfo
 }
 
 /* universal message format */
-#[derive(Serialize, Deserialize)] 
-pub struct Message 
-{     
-   pub messageType: char,            
-   pub ip: String,  
-   pub port: u16, 
-   pub message: String, 
-} 
+#[derive(Serialize, Deserialize)]
+pub struct Message
+{
+   pub messageType: char,
+   pub ip: String,
+   pub port: u16,
+   pub message: String,
+}
 
-#[derive(Serialize, Deserialize)] 
+#[derive(Serialize, Deserialize)]
 pub struct MasterProcess
 {
    //hash by channel name, store channel objects
@@ -80,17 +80,19 @@ impl MasterProcess
       println!("master_process on {}", lastEndpoint);
 
       //start main loop
-      loop 
+      loop
       {
          println!("looping");
          //wait for a message to come in from a subscriber or publisher
          let mut msg = zmq::Message::new();
-         repSocket.recv(&mut msg, 0).unwrap();      
-      
+         repSocket.recv(&mut msg, 0).unwrap();
+
+         println!("Master_proc received shit");
+
          //get package as a string
          let msg_data = msg.as_str().unwrap();
          let msg_string = serde_json::from_str(msg_data);
-   
+
          //deserialize into message struct
          let msg: Message = msg_string.unwrap();
 
@@ -112,6 +114,7 @@ impl MasterProcess
          }
          else if  msg.messageType == 'D' || msg.messageType == 'd'
          {
+            println!("Master_proc Hit D");
             //publisher disconnect
             //d is for publisher D is for subscriber
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
@@ -121,7 +124,7 @@ impl MasterProcess
 
             //take off internal list
             //message is string of channel name
-            
+
             //get channelInfo obj
             //let temp_s = msg.message.to_string();
             let chan_info = (self.channels.get_mut(&msg.message)).unwrap();
@@ -144,6 +147,7 @@ impl MasterProcess
          {
             //publisher requesting connection to channel
             //check if channel exists
+            println!("Master_proc Hit C");
             let mut channel_port: u16 = 0;
             let channel_exists = self.channels.contains_key(&msg.message);
             if channel_exists == true
@@ -186,6 +190,7 @@ impl MasterProcess
          }
          else if msg.messageType == 'J'
          {
+            println!("Master_proc Hit J");
             //handle returning a json in message
             let res = serde_json::to_string(&self);
             let serial_message: String = res.unwrap();
@@ -204,14 +209,14 @@ impl MasterProcess
          //convert the ip address of the channel to a byte array
          //let channelIP = &channelInfo.info.0.as_bytes();
          let channelPort = &channelInfo.info.1.to_be_bytes();
-         
-      
+
+
          //send data back to node
-         let msg = Message { 
+         let msg = Message {
             messageType: 'M',
-            ip: nodeIP,  
-            port: nodePort, 
-            message: channelName, 
+            ip: nodeIP,
+            port: nodePort,
+            message: channelName,
 
           };
          let msg_str = serde_json::to_string(&msg);
@@ -219,10 +224,10 @@ impl MasterProcess
          repSocket.send(&serial_message, 0).unwrap();
 */
          /* if we want to exit, call break; */
-      }; 
-         
+      };
 
-      
+
+
    }
 
    /********************** PRIVATE ******************/
@@ -245,7 +250,7 @@ impl MasterProcess
             terminate = true;
 
          }
-         
+
       });
 
       let contactInfo: AddressPort = ( ipAddress, port );
@@ -259,7 +264,7 @@ impl MasterProcess
       //first 4 bytes are the sender ip address, so lets extract that
       *ipString = [byte_msg[0].to_string(),
                    byte_msg[1].to_string(),
-                   byte_msg[2].to_string(), 
+                   byte_msg[2].to_string(),
                    byte_msg[3].to_string()]
                    .join(".");
 
@@ -280,7 +285,7 @@ impl MasterProcess
 
 }
 
-/* example usage for parseMessage 
+/* example usage for parseMessage
 
 let v: Vec<u8> = vec![1, 2, 3, 4, 0, 4, 10, 0, 240, 159, 146, 150];
 let mut mode = 0;

@@ -18,13 +18,13 @@ fn main() {
     let ip = "127.0.0.1".to_string();
     let port = 25565;
     let m = master::connect(ip, port);
-    
-    
+
+
     let sub_ = m.subscriber();
     let sub_2 = m.subscriber();
     let pub_ = m.publisher();
 
-    m.host();
+    //m.host();
 
     println!("Back to main from hosting");
     //code
@@ -34,7 +34,7 @@ fn main() {
     let b1 = std::io::stdin().read_line(&mut line).unwrap();
 
 
-    m.terminate();
+    //m.terminate();
 
     let mut xx = String::new();
     println!("Break2:");
@@ -53,5 +53,5 @@ fn main() {
 
     println!("{} = FirstMessage",data.to_string());
     */
-    
+
 }

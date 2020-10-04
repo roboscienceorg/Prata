@@ -90,7 +90,7 @@ impl Master
    }
 
 
-  
+
    /* Return a publisher object */
    pub fn publisher( &self) -> publisher::Publisher
    {
@@ -102,12 +102,12 @@ impl Master
       return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
 
-   pub fn host(&self)
+   pub fn host(&self, thread: bool)
    {
       let s = self.ipAddress.to_string();
       let p = self.port;
       //let p = self.port;
-
+      if thread{
       thread::spawn( move || {
 
 
@@ -115,6 +115,13 @@ impl Master
          let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
          mp.start();
       });
+      }
+      else
+      {
+         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
+         mp.start();
+      
+      }
 
 
    }

@@ -161,7 +161,7 @@ impl MasterProcess
             }
             else
             {
-               //get port
+               //get port .
                channel_port = request_open_port().unwrap_or(0);
                //make channel and insert it into hash map
                let mut chan_info = MasterProcess::newChannel(self.ipAddress.to_string(), channel_port, msg.message.to_string());

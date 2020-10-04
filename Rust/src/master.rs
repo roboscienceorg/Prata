@@ -8,6 +8,7 @@ use serde_derive;
 use serde::{Deserialize, Serialize};
 use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
+use std::thread;
 
 #[path = "subscriber.rs"] mod subscriber;
 #[path = "publisher.rs"] mod publisher;
@@ -53,6 +54,7 @@ impl Master
       
       responder.send(&serial_message, 0).unwrap();
       responder.recv(&mut msg, 0).unwrap();
+
       //data as string
       let data = msg.as_str().unwrap();
       let res = serde_json::from_str(data);
@@ -69,18 +71,45 @@ impl Master
    {
       let p = request_open_port().unwrap_or(0);
       let addr = (Ipv4Addr::LOCALHOST).to_string();
-      
+
       return Master {ipAddress: addr, port: p};
    }
    /* Starts a host process in this thread. */
-   pub fn host(&self)
+   pub fn host(self)
    {
+      thread::spawn(move || {
 
-      let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress.to_string(), port: self.port };
-      mp.start();
+         
+
+         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: self.ipAddress.to_string(), port: self.port };
+         mp.start();
+      });
+
 
    }
+   pub fn terminate(&self)
+   {
 
+      let context = zmq::Context::new();
+      let responder = context.socket(zmq::REQ).unwrap();
+
+      let protocol = "tcp".to_string();
+      let str1 = String::from("://*:");
+      let str_with_port = self.port.to_string();
+      let address = [protocol, str1, str_with_port].concat();
+
+
+      let m = Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+
+      let res = serde_json::to_string(&m);
+      let serial_message: String = res.unwrap();
+      let mut msg = zmq::Message::new();
+      
+      responder.send(&serial_message, 0).unwrap();
+      responder.recv(&mut msg, 0).unwrap();
+
+
+   }
    /* Saves the credentials for the remote master process*/
    pub fn connect( mut self, ip: String, port: u16 )
    {

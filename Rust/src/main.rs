@@ -11,12 +11,16 @@ fn main() {
 
     TEST_Channel::test();
     let m = master::Master::new();
+
     let sub_ = m.subscriber();
     let pub_ = m.publisher();
-    thread::spawn(move || {
-        m.host();
-        
-     });
+
+    m = m.host();
+
+    //code
+
+    m.terminate();
+    println!("Finished mains");
     /*
     let mut publisher = m.publisher();
     let channel = "X92.FM".to_string();

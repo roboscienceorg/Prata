@@ -41,9 +41,9 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
 
 
     #[pyfn(m, "host")]
-    fn host(_py: Python, ms: Master) -> PyResult<Master>{
+    fn host(_py: Python, ms: Master) -> PyResult<()>{
         ms.host();
-        Ok(ms)
+        Ok(())
     }
 
     #[pyfn(m, "connect")]

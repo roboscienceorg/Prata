@@ -28,14 +28,12 @@ mkdir  Build
 mkdir .\Build\Wheels
 mkdir .\Build\Julia\TALA.jl\src
 
-
+cargo build
 maturin build
 
-copy .\target\release\TALA.dll .\Build\TALA.dll
+copy .\target\debug\TALA.dll .\Build\TALA.dll
 copy .\Build\TALA.dll .\Build\TALA.pyd
 copy .\target\wheels\* .\Build\wheels\
-xcopy .\TALA\src\. .\Build\Julia\TALA.jl\src\ /E
-xcopy .\TALA\Project.toml .\Build\Julia\TALA.jl\ /E
 
 
 pause

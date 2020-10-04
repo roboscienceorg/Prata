@@ -15,10 +15,11 @@ fn main() {
     let m = master::Master::new();
 
     let sub_ = m.subscriber();
+    let sub_2 = m.subscriber();
     let pub_ = m.publisher();
 
     m.host();
-
+    println!("Back to main from hosting");
     //code
 
     m.terminate();

@@ -26,6 +26,7 @@ use std::collections::HashMap;
  * 
  * Defaults to STANDARD
  */
+#[allow(dead_code)]
 pub enum ChannelMode
 {
     STANDARD,
@@ -192,6 +193,7 @@ impl Channel
       * CONSTRUCTOR
       *
       */
+      #[allow(dead_code)]
      pub fn new(port_: u16) -> Channel
      {
           return Channel { port: port_, ..Default::default() };
@@ -204,11 +206,12 @@ impl Channel
      * return void
      * 
      * */
+     #[allow(dead_code)]
     pub fn add(&mut self, ip: String )
     {
         self.addressBook.insert(ip, Default::default() );
     }
-
+    #[allow(dead_code)]
     pub fn remove(&mut self, ip: String )
     {
         self.addressBook.remove(&ip);
@@ -222,7 +225,7 @@ impl Channel
      * 
      * return void
      */
-     
+    #[allow(dead_code)]
      pub fn addWithPorts(&mut self, ip: String, min: u16, max: u16 )
      {
           let mut ss = SplaySet::<u16>::new();
@@ -232,15 +235,17 @@ impl Channel
           {
               ss.insert(x);
           }
-          let mut ports = Ports { fullRange: false, portRange: ss };
+          let ports = Ports { fullRange: false, portRange: ss };
           self.addressBook.insert(ip, ports );
      
      }
+     #[allow(dead_code)]
      pub fn getPorts(&mut self, ip: String) -> &Ports
      {
 
           return (self.addressBook.get(&ip)).unwrap();
      }
+     #[allow(dead_code)]
      pub fn addPort(&mut self, ip: String, port: u16)
      {
           let  ports = (self.addressBook.get_mut(&ip)).unwrap();
@@ -248,7 +253,7 @@ impl Channel
           let y = ports.clone();
           self.addressBook.insert(ip, y);
      }
-
+     #[allow(dead_code)]
      pub fn removePort(&mut self, ip: String, port: u16)
      {
           let ports = (self.addressBook.get_mut(&ip)).unwrap();
@@ -265,17 +270,18 @@ impl Channel
           return void
 
       */
+      #[allow(dead_code)]
      pub fn addData(&mut self, message: String)
      {
           self.info.add(message);
           return;
      }
-
+     #[allow(dead_code)]
      pub fn getData(&mut self) -> String
      {
           return self.info.get();
      }
-
+     #[allow(dead_code)]
      pub fn getListed(&mut self) -> Vec<String>
      {
           let mut vec = Vec::new();
@@ -284,7 +290,7 @@ impl Channel
            }
            return vec;
      }
-
+     #[allow(dead_code)]
      pub fn count(&mut self) -> usize
      {
           return self.getListed().len();
@@ -300,6 +306,7 @@ impl Channel
       * return false - invalid credentials to receive from
       *
       */
+     #[allow(dead_code)]
      fn validAddress(&mut self, ip: String, port: u16) -> bool
      {
           
@@ -349,7 +356,7 @@ impl Channel
 
           //return true;s
      }
-     
+     #[allow(dead_code)]
      pub fn setMode(&mut self, m: ChannelMode)
      {
           self.mode = m;
@@ -362,6 +369,7 @@ impl Channel
       * return void - if function returns, channel listening has halted
       *
       */
+      #[allow(dead_code)]
      pub fn main(&mut self)
      {
 
@@ -467,6 +475,7 @@ mod data
           *
           * return none
           */
+          #[allow(dead_code)]
           pub fn add(&mut self, bytes: String)
           {
                self.info.push_back(bytes);
@@ -478,6 +487,7 @@ mod data
           *
           * return (String) - All data from FIFO
           */
+          #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
                let mut retval = String::from("");
@@ -496,6 +506,7 @@ mod data
           *
           * return (Information) - A blank information object
           */
+          #[allow(dead_code)]
           pub fn new() -> Information
           {
                return Information { info: VecDeque::new()};

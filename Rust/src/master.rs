@@ -6,7 +6,11 @@ use serde_json;
 use serde;
 use serde_derive;
 use serde::{Deserialize, Serialize};
+use std::net::Ipv4Addr;
+use port_scanner::request_open_port;
 
+#[path = "subscriber.rs"] mod subscriber;
+#[path = "publisher.rs"] mod publisher;
 
 #[pyclass]
 #[derive(Clone)]
@@ -63,7 +67,10 @@ impl Master
 {
    pub fn new() -> Master
    {
-      return Master {ipAddress: "192.test".to_string(), port: 25565};
+      let p = request_open_port().unwrap_or(0);
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
+      
+      return Master {ipAddress: addr, port: p};
    }
    /* Starts a host process in this thread. */
    pub fn host(&self)
@@ -95,16 +102,41 @@ impl Master
    }
 
    /* Return a subscriber object */
-   pub fn subscriber( self)
+   pub fn subscriber( &self) -> subscriber::Subscriber
    {
       //just need subscriber constructor
+      let port = request_open_port().unwrap_or(0);
+      //let octets = (Ipv4Addr::LOCALHOST).octets();
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
+      println!("your subscriber ip is {}",addr);
+/*
+      let mut addr = String::from("");
+      for i in &octets
+      {
+           addr.push_str(i.to_string());
+           addr.push_str(".".to_string());
+      }
+      let len = addr.len();
+      addr.truncate(len - 1);
+      self.info.clear();
+      return retval;
+*/
+
+      return subscriber::Subscriber::new(self.ipAddress.to_string(), self.port, addr,port);
    }
 
    /* Return a publisher object */
-   pub fn publisher( self)
+   pub fn publisher( &self) -> publisher::Publisher
    {
       //just need publisher constructor
+      let port = request_open_port().unwrap_or(0);
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
+      println!("your publisher ip is {}",addr);
+
+      return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
+
+
    
 }
 

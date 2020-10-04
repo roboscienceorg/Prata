@@ -4,11 +4,11 @@ extern crate serde_derive;
 
 //use std::collections::HashMap;
 use std::collections::HashMap;
-use std::thread;
-use std::time::Duration;
+//use std::thread;
+//use std::time::Duration;
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
-use serde_json::Value as JsonValue;
+//use serde_json::Result;
+//use serde_json::Value as JsonValue;
 use pyo3::prelude::*;
 
 //#[derive(Debug)]
@@ -39,7 +39,7 @@ pub struct Subscriber
 impl Subscriber
 {
     //constructor for Publisher Object
-    pub fn new(&mut self, MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
+    pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
     {
         return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }

@@ -3,7 +3,7 @@
 mod TEST_Channel;
 mod channel;
 mod master;
-
+use std::thread;
 
 
 fn main() {
@@ -11,8 +11,12 @@ fn main() {
 
     TEST_Channel::test();
     let m = master::Master::new();
-    m.host();
-
+    let sub_ = m.subscriber();
+    let pub_ = m.publisher();
+    thread::spawn(move || {
+        m.host();
+        
+     });
     /*
     let mut publisher = m.publisher();
     let channel = "X92.FM".to_string();

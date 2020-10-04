@@ -49,11 +49,15 @@ impl MasterProcess
    pub fn start(mut self)
    {
       //set up the socket so we can connect to publishers and subscribers
+      let mut full_address = "tcp://".to_string();
+      full_address.push_str(&self.ipAddress);
+      full_address.push_str(&":");
+      full_address.push_str(&self.port.to_string());
       let context = zmq::Context::new();
       let repSocket = context.socket(zmq::REP).unwrap();
       let port = request_open_port().unwrap_or(0);
       repSocket
-         .connect( &("tcp://0.0.0.0:".to_owned() + &port.to_string()) )
+         .connect( &(full_address) )
          //.connect("tcp://0.0.0.0:7000")
          .expect("failed binding socket");
       println!("repSocket bound");
@@ -71,12 +75,12 @@ impl MasterProcess
          Err(_e) => "failed".to_string(),
       };
 
-      println!("{}", lastEndpoint);
+      println!("master_process on {}", lastEndpoint);
 
       //start main loop
       loop 
       {
-
+         println!("looping");
          //wait for a message to come in from a subscriber or publisher
          let mut msg = zmq::Message::new();
          repSocket.recv(&mut msg, 0).unwrap();      
@@ -98,12 +102,14 @@ impl MasterProcess
          if  msg.messageType == 'T'
          {
             //terminate host
+            println!("In msg type T");
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
 
             //terminate by returning this thread
+            println!("Terminating master_process");
             return;
          }
          else if  msg.messageType == 'D'
@@ -130,6 +136,10 @@ impl MasterProcess
          else if msg.messageType == 'P'
          {
             //publisher requesting connection to channel
+         }
+         else if msg.messageType == 'J'
+         {
+            //handle returning a json in message
          }
          /*
          HANDLE ALL LETTERS

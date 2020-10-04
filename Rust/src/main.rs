@@ -13,16 +13,26 @@ fn main() {
 
 
     let m = master::Master::new();
-
     let sub_ = m.subscriber();
     let sub_2 = m.subscriber();
     let pub_ = m.publisher();
 
     m.host();
+
     println!("Back to main from hosting");
     //code
 
+    let mut line = String::new();
+    println!("Break1:");
+    let b1 = std::io::stdin().read_line(&mut line).unwrap();
+
+
     m.terminate();
+
+    let mut xx = String::new();
+    println!("Break2:");
+    let b1 = std::io::stdin().read_line(&mut xx).unwrap();
+
     println!("Finished mains");
     /*
     let mut publisher = m.publisher();

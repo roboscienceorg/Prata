@@ -23,14 +23,14 @@ pub struct Master
 }
 
 /* universal message format */
-#[derive(Serialize, Deserialize)] 
-pub struct Message 
-{     
-   pub messageType: char,            
-   pub ip: String,  
-   pub port: u16, 
-   pub message: String, 
-} 
+#[derive(Serialize, Deserialize)]
+pub struct Message
+{
+   pub messageType: char,
+   pub ip: String,
+   pub port: u16,
+   pub message: String,
+}
 
 #[pymethods]
 impl Master
@@ -51,7 +51,7 @@ impl Master
       let res = serde_json::to_string(&m);
       let serial_message: String = res.unwrap();
       let mut msg = zmq::Message::new();
-      
+
       responder.send(&serial_message, 0).unwrap();
       responder.recv(&mut msg, 0).unwrap();
 
@@ -61,29 +61,61 @@ impl Master
       //json deserialized stored inside p value
       let json_data: Message = res.unwrap();
       Ok(json_data.message)
-
-
    }
-}
-impl Master
-{
-   pub fn new() -> Master
+
+
+   /* Saves the credentials for the remote master process*/
+   pub fn connect( &mut self, ip: String, port: u16 )
    {
-      let p = request_open_port().unwrap_or(0);
-      let addr = (Ipv4Addr::LOCALHOST).to_string();
-
-      return Master {ipAddress: addr, port: p};
+      self.port = port;
+      self.ipAddress = ip;
    }
-   /* Starts a host process in this thread. */
+
+  pub fn subscriber( &self) -> subscriber::Subscriber
+   {
+      //just need subscriber constructor
+      let port = request_open_port().unwrap_or(0);
+      //let octets = (Ipv4Addr::LOCALHOST).octets();
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
+      println!("your subscriber ip is {} with port {}",addr,port);
+/*
+      let mut addr = String::from("");
+      for i in &octets
+      {
+           addr.push_str(i.to_string());
+           addr.push_str(".".to_string());
+      }
+      let len = addr.len();
+      addr.truncate(len - 1);
+      self.info.clear();
+      return retval;
+*/
+
+      return subscriber::Subscriber::new(self.ipAddress.to_string(), self.port, addr,port);
+   }
+
+
+  
+   /* Return a publisher object */
+   pub fn publisher( &self) -> publisher::Publisher
+   {
+      //just need publisher constructor
+      let port = request_open_port().unwrap_or(0);
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
+      println!("your publisher ip is {} with port {}",addr,port);
+
+      return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
+   }
+
    pub fn host(&self)
    {
       let s = self.ipAddress.to_string();
       let p = self.port;
       //let p = self.port;
-      
+
       thread::spawn( move || {
 
-         
+
 
          let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
          mp.start();
@@ -108,20 +140,28 @@ impl Master
       let res = serde_json::to_string(&m);
       let serial_message: String = res.unwrap();
       let mut msg = zmq::Message::new();
-      
+
       responder.send(&serial_message, 0).unwrap();
       responder.recv(&mut msg, 0).unwrap();
 
 
    }
-   /* Saves the credentials for the remote master process*/
-   pub fn connect( mut self, ip: String, port: u16 )
-   {
-      self.port = port;
-      self.ipAddress = ip;
-   }
 
-   /* Launch gui for current master 
+
+}
+impl Master
+{
+   pub fn new() -> Master
+   {
+      let p = request_open_port().unwrap_or(0);
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
+
+      return Master {ipAddress: addr, port: p};
+   }
+   /* Starts a host process in this thread. */
+
+
+   /* Launch gui for current master
       Return error if no master */
    pub fn gui( self)
    {
@@ -135,41 +175,7 @@ impl Master
    }
 
    /* Return a subscriber object */
-   pub fn subscriber( &self) -> subscriber::Subscriber
-   {
-      //just need subscriber constructor
-      let port = request_open_port().unwrap_or(0);
-      //let octets = (Ipv4Addr::LOCALHOST).octets();
-      let addr = (Ipv4Addr::LOCALHOST).to_string();
-      println!("your subscriber ip is {} with port {}",addr,port);
-/*
-      let mut addr = String::from("");
-      for i in &octets
-      {
-           addr.push_str(i.to_string());
-           addr.push_str(".".to_string());
-      }
-      let len = addr.len();
-      addr.truncate(len - 1);
-      self.info.clear();
-      return retval;
-*/
-
-      return subscriber::Subscriber::new(self.ipAddress.to_string(), self.port, addr,port);
-   }
-
-   /* Return a publisher object */
-   pub fn publisher( &self) -> publisher::Publisher
-   {
-      //just need publisher constructor
-      let port = request_open_port().unwrap_or(0);
-      let addr = (Ipv4Addr::LOCALHOST).to_string();
-      println!("your publisher ip is {} with port {}",addr,port);
-
-      return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
-   }
 
 
-   
+
 }
-

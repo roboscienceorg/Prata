@@ -23,14 +23,14 @@ pub struct Master
 }
 
 /* universal message format */
-#[derive(Serialize, Deserialize)] 
-pub struct Message 
-{     
-   pub messageType: char,            
-   pub ip: String,  
-   pub port: u16, 
-   pub message: String, 
-} 
+#[derive(Serialize, Deserialize)]
+pub struct Message
+{
+   pub messageType: char,
+   pub ip: String,
+   pub port: u16,
+   pub message: String,
+}
 
 #[pymethods]
 impl Master
@@ -51,7 +51,7 @@ impl Master
       let res = serde_json::to_string(&m);
       let serial_message: String = res.unwrap();
       let mut msg = zmq::Message::new();
-      
+
       responder.send(&serial_message, 0).unwrap();
       responder.recv(&mut msg, 0).unwrap();
 
@@ -61,80 +61,16 @@ impl Master
       //json deserialized stored inside p value
       let json_data: Message = res.unwrap();
       Ok(json_data.message)
-
-
    }
-}
-impl Master
-{
-   pub fn new() -> Master
-   {
-      let p = request_open_port().unwrap_or(0);
-      let addr = (Ipv4Addr::LOCALHOST).to_string();
-
-      return Master {ipAddress: addr, port: p};
-   }
-   /* Starts a host process in this thread. */
-   pub fn host(&self)
-   {
-      let s = self.ipAddress.to_string();
-      let p = self.port;
-      //let p = self.port;
-      
-      thread::spawn( move || {
-
-         
-
-         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
-         mp.start();
-      });
 
 
-   }
-   pub fn terminate(&self)
-   {
-
-      let context = zmq::Context::new();
-      let responder = context.socket(zmq::REQ).unwrap();
-
-      let protocol = "tcp".to_string();
-      let str1 = String::from("://*:");
-      let str_with_port = self.port.to_string();
-      let address = [protocol, str1, str_with_port].concat();
-
-
-      let m = Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-
-      let res = serde_json::to_string(&m);
-      let serial_message: String = res.unwrap();
-      let mut msg = zmq::Message::new();
-      
-      responder.send(&serial_message, 0).unwrap();
-      responder.recv(&mut msg, 0).unwrap();
-
-
-   }
    /* Saves the credentials for the remote master process*/
-   pub fn connect( mut self, ip: String, port: u16 )
+   pub fn connect( &mut self, ip: String, port: u16 )
    {
       self.port = port;
       self.ipAddress = ip;
    }
 
-   /* Launch gui for current master 
-      Return error if no master */
-   pub fn gui( self)
-   {
-      //gui launch
-   }
-
-   /* Disconnect from master */
-   pub fn disconnect( &self)
-   {
-
-   }
-
-   /* Return a subscriber object */
    pub fn subscriber( &self) -> subscriber::Subscriber
    {
       //just need subscriber constructor
@@ -169,7 +105,75 @@ impl Master
       return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
 
+   pub fn host(&self)
+   {
+      let s = self.ipAddress.to_string();
+      let p = self.port;
+      //let p = self.port;
 
-   
+      thread::spawn( move || {
+
+
+
+         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
+         mp.start();
+      });
+
+
+   }
+   pub fn terminate(&self)
+   {
+
+      let context = zmq::Context::new();
+      let responder = context.socket(zmq::REQ).unwrap();
+
+      let protocol = "tcp".to_string();
+      let str1 = String::from("://*:");
+      let str_with_port = self.port.to_string();
+      let address = [protocol, str1, str_with_port].concat();
+
+
+      let m = Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+
+      let res = serde_json::to_string(&m);
+      let serial_message: String = res.unwrap();
+      let mut msg = zmq::Message::new();
+
+      responder.send(&serial_message, 0).unwrap();
+      responder.recv(&mut msg, 0).unwrap();
+
+
+   }
+
+
 }
+impl Master
+{
+   pub fn new() -> Master
+   {
+      let p = request_open_port().unwrap_or(0);
+      let addr = (Ipv4Addr::LOCALHOST).to_string();
 
+      return Master {ipAddress: addr, port: p};
+   }
+   /* Starts a host process in this thread. */
+
+
+   /* Launch gui for current master
+      Return error if no master */
+   pub fn gui( self)
+   {
+      //gui launch
+   }
+
+   /* Disconnect from master */
+   pub fn disconnect( &self)
+   {
+
+   }
+
+   /* Return a subscriber object */
+
+
+
+}

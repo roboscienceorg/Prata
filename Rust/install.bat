@@ -28,7 +28,6 @@ mkdir  Build
 mkdir .\Build\Wheels
 mkdir .\Build\Julia
 
-cargo build --release
 maturin build
 
 copy .\target\release\TALA.dll .\Build\TALA.dll

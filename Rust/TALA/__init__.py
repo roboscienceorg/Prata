@@ -5,10 +5,6 @@ import json
 
 print("TALA Loaded!")
 
-def gui(m)
+def gui(m):
 
     g.gui(json.loads(m.serialize()))#st is a json of master_process object
-
-
-
-

@@ -12,7 +12,14 @@ fn main() {
     TEST_Channel::test();
 
 
-    let m = master::Master::new();
+    //let m = master::Master::new();
+    //let m = master::Master {ipAddress: "127.0.0.1".to_string(), port: 10819};
+
+    let ip = "127.0.0.1".to_string();
+    let port = 25565;
+    let m = master::connect(ip, port);
+    
+    
     let sub_ = m.subscriber();
     let sub_2 = m.subscriber();
     let pub_ = m.publisher();

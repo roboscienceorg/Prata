@@ -64,12 +64,7 @@ impl Master
    }
 
 
-   /* Saves the credentials for the remote master process*/
-   pub fn connect( &mut self, ip: String, port: u16 )
-   {
-      self.port = port;
-      self.ipAddress = ip;
-   }
+
 
   pub fn subscriber( &self) -> subscriber::Subscriber
    {
@@ -182,4 +177,9 @@ impl Master
 
 
 
+}
+/* Saves the credentials for the remote master process*/
+pub fn connect(ip: String, p: u16 ) -> Master
+{
+   return Master {ipAddress: ip, port: p}
 }

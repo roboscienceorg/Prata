@@ -238,8 +238,11 @@ impl MasterProcess
 
       //pass assigned port into new channel
 
+      let s = ipAddress.to_string();
+      let p = port;
+
       thread::spawn(move || {
-         let mut c = channel::Channel::new(port);
+         let mut c = channel::Channel::new(s.to_string(), p);
          //c.setMode(channel::ChannelMode::BLACKLIST);
          let mut terminate = false;
          while terminate == false

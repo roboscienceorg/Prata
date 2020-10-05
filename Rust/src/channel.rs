@@ -19,11 +19,11 @@ use std::collections::HashMap;
 
 /**
  * Represents Channel mode
- * 
+ *
  * STANDARD  - No white or blacklist
  * BLACKLIST - ip's and ports added to the channel are banned
  * WHITELIST - ip's and ports added to the channel are the only ones allowed to talk
- * 
+ *
  * Defaults to STANDARD
  */
 #[allow(dead_code)]
@@ -44,15 +44,15 @@ impl Default for ChannelMode
  * Represents ports for an ip address
  * fullRange (boolean) - true if all ports should be included
  * PortRange (SplaySet) - Contains ports included
- * 
+ *
  * Defaults to fullrange = true
- * Defaults to portRange = {empty set} 
- * 
+ * Defaults to portRange = {empty set}
+ *
  * Note - fullrange is meant to be used when all the ports are on the list
  *        if many are on the list, this data structure becomes large
  * Note - SplaySet could be removed for a hash set instead
- * 
- * 
+ *
+ *
  */
 #[derive(Clone)]
 pub struct Ports
@@ -62,7 +62,7 @@ pub struct Ports
 }
 impl Default for Ports
 {
-     fn default() -> Ports 
+     fn default() -> Ports
      {
           Ports
           {
@@ -99,19 +99,19 @@ impl Ports
  * ip (String) - what ip is sending the message
  * port (u16) - what port is sending the message
  * message (String) - the message recieved
- * 
+ *
  * Defaults there is no defaults for this object
- * 
- * 
+ *
+ *
  */
-#[derive(Serialize, Deserialize)] 
-pub struct Message 
-{     
-     pub messageType: char,            
-     pub ip: String,  
-     pub port: u16, 
-     pub message: String, 
-} 
+#[derive(Serialize, Deserialize)]
+pub struct Message
+{
+     pub messageType: char,
+     pub ip: String,
+     pub port: u16,
+     pub message: String,
+}
 
 
 
@@ -125,19 +125,19 @@ pub struct Message
  * protocol (String) - Must be lowercase udp or tcp
  * addressBook (SplayMap<u32,Ports>) - used for ip and port lookup
  *                      for black/whitelist
- * 
+ *
  * Defaults to mode = STANDARD
  * Defaults to name = "NoName"
  * Defaults to port = 555555
  * Defaults to info = {empty}
  * Defaults to protocol = "tcp"
  * Defaults to addressBook = {empty}
- * 
+ *
  * Note the addressbook could be implemented with a traditinal map
  *        if the speed measured is slow on larger scales
- * 
- * 
- * 
+ *
+ *
+ *
  */
 
 pub struct Channel
@@ -145,17 +145,17 @@ pub struct Channel
 
      pub mode: ChannelMode,
      pub name: String,
-     pub ip: String,   
-     pub port: u16,                     
-     pub info: self::data::Information, 
+     pub ip: String,
+     pub port: u16,
+     pub info: self::data::Information,
      pub protocol: String,
      //maps an ip to its port range
      pub addressBook : HashMap<String,Ports>,  //STRING
-     
+
 }
 impl Default for Channel
 {
-    fn default() -> Channel 
+    fn default() -> Channel
     {
         Channel
         {
@@ -194,17 +194,17 @@ impl Channel
       *
       */
       #[allow(dead_code)]
-     pub fn new(port_: u16) -> Channel
+     pub fn new(ip_: String, port_: u16) -> Channel
      {
-          return Channel { port: port_, ..Default::default() };
+          return Channel { port: port_, ip: ip_, ..Default::default() };
      }
     /**
      * adds ip address to addressbook with default port range 0-max
-     * 
+     *
      * param ip (u32) - ip to add to list
-     * 
+     *
      * return void
-     * 
+     *
      * */
      #[allow(dead_code)]
     pub fn add(&mut self, ip: String )
@@ -218,18 +218,18 @@ impl Channel
     }
     /**
      * Adds ip to list with port range
-     * 
+     *
      * param ip (u32) - ip address to add to list
      * param min (u16) - min port to add inclusive
      * param max (u16) - max port to add inclusive
-     * 
+     *
      * return void
      */
     #[allow(dead_code)]
      pub fn addWithPorts(&mut self, ip: String, min: u16, max: u16 )
      {
           let mut ss = SplaySet::<u16>::new();
- 
+
 
           for x in min..max
           {
@@ -237,7 +237,7 @@ impl Channel
           }
           let ports = Ports { fullRange: false, portRange: ss };
           self.addressBook.insert(ip, ports );
-     
+
      }
      #[allow(dead_code)]
      pub fn getPorts(&mut self, ip: String) -> &Ports
@@ -262,7 +262,7 @@ impl Channel
           self.addressBook.insert(ip, y);
      }
      /**
-      * 
+      *
           Adds data to internal info
 
           param message (String) - data to add to info
@@ -309,7 +309,7 @@ impl Channel
      #[allow(dead_code)]
      fn validAddress(&mut self, ip: String, port: u16) -> bool
      {
-          
+
           //blacklist
           match self.mode
           {
@@ -399,14 +399,21 @@ impl Channel
           };
 
           println!("Channel on {}", lastEndpoint);
-          let mut msg = zmq::Message::new();
 
-          
-          loop 
+
+
+          loop
           {
                //read inbound messages
-               responder.recv(&mut msg, 0).unwrap();
+
                //Can never return none cause it waits
+               let mut msg = zmq::Message::new();
+
+               responder.recv(&mut msg, 0).unwrap();
+               println!("");
+
+
+
 
                //data as string
                let data = msg.as_str().unwrap();
@@ -454,7 +461,7 @@ impl Channel
                }
 
                //thread::sleep(Duration::from_millis(1000));
-               
+
           }
      }
 
@@ -526,4 +533,3 @@ mod data
      }
 
 }
-

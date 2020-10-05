@@ -124,7 +124,7 @@ impl Publisher{
 
         assert!(responder.bind(&address).is_ok());
         println!("create chan at addr {}", address.to_string());
-        let m = Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+        let m = Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
 
         let res = serde_json::to_string(&m);
         let serial_message: String = res.unwrap();
@@ -188,42 +188,42 @@ impl Publisher{
     }
     pub fn publish(&mut self, ChannelName : String, Mess: String)
     {
+
+
+        if  self.channelInfo.contains_key(&ChannelName) == false
+        {
+            self.connect(ChannelName.to_string());
+        }
+
+
+        let chanInfo = self.channelInfo.get(&ChannelName).unwrap();
+
+        let chanIP = &chanInfo.0;
+        let chanPort = &chanInfo.1;
+
+        println!("Enterting pub send the big D");
         let context = zmq::Context::new();
-        let client = context.socket(zmq::REQ).unwrap();
+        let responder = context.socket(zmq::REQ).unwrap();
 
-        let messageSent = Message{messageType: 'D',ip: self.ip.to_string(),port: self.port,message: Mess};         // create message object
-        let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
+        let protocol = "tcp://".to_string();
+        let str1 = String::from(chanIP.to_string());
+        let str2 = String::from(":");
+        let str_with_port = chanPort.to_string();
+        let address = [protocol, str1, str2, str_with_port].concat();
 
-        //check the hashmap to see if the channel information is stored
-        if  self.channelInfo.contains_key(&ChannelName)
-        {
-        }
-        else
-        {
-        //if the information is not stored then need to request it from master using connect
-        //print message to screen or choose to handle it by calling the connect function
-        self.connect(ChannelName.to_string());
-        }
+        assert!(responder.bind(&address).is_ok());
+        println!("got bind {}", address.to_string());
+        let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: Mess.to_string() };
 
-        let mut a = "tcp://".to_string();
-        let b = self.channelInfo.get(&ChannelName).unwrap().0.to_string();   //ip   doesnt handle the none case and might cause probs
-        let c = ":".to_string();
-        let d = self.channelInfo.get(&ChannelName).unwrap().1.to_string();   //port doesnt handle the none case and might cause probs
+        let res = serde_json::to_string(&m);
 
-
-        a.push_str(&b);
-        a.push_str(&c);
-        a.push_str(&d);
-        //connect to the channel using the message information
-
-        //connect to the channel object
-        client.connect(&a);
-
-        //send the message that has been serialized to the master
-        client.send(&serialMessage,0).unwrap();
-
-        //wait for the response
+        let serial_message: String = res.unwrap();
+        println!("{}", serial_message);
         let mut msg = zmq::Message::new();
-        client.recv(&mut msg,0).unwrap();
+
+        println!("Sending info");
+        responder.send(&serial_message, 0).unwrap();
+        println!("exit info");
+
     }
 }

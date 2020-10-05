@@ -1,0 +1,7 @@
+name = "TALA"
+uuid = "2e9b6035-0378-4515-92f2-db6bbebc62e8"
+authors = ["Ayden Drabek <Ayden.Drabek@mines.sdsmt.edu>", "Brennen Lamoreaux <Brennen.Lamoreaux@mines.sdsmt.edu>", "Ethan Steidl <Ethan.Steidl@mines.sdsmt.edu>", "Ryan Shell <Ryan.Shell@mines.sdsmt.edu>", "Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>"]
+version = "0.1.0"
+
+[deps]
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"

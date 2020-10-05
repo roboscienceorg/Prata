@@ -12,8 +12,8 @@ mod publisher;
 mod subscriber;
 
 use pyo3::prelude::*;
-use std::net::Ipv4Addr;
-use port_scanner::request_open_port;
+//use std::net::Ipv4Addr;
+//use port_scanner::request_open_port;
 
 use master::Master;
 use publisher::Publisher;

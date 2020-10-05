@@ -62,11 +62,10 @@ impl MasterProcess
          .connect( &(full_address) )
          //.connect("tcp://0.0.0.0:7000")
          .expect("failed binding socket");
-      println!("repSocket bound");
       thread::sleep(Duration::from_millis(1));
 
       //get the port that we are bound to
-      let lastEndpoint = match repSocket.get_last_endpoint()
+      let _lastEndpoint = match repSocket.get_last_endpoint()
       {
          Ok(lastEndpoint) => {
             match lastEndpoint {
@@ -77,17 +76,13 @@ impl MasterProcess
          Err(_e) => "failed".to_string(),
       };
 
-      println!("master_process on {}", lastEndpoint);
 
       //start main loop
       loop
       {
-         println!("looping");
          //wait for a message to come in from a subscriber or publisher
          let mut msg = zmq::Message::new();
          repSocket.recv(&mut msg, 0).unwrap();
-
-         println!("Master_proc received shit");
 
          //get package as a string
          let msg_data = msg.as_str().unwrap();
@@ -102,19 +97,16 @@ impl MasterProcess
          if  msg.messageType == 'T'
          {
             //terminate host
-            println!("In msg type T");
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
 
             //terminate by returning this thread
-            println!("Terminating master_process");
             return;
          }
          else if  msg.messageType == 'D' || msg.messageType == 'd'
          {
-            println!("Master_proc Hit D");
             //publisher disconnect
             //d is for publisher D is for subscriber
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
@@ -147,8 +139,7 @@ impl MasterProcess
          {
             //publisher requesting connection to channel
             //check if channel exists
-            println!("Master_proc Hit C");
-            let mut channel_port: u16 = 0;
+            let channel_port: u16;
             let channel_exists = self.channels.contains_key(&msg.message);
             if channel_exists == true
             {
@@ -190,7 +181,6 @@ impl MasterProcess
          }
          else if msg.messageType == 'J'
          {
-            println!("Master_proc Hit J");
             //handle returning a json in message
             let res = serde_json::to_string(&self);
             let serial_message: String = res.unwrap();
@@ -262,6 +252,7 @@ impl MasterProcess
    }
 
    /* takes in a message from a pub/sub and decodes it */
+    #[allow(dead_code)]
    fn parseMessage(byte_msg: &Vec<u8>, ipString: &mut String, port: &mut u16, mode: &mut u8, channelName: &mut String)
    {
       //first 4 bytes are the sender ip address, so lets extract that

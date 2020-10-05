@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use pyo3::prelude::*;
 use serde_json;
 use serde;
-use serde_derive;
+//use serde_derive;
 use serde::{Deserialize, Serialize};
 use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
@@ -43,7 +43,7 @@ impl Master
       let protocol = "tcp".to_string();
       let str1 = String::from("://*:");
       let str_with_port = self.port.to_string();
-      let address = [protocol, str1, str_with_port].concat();
+      let _address = [protocol, str1, str_with_port].concat();
 
 
       let m = Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
@@ -120,14 +120,13 @@ impl Master
       {
          let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
          mp.start();
-      
+
       }
 
 
    }
    pub fn terminate(&self)
    {
-      println!("Enterting Terminate");
       let context = zmq::Context::new();
       let responder = context.socket(zmq::REQ).unwrap();
 
@@ -138,18 +137,14 @@ impl Master
       let address = [protocol, str1, str2, str_with_port].concat();
 
       assert!(responder.bind(&address).is_ok());
-      println!("Termin at addr {}", address.to_string());
       let m = Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
 
       let res = serde_json::to_string(&m);
       let serial_message: String = res.unwrap();
       let mut msg = zmq::Message::new();
 
-      println!("Sending terminate");
       responder.send(&serial_message, 0).unwrap();
-      println!("attempting to recieve terminate confirm");
       responder.recv(&mut msg, 0).unwrap();
-      println!("exit terminate");
 
    }
 
@@ -186,6 +181,7 @@ impl Master
 
 }
 /* Saves the credentials for the remote master process*/
+#[allow(dead_code)]
 pub fn connect(ip: String, p: u16 ) -> Master
 {
    return Master {ipAddress: ip, port: p}

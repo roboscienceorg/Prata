@@ -79,7 +79,6 @@ impl Subscriber {
         // let mut msg = zmq::Message::new();
         // client.recv(&mut msg,0).unwrap();
 
-        println!("Enterting sub create chan");
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -90,20 +89,14 @@ impl Subscriber {
         let address = [protocol, str1, str2, str_with_port].concat();
 
         assert!(responder.bind(&address).is_ok());
-        println!("create chan at addr {}", address.to_string());
         let m = Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
 
         let res = serde_json::to_string(&m);
         let serial_message: String = res.unwrap();
         let mut msg = zmq::Message::new();
 
-        println!("Sending info");
         responder.send(&serial_message, 0).unwrap();
-        println!("attempting to recieve info confirm");
         responder.recv(&mut msg, 0).unwrap();
-        println!("exit info");
-
-
 
         //deserialize the information
 
@@ -139,7 +132,7 @@ impl Subscriber {
          a.push_str(&self.masterport.to_string());
 
          //connect to the master object
-         client.connect(&a);
+         assert!(client.bind(&a).is_ok());
 
          //send the message that has been serialized to the master
          client.send(&serialMessage,0).unwrap();
@@ -166,7 +159,6 @@ impl Subscriber {
         let chanIP = &chanInfo.0;
         let chanPort = &chanInfo.1;
 
-        println!("Enterting sub get the big D");
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -177,17 +169,13 @@ impl Subscriber {
         let address = [protocol, str1, str2, str_with_port].concat();
 
         assert!(responder.bind(&address).is_ok());
-        println!("got bind {}", address.to_string());
         let m = Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
 
         let res = serde_json::to_string(&m);
         let serial_message: String = res.unwrap();
         let mut msg = zmq::Message::new();
 
-        println!("Sending info");
         responder.send(&serial_message, 0).unwrap();
-        println!("exit info");
-        println!("get ACk");
         responder.recv(&mut msg, 0).unwrap();
         let data = msg.as_str().unwrap();
         let res = serde_json::from_str(data);

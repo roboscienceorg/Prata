@@ -1,12 +1,12 @@
 
 #![allow(non_snake_case)]
+
 mod TEST_Channel;
 mod channel;
 mod master;
-use std::thread;
+//use std::thread;
 
-use port_scanner::request_open_port;
-
+//use port_scanner::request_open_port;
 
 fn main() {
     //println!("ChannelTests");
@@ -24,8 +24,7 @@ fn main() {
     let mut line = String::new();
     m.host(true);
 
-
-    let mut b1 = std::io::stdin().read_line(&mut line).unwrap();
+    std::io::stdin().read_line(&mut line).unwrap();
 
 
     let mut sub_ = m.subscriber();
@@ -48,7 +47,7 @@ fn main() {
 
 
     println!("Break1:");
-    b1 = std::io::stdin().read_line(&mut line).unwrap();
+    std::io::stdin().read_line(&mut line).unwrap();
 
 
     m.terminate();

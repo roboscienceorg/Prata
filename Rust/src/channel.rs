@@ -73,15 +73,18 @@ impl Default for Ports
 }
 impl Ports
 {
+     #[allow(dead_code)]
      pub fn remove(&mut self, port: u16)
      {
           self.fullRange = false;
           self.portRange.remove(&port);
      }
+      #[allow(dead_code)]
      pub fn insert(&mut self, port: u16)
      {
           self.portRange.insert(port);
      }
+     #[allow(dead_code)]
      pub fn count(&mut self) -> usize
      {
           return self.portRange.len();
@@ -383,11 +386,10 @@ impl Channel
                .connect( &(full_address) )
                //.connect("tcp://0.0.0.0:7000")
                .expect("failed binding socket");
-          println!("Channel Socket bound");
           //thread::sleep(Duration::from_millis(1));
 
           //get the port that we are bound to
-          let lastEndpoint = match responder.get_last_endpoint()
+          let _lastEndpoint = match responder.get_last_endpoint()
           {
                Ok(lastEndpoint) => {
                match lastEndpoint {
@@ -398,7 +400,6 @@ impl Channel
                Err(_e) => "failed".to_string(),
           };
 
-          println!("Channel on fucking {}", lastEndpoint);
           let mut msg = zmq::Message::new();
 
 
@@ -408,33 +409,24 @@ impl Channel
 
                //Can never return none cause it waits
 
-               println!("before data pull");
                responder.recv(&mut msg, 0).unwrap();
-               println!("after data pull");
 
-
-
-               println!("before data strip");
                //data as string
                let data = msg.as_str().unwrap();
                let res = serde_json::from_str(data);
 
                //json deserialized stored inside p value
                let inbound: Message = res.unwrap();
-               println!("after data strip {}", inbound.message);
                //white/black list check for valid credentials
                if self.validAddress(inbound.ip, inbound.port) == false
                {
                     //do nothing if invalid
-                     println!("valid addr false");
                }
                else if  inbound.messageType == 'D'
                {
                     //add data
-                    println!("inbound type");
                     //use CLASS ADD FUNCTION
                     self.info.add(inbound.message);
-                    println!("leaving inbound tpye");
                     let m = Message { messageType: 'A', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
 
                     let res = serde_json::to_string(&m);

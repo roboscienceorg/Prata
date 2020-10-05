@@ -1,7 +1,7 @@
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
-use std::time::Duration;
+//use std::time::Duration;
 //use std::collections::HashMap;
 use std::collections::HashMap;
 //use std::thread;
@@ -112,7 +112,6 @@ impl Publisher{
         // reqSocket.recv(&mut msg,0).unwrap();
         // println!("recieved{}", lastEndpoint);
 //=====================================
-        println!("Enterting pub create chan");
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -123,18 +122,14 @@ impl Publisher{
         let address = [protocol, str1, str2, str_with_port].concat();
 
         assert!(responder.bind(&address).is_ok());
-        println!("create chan at addr {}", address.to_string());
         let m = Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
 
         let res = serde_json::to_string(&m);
         let serial_message: String = res.unwrap();
         let mut msg = zmq::Message::new();
 
-        println!("Sending info");
         responder.send(&serial_message, 0).unwrap();
-        println!("attempting to recieve info confirm");
         responder.recv(&mut msg, 0).unwrap();
-        println!("exit info");
 
 
         //deserialize the information
@@ -144,9 +139,7 @@ impl Publisher{
 
         let inbound : Message = res.unwrap();
         //add the information to the channelInfo Object
-        println!("add shitw");
         self.add(Name, inbound.ip, inbound.port);
-        println!("add shitw");
         }
     }
     //adds ip address to addressbook with default port range 0-max
@@ -171,7 +164,7 @@ impl Publisher{
         a.push_str(&self.masterport.to_string());
 
          //connect to the master object
-        client.connect(&a);
+        assert!(client.bind(&a).is_ok());
 
          //send the message that has been serialized to the master
         client.send(&serialMessage,0).unwrap();
@@ -201,7 +194,6 @@ impl Publisher{
         let chanIP = &chanInfo.0;
         let chanPort = &chanInfo.1;
 
-        println!("Enterting pub send the big D");
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -212,20 +204,15 @@ impl Publisher{
         let address = [protocol, str1, str2, str_with_port].concat();
 
         assert!(responder.bind(&address).is_ok());
-        println!("got bind {}", address.to_string());
         let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: Mess.to_string() };
 
         let res = serde_json::to_string(&m);
 
         let serial_message: String = res.unwrap();
-        println!("{}", serial_message);
         let mut msg = zmq::Message::new();
 
-        println!("Sending info");
+
         responder.send(&serial_message, 0).unwrap();
-        println!("exit info");
-        println!("waiting resp");
         responder.recv(&mut msg, 0).unwrap();
-        println!("got resp");
     }
 }

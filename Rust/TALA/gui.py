@@ -39,27 +39,27 @@ class ManageFrames(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
-        
 
-        
+
+
 
 
 class Window(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
 
-        img = ImageTk.PhotoImage(file="ansuz.png")    
+        img = ImageTk.PhotoImage(file="ansuz.png")
 
-        canvas = tk.Canvas(self, width = img.width(), height = img.height())      
+        canvas = tk.Canvas(self, width = img.width(), height = img.height())
         canvas.place(relx = .5, rely = .45, relwidth = 1, relheight = 1,anchor = 'center')
 
-        parent.one = img  
+        parent.one = img
         canvas.create_image(0,0, anchor='nw', image=img)
 
         canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,
                         text="TALA")
 
-        
+
         create_label = tk.Label(self, text = "Create new Host", bg = "white")
         create_label.place(x = img.width()/2, rely = .45, relwidth = .1, relheight = .05 ,anchor = 'n')
 
@@ -77,8 +77,12 @@ class Window(tk.Frame):
 
         connect_bot = ttk.Button(self, text = "Connect", command=lambda: controller.topFrame(Graph))
         connect_bot.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
-        
 
 
-app = ManageFrames()
-app.mainloop()
+def gui(json_object)
+    #parse json DATA
+    # needs master.rs data struct
+    print("In gui.gui listing json:")
+    print(json_object)
+    app = ManageFrames()
+    app.mainloop()

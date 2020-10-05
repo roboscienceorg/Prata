@@ -10,7 +10,7 @@ pub fn test()
 fn add_ip_ports_test()
 {
     //println!("Test - Channel - Add IP and Ports");
-    let mut c = channel::Channel::new(55555);  
+    let mut c = channel::Channel::new("test".to_string(),55555);
     c.add("192.168.0.0".to_string());
     let ports = c.getPorts("192.168.0.0".to_string());
 
@@ -20,7 +20,7 @@ fn add_ip_ports_test()
 fn remove_data_test()
 {
     //println!("Test - Channel - Remove Data");
-    let mut c = channel::Channel::new(55555);  
+    let mut c = channel::Channel::new("test".to_string(),55555);
 
     let data = c.getData();
     assert!(data == "", "TEST: Constructs with data already inside FAIL");
@@ -29,7 +29,7 @@ fn remove_data_test()
 fn add_data_test()
 {
     //println!("Test - Channel - Add Data");
-    let mut c = channel::Channel::new(55555);   
+    let mut c = channel::Channel::new("test".to_string(),55555);
     c.addData("data element 1".to_string());
     c.addData("data element 2".to_string());
     c.addData("data element 3".to_string());
@@ -48,7 +48,7 @@ fn add_data_test()
 fn basic_test()
 {
     //println!("Test - Channel - Basic");
-    let mut c = channel::Channel::new(55555);
+    let mut c = channel::Channel::new("test".to_string(),55555);
     let listed = c.getListed();
     assert!(listed.len() == 0, "TEST: Default constructor starts with ip listed");
 
@@ -73,7 +73,7 @@ fn basic_test()
 fn remove_ip_test()
 {
     //println!("Test - Channel - Remove Address");
-    let mut c = channel::Channel::new(55555);
+    let mut c = channel::Channel::new("test".to_string(),55555);
     c.add("192.168.0.1".to_string());
     c.add("192.168.0.2".to_string());
     c.add("192.168.0.3".to_string());

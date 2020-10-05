@@ -1,9 +1,11 @@
-import TALA as tl
-import time
+using PyCall
+
+tl = pyimport("TALA")
+time =  pyimport("time")
 
 m = tl.connect("127.0.0.1", 25565);
 
-m.host(True);
+m.host(true);
 
 time.sleep(5)
 

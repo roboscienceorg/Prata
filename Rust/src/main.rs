@@ -5,6 +5,8 @@ mod channel;
 mod master;
 use std::thread;
 
+use port_scanner::request_open_port;
+
 
 fn main() {
     //println!("ChannelTests");
@@ -17,28 +19,39 @@ fn main() {
 
     let ip = "127.0.0.1".to_string();
     let port = 25565;
-    let m = master::connect(ip, port);
+    let m = master::connect(ip.to_string(), port);
+
+    let mut line = String::new();
+    m.host(true);
 
 
-    let sub_ = m.subscriber();
-    let sub_2 = m.subscriber();
-    let pub_ = m.publisher();
+    let mut b1 = std::io::stdin().read_line(&mut line).unwrap();
 
-    //m.host();
+
+    let mut sub_ = m.subscriber();
+    let mut pub_ = m.publisher();
+
+    pub_.connect("test".to_string());
+    pub_.publish("test".to_string(),"testing message 1=======".to_string());
+
+
+    sub_.connect("test".to_string());
+    println!("listen 1 {}", sub_.listen("test".to_string()));
+    pub_.publish("test".to_string(),"testing message2 ==========".to_string());
+    println!("listen 2 {}", sub_.listen("test".to_string()));
+    println!("listen 3 {}", sub_.listen("test".to_string()));
+    //m.host(true);
+
 
     println!("Back to main from hosting");
     //code
 
-    let mut line = String::new();
+
     println!("Break1:");
-    let b1 = std::io::stdin().read_line(&mut line).unwrap();
+    b1 = std::io::stdin().read_line(&mut line).unwrap();
 
 
-    //m.terminate();
-
-    let mut xx = String::new();
-    println!("Break2:");
-    let b1 = std::io::stdin().read_line(&mut xx).unwrap();
+    m.terminate();
 
     println!("Finished mains");
     /*

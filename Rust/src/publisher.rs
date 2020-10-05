@@ -224,6 +224,8 @@ impl Publisher{
         println!("Sending info");
         responder.send(&serial_message, 0).unwrap();
         println!("exit info");
-
+        println!("waiting resp");
+        responder.recv(&mut msg, 0).unwrap();
+        println!("got resp");
     }
 }

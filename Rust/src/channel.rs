@@ -398,8 +398,8 @@ impl Channel
                Err(_e) => "failed".to_string(),
           };
 
-          println!("Channel on {}", lastEndpoint);
-
+          println!("Channel on fucking {}", lastEndpoint);
+          let mut msg = zmq::Message::new();
 
 
           loop
@@ -407,31 +407,39 @@ impl Channel
                //read inbound messages
 
                //Can never return none cause it waits
-               let mut msg = zmq::Message::new();
 
+               println!("before data pull");
                responder.recv(&mut msg, 0).unwrap();
-               println!("");
+               println!("after data pull");
 
 
 
-
+               println!("before data strip");
                //data as string
                let data = msg.as_str().unwrap();
                let res = serde_json::from_str(data);
 
                //json deserialized stored inside p value
                let inbound: Message = res.unwrap();
-
+               println!("after data strip {}", inbound.message);
                //white/black list check for valid credentials
                if self.validAddress(inbound.ip, inbound.port) == false
                {
                     //do nothing if invalid
+                     println!("valid addr false");
                }
                else if  inbound.messageType == 'D'
                {
                     //add data
+                    println!("inbound type");
                     //use CLASS ADD FUNCTION
                     self.info.add(inbound.message);
+                    println!("leaving inbound tpye");
+                    let m = Message { messageType: 'A', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+
+                    let res = serde_json::to_string(&m);
+                    let serial_message: String = res.unwrap();
+                    responder.send(&serial_message, 0).unwrap();
                }
                else if  inbound.messageType == 'R'
                {

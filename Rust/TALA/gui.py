@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 import numpy as np
-from graph import *
+from .graph import *
 
 
 LARGE_FONT= ("Verdana", 20)
@@ -79,10 +79,10 @@ class Window(tk.Frame):
         connect_bot.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
 
 
-def gui(json_object)
+def gui(json_object):
     #parse json DATA
     # needs master.rs data struct
-    print("In gui.gui listing json:")
+    print("Made it to GUI here is the current Master DATA:")
     print(json_object)
     app = ManageFrames()
     app.mainloop()

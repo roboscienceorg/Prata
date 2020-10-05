@@ -35,17 +35,18 @@ pub struct Message
 #[pymethods]
 impl Master
 {
-   pub fn serialize(&self) -> PyResult<String>
+   pub fn serialize(&self) -> String
    {
       let context = zmq::Context::new();
       let responder = context.socket(zmq::REQ).unwrap();
 
-      let protocol = "tcp".to_string();
-      let str1 = String::from("://*:");
+      let protocol = "tcp://".to_string();
+      let str1 = String::from(&self.ipAddress);
+      let str2 = String::from(":");
       let str_with_port = self.port.to_string();
-      let _address = [protocol, str1, str_with_port].concat();
+      let address = [protocol, str1, str2, str_with_port].concat();
 
-
+      assert!(responder.bind(&address).is_ok());
       let m = Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
 
       let res = serde_json::to_string(&m);
@@ -53,15 +54,21 @@ impl Master
       let mut msg = zmq::Message::new();
 
       responder.send(&serial_message, 0).unwrap();
+
+      println!("sent awaiting recv");
+
       responder.recv(&mut msg, 0).unwrap();
+
+      println!("received");
 
       //data as string
       let data = msg.as_str().unwrap();
       let res = serde_json::from_str(data);
       //json deserialized stored inside p value
       let json_data: Message = res.unwrap();
-      Ok(json_data.message)
-   }
+      println!("packaged returned");
+      return json_data.message;
+      }
 
 
 

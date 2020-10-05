@@ -43,8 +43,8 @@ fn main() {
 
 
     println!("Back to main from hosting");
-    //code
 
+    println!("{:?}", m.serialize());
 
     println!("Break1:");
     std::io::stdin().read_line(&mut line).unwrap();

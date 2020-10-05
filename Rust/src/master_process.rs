@@ -93,7 +93,6 @@ impl MasterProcess
 
 
          //let reqType = msg.messageType;
-
          if  msg.messageType == 'T'
          {
             //terminate host
@@ -182,7 +181,10 @@ impl MasterProcess
          else if msg.messageType == 'J'
          {
             //handle returning a json in message
-            let res = serde_json::to_string(&self);
+            let me = serde_json::to_string(&self);
+            let meserl: String = me.unwrap();
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: meserl.to_string() };
+            let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
          }

@@ -20,6 +20,7 @@ pub struct Master
 {
    pub ipAddress: String,
    pub port: u16,
+   pub threading: bool,
 }
 
 /* universal message format */
@@ -109,16 +110,13 @@ impl Master
       return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
 
-   pub fn host(&self, thread: bool)
+   pub fn host(&self)
    {
       let s = self.ipAddress.to_string();
       let p = self.port;
       //let p = self.port;
-      if thread{
+      if self.threading{
       thread::spawn( move || {
-
-
-
          let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
          mp.start();
       });
@@ -164,7 +162,7 @@ impl Master
       let p = request_open_port().unwrap_or(0);
       let addr = (Ipv4Addr::LOCALHOST).to_string();
 
-      return Master {ipAddress: addr, port: p};
+      return Master {ipAddress: addr, port: p, threading: true};
    }
    /* Starts a host process in this thread. */
 
@@ -184,12 +182,15 @@ impl Master
 
    /* Return a subscriber object */
 
-
+   pub fn setThreading( &mut self, value: bool)
+   {
+      self.threading = value;
+   }
 
 }
 /* Saves the credentials for the remote master process*/
 #[allow(dead_code)]
 pub fn connect(ip: String, p: u16 ) -> Master
 {
-   return Master {ipAddress: ip, port: p}
+   return Master {ipAddress: ip, port: p, threading: true}
 }

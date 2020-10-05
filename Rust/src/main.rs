@@ -19,10 +19,12 @@ fn main() {
 
     let ip = "127.0.0.1".to_string();
     let port = 25565;
-    let m = master::connect(ip.to_string(), port);
+    let mut m = master::connect(ip.to_string(), port);
 
     let mut line = String::new();
-    m.host(true);
+
+    //m.setThreading(true);
+    m.host();
 
     std::io::stdin().read_line(&mut line).unwrap();
 

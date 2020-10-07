@@ -97,10 +97,8 @@ class Window(tk.Frame):
 
     
 
-def gui(json_object):
-    #parse json DATA
-    # needs master.rs data struct
-    print("Made it to GUI here is the current Master DATA:")
-    print(json_object)
+def gui():
     app = ManageFrames()
     app.mainloop()
+
+

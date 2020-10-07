@@ -46,12 +46,20 @@ class Window(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
 
+        self.ip = tk.StringVar() 
+        self.port = tk.StringVar()
+        self.parent = parent
+        self.controller = controller 
+        self.createDisplay()
+
+
+    def createDisplay(self,):
         img = ImageTk.PhotoImage(file="ansuz.png")
 
         canvas = tk.Canvas(self, width = img.width(), height = img.height())
         canvas.place(relx = .5, rely = .45, relwidth = 1, relheight = 1,anchor = 'center')
 
-        parent.one = img
+        self.parent.one = img
         canvas.create_image(0,0, anchor='nw', image=img)
 
         canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,
@@ -70,24 +78,29 @@ class Window(tk.Frame):
         ip_label = tk.Label(self, text = "IP of Host", bg = "white")
         ip_label.place(x = img.width()/2, rely = .65, width = 100, height = 25 ,anchor = 's')
 
-        ip_entry = tk.Entry(self, bg = 'white')
+        ip_entry = tk.Entry(self, bg = 'white', textvariable = self.ip)
         ip_entry.place(x = img.width()/2, rely = .65, relwidth = .1, relheight = .05,anchor = 'n')
 
         port_label = tk.Label(self, text = "Port of Host", bg = "white")
         port_label.place(x = img.width()/2, rely = .75, width = 100, height = 25 ,anchor = 's')
 
-        port_entry = tk.Entry(self, bg = 'white')
+        port_entry = tk.Entry(self, bg = 'white', textvariable = self.port)
         port_entry.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
 
-        connect_bot = tk.Button(self, text = "Connect", command=lambda: controller.topFrame(Graph))
+        connect_bot = tk.Button(self, text = "Connect", command=lambda: [self.controller.topFrame(Graph), self.setMaster() ])
         connect_bot.place(x = img.width()/2, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
 
 
+    def setMaster(self):
+        MASTERIP = self.ip.get() 
+        MASTERPORT = self.port.get() 
+
+    
 
 def gui(json_object):
     #parse json DATA
     # needs master.rs data struct
     print("Made it to GUI here is the current Master DATA:")
     print(json_object)
-app = ManageFrames()
-app.mainloop()
+    app = ManageFrames()
+    app.mainloop()

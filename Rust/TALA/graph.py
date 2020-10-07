@@ -1,71 +1,35 @@
 import tkinter as tk
-
+from .TALA import Master, connect
 HEIGHT = 700
 WIDTH = 800
+MASTERIP = ""
+MASTERPORT = 0
 
 
-channels = {}
 
+class ConnectionData():
+    def __init__(self):
+        self.channels = {}
+        self.jsondata = {}
+        self.master_ip = ""
+        self.master_port = 0
 
-channel = {
-  "channels": {
-    "test": {
-      "name": "test",
-      "info": [
-        "127.0.0.2",
-        60448
-      ],
-      "publishers": [
-        [
-          "127.0.0.3",
-          60439
-        ]
-      ],
-      "subscribers": [
-        [
-          "127.0.0.4",
-          60438
-        ]
-      ]
-    },
-        "test2": {
-      "name": "test",
-      "info": [
-        "127.0.0.2",
-        60448
-      ],
-      "publishers": [
-        [
-          "127.0.0.3",
-          60439
-        ]
-      ],
-      "subscribers": [
-        [
-          "127.0.0.4",
-          60438
-        ]
-      ]
-      }
-  },
-  "ipAddress": "127.0.0.1",
-  "port": 25565
-}
+    def parseJson(self):
+        self.master_ip = channel["ipAddress"]
+        self.master_port = channel["port"]
+        cords = [0,0]
+        publishers = []
+        subscribers = []
+        for key in channel["channels"]:
+            info = channel["channels"][key]["info"]
+            for pubs in channel["channels"][key]["publishers"]:
+                publishers.append(pubs) 
+            for subs in channel["channels"][key]["subscribers"]:
+                subscribers.append(subs)
+            self.channels[key] = [info, publishers,subscribers,cords]
 
-
-def parseJson():
-    master_ip = channel["ipAddress"]
-    master_port = channel["port"]
-    cords = [0,0]
-    publishers = []
-    subscribers = []
-    for key in channel["channels"]:
-        info = channel["channels"][key]["info"]
-        for pubs in channel["channels"][key]["publishers"]:
-            publishers.append(pubs) 
-        for subs in channel["channels"][key]["subscribers"]:
-            subscribers.append(subs)
-        channels[key] = [info, publishers,subscribers,cords]
+    def connectMaster(self):
+        self.jsondata = connect(MASTERIP,MASTERPORT).serialize()
 
 
 class Graph(tk.Frame):
@@ -76,8 +40,10 @@ class Graph(tk.Frame):
         self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
         self.publishers = {}
         self.subscribers = {}
-        parseJson()
-        self.createGraph(channels)
+        connection = ConnectionData()
+        connection.connectMaster()
+        connection.parseJson()
+        self.createGraph(connection.channels)
         self.buttons()
 
     def calculatePoint(self,object_dic,x_offset,color):

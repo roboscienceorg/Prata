@@ -1,8 +1,6 @@
 import tkinter as tk
-import tkinter.ttk as ttk
 from PIL import Image, ImageTk
-import numpy as np
-from .graph import *
+from graph import *
 
 
 LARGE_FONT= ("Verdana", 20)
@@ -69,14 +67,21 @@ class Window(tk.Frame):
         canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,
                         text="TALA")
 
-        connect_label = ttk.Label(self, text = "IP or DNS of Host")
-        connect_label.place(x = img.width()/2, rely = .65, width = 100, height = 25 ,anchor = 'n')
+        ip_label = tk.Label(self, text = "IP of Host", bg = "white")
+        ip_label.place(x = img.width()/2, rely = .65, width = 100, height = 25 ,anchor = 's')
 
-        host_entry = tk.Entry(self, bg = 'white')
-        host_entry.place(x = img.width()/2, rely = .7, relwidth = .1, relheight = .05,anchor = 'n')
+        ip_entry = tk.Entry(self, bg = 'white')
+        ip_entry.place(x = img.width()/2, rely = .65, relwidth = .1, relheight = .05,anchor = 'n')
 
-        connect_bot = ttk.Button(self, text = "Connect", command=lambda: controller.topFrame(Graph))
-        connect_bot.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
+        port_label = tk.Label(self, text = "Port of Host", bg = "white")
+        port_label.place(x = img.width()/2, rely = .75, width = 100, height = 25 ,anchor = 's')
+
+        port_entry = tk.Entry(self, bg = 'white')
+        port_entry.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
+
+        connect_bot = tk.Button(self, text = "Connect", command=lambda: controller.topFrame(Graph))
+        connect_bot.place(x = img.width()/2, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
+
 
 
 def gui(json_object):
@@ -84,5 +89,5 @@ def gui(json_object):
     # needs master.rs data struct
     print("Made it to GUI here is the current Master DATA:")
     print(json_object)
-    app = ManageFrames()
-    app.mainloop()
+app = ManageFrames()
+app.mainloop()

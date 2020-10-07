@@ -1,16 +1,71 @@
-import numpy as np
 import tkinter as tk
 
 HEIGHT = 700
 WIDTH = 800
 
-pub1 = np.array(["192.168.1.1","192.168.1.3","192.168.1.2"])
-pub2 = np.array(["192.168.1.3","192.168.1.4","192.168.1.5","192.168.2.3","192.168.2.4","192.168.2.5","192.168.3.3","192.168.3.4","192.168.3.5"])
-sub1 = np.array(["192.168.2.1","192.168.2.2","192.168.2.3"])
-cords = [400,90]
-channel1 = np.array([pub1,sub1,cords], dtype=object)
-channel2 = np.array([pub2,sub1,cords], dtype=object)
-channels = {"channel1":channel1,"channel2":channel2}
+
+channels = {}
+
+
+channel = {
+  "channels": {
+    "test": {
+      "name": "test",
+      "info": [
+        "127.0.0.2",
+        60448
+      ],
+      "publishers": [
+        [
+          "127.0.0.3",
+          60439
+        ]
+      ],
+      "subscribers": [
+        [
+          "127.0.0.4",
+          60438
+        ]
+      ]
+    },
+        "test2": {
+      "name": "test",
+      "info": [
+        "127.0.0.2",
+        60448
+      ],
+      "publishers": [
+        [
+          "127.0.0.3",
+          60439
+        ]
+      ],
+      "subscribers": [
+        [
+          "127.0.0.4",
+          60438
+        ]
+      ]
+      }
+  },
+  "ipAddress": "127.0.0.1",
+  "port": 25565
+}
+
+
+def parseJson():
+    master_ip = channel["ipAddress"]
+    master_port = channel["port"]
+    cords = [0,0]
+    publishers = []
+    subscribers = []
+    for key in channel["channels"]:
+        info = channel["channels"][key]["info"]
+        for pubs in channel["channels"][key]["publishers"]:
+            publishers.append(pubs) 
+        for subs in channel["channels"][key]["subscribers"]:
+            subscribers.append(subs)
+        channels[key] = [info, publishers,subscribers,cords]
 
 
 class Graph(tk.Frame):
@@ -21,6 +76,7 @@ class Graph(tk.Frame):
         self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
         self.publishers = {}
         self.subscribers = {}
+        parseJson()
         self.createGraph(channels)
         self.buttons()
 
@@ -48,16 +104,16 @@ class Graph(tk.Frame):
         x_channel = int(3*WIDTH / 6)
         y_channel = int(HEIGHT / (len(channels)*2))
         for channel in channels:
-            for pubs in channels[channel][0]:
-                if pubs not in self.publishers:
-                    self.publishers[pubs] = [0,0]
+            for pubs in channels[channel][1]:
+                if pubs[0] not in self.publishers:
+                    self.publishers[pubs[0]] = [0,0]
 
-            for subs in channels[channel][1]:
-                if subs not in self.subscribers:
-                    self.subscribers[subs] = [0,0]
+            for subs in channels[channel][2]:
+                if subs[0] not in self.subscribers:
+                    self.subscribers[subs[0]] = [0,0]
 
-            channels[channel][2] = [x_channel, y_channel * channel_count + 20]
-            self.plotPoint(channels[channel][2],channel,"channel")
+            channels[channel][3] = [x_channel, y_channel * channel_count + 20]
+            self.plotPoint(channels[channel][3],channels[channel][0],"channel")
             channel_count += 1
 
     
@@ -65,10 +121,10 @@ class Graph(tk.Frame):
         self.calculatePoint(self.subscribers,4.5,"subsciber")
 
         for channel in channels:
-            for pubs in channels[channel][0]:
-                self.drawArrow(self.publishers[pubs],channels[channel][2])
-            for subs in channels[channel][1]:
-                self.drawArrow(channels[channel][2],self.subscribers[subs])
+            for pubs in channels[channel][1]:
+                self.drawArrow(self.publishers[pubs[0]],channels[channel][3])
+            for subs in channels[channel][2]:
+                self.drawArrow(channels[channel][3],self.subscribers[subs[0]])
 
 
     #   drawArror(self,canvas,start,end)

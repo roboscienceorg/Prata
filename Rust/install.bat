@@ -24,16 +24,16 @@ maturin --version >nul 2>&1 || (
 )
 
 
-mkdir  Build
-mkdir .\Build\Wheels
-mkdir .\Build\Julia\TALA.jl\src
+mkdir  Build > NUL
+mkdir .\Build\Wheels > NUL
+mkdir .\Build\Julia\TALA.jl\src > NUL
 
-cargo build
 maturin build
 
-copy .\target\debug\TALA.dll .\Build\TALA.dll
-copy .\Build\TALA.dll .\Build\TALA.pyd
-copy .\target\wheels\* .\Build\wheels\
+copy .\target\debug\TALA.dll .\Build\TALA.dll > NUL
+copy .\Build\TALA.dll .\Build\TALA.pyd > NUL
+copy .\target\wheels\* .\Build\wheels\ > NUL
 
+pip uninstall -y TALA > NUL
 
-pause
+echo [1;34m Please install TALA by installing the wheel file in Build/Wheels[0m

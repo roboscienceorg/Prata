@@ -56,22 +56,21 @@ impl Master
 
       responder.send(&serial_message, 0).unwrap();
 
-      println!("sent awaiting recv");
-
       responder.recv(&mut msg, 0).unwrap();
-
-      println!("received");
 
       //data as string
       let data = msg.as_str().unwrap();
       let res = serde_json::from_str(data);
       //json deserialized stored inside p value
       let json_data: Message = res.unwrap();
-      println!("packaged returned");
+
       return json_data.message;
       }
 
-
+   pub fn setThreading( &mut self, value: bool)
+   {
+      self.threading = value;
+   }
 
 
   pub fn subscriber( &self) -> subscriber::Subscriber
@@ -80,7 +79,6 @@ impl Master
       let port = request_open_port().unwrap_or(0);
       //let octets = (Ipv4Addr::LOCALHOST).octets();
       let addr = (Ipv4Addr::LOCALHOST).to_string();
-      println!("your subscriber ip is {} with port {}",addr,port);
 /*
       let mut addr = String::from("");
       for i in &octets
@@ -105,7 +103,6 @@ impl Master
       //just need publisher constructor
       let port = request_open_port().unwrap_or(0);
       let addr = (Ipv4Addr::LOCALHOST).to_string();
-      println!("your publisher ip is {} with port {}",addr,port);
 
       return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
@@ -182,10 +179,7 @@ impl Master
 
    /* Return a subscriber object */
 
-   pub fn setThreading( &mut self, value: bool)
-   {
-      self.threading = value;
-   }
+
 
 }
 /* Saves the credentials for the remote master process*/

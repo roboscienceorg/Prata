@@ -1,17 +1,24 @@
 import TALA as tl
 import time
+import json
 
-m = tl.connect("127.0.0.1", 25565);
+m = tl.connect("127.0.0.1", 25565)
 
-m.host(True);
+m.host()
+
+
+
 
 time.sleep(1)
 
 
 sub = m.subscriber()
 pub = m.publisher()
+pub1 = m.publisher()
 
 pub.connect("test")
+pub.connect("test1")
+
 pub.publish("test","testing message 1=======")
 
 sub.connect("test")
@@ -24,10 +31,11 @@ pub.publish("test","testing message2 ==========")
 
 print("listen 2 ", sub.listen("test"))
 print("listen 3 ", sub.listen("test"))
+pub.disconnect("test1")
 
-tl.gui("127.0.0.1", 25565)
 
+tl.gui()
 
-m.terminate()   
+m.terminate()
 
 exit()

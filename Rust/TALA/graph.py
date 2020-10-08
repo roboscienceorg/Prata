@@ -1,5 +1,6 @@
 import tkinter as tk
 from .TALA import Master, connect
+import json
 HEIGHT = 700
 WIDTH = 800
 MASTERIP = ""
@@ -15,32 +16,38 @@ class ConnectionData():
         self.master_port = 0
 
     def parseJson(self):
-        self.master_ip = channel["ipAddress"]
-        self.master_port = channel["port"]
+        self.master_ip = self.jsondata["ipAddress"]
+        self.master_port = self.jsondata["port"]
         cords = [0,0]
         publishers = []
         subscribers = []
-        for key in channel["channels"]:
-            info = channel["channels"][key]["info"]
-            for pubs in channel["channels"][key]["publishers"]:
-                publishers.append(pubs) 
-            for subs in channel["channels"][key]["subscribers"]:
+        for key in self.jsondata["channels"]:
+            publishers = []
+            subscribers = []
+            info = self.jsondata["channels"][key]["info"]
+            for pubs in self.jsondata["channels"][key]["publishers"]:
+                publishers.append(pubs)
+            for subs in self.jsondata["channels"][key]["subscribers"]:
                 subscribers.append(subs)
             self.channels[key] = [info, publishers,subscribers,cords]
+        print(self.channels,"\n\n\n\n")
 
     def connectMaster(self):
-        self.jsondata = connect(MASTERIP,MASTERPORT).serialize()
+        self.jsondata = json.loads(connect(self.master_ip, self.master_port).serialize())
+        print(self.jsondata,"\n\n\n")
 
 
 class Graph(tk.Frame):
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, ip, port):
         tk.Frame.__init__(self,parent)
         self.canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
         self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
         self.publishers = {}
         self.subscribers = {}
         connection = ConnectionData()
+        connection.master_ip = ip
+        connection.master_port = int(port)
         connection.connectMaster()
         connection.parseJson()
         self.createGraph(connection.channels)
@@ -56,7 +63,7 @@ class Graph(tk.Frame):
             object_count += 1
 
     #   createGraph(self,channels,canvas)
-    #       Takes in a dictionary of channels and a canvas.It then 
+    #       Takes in a dictionary of channels and a canvas.It then
     #       Seperates out the publishers and subscribers and creates a
     #       new dictionary for each that contains all the channels they are
     #       connected to and an array for the x and y position on the graph.
@@ -82,7 +89,7 @@ class Graph(tk.Frame):
             self.plotPoint(channels[channel][3],channels[channel][0],"channel")
             channel_count += 1
 
-    
+
         self.calculatePoint(self.publishers,1.5,"publisher")
         self.calculatePoint(self.subscribers,4.5,"subsciber")
 
@@ -99,10 +106,10 @@ class Graph(tk.Frame):
     def drawArrow(self,start,end):
         self.canvas.create_line(start[0]+20, start[1]+10, end[0], end[1]+10, arrow=tk.LAST)
 
-   
+
     #   plotPoint(self,canvas,dic,text,color)
     #   Takes in a canvas, a dictionary, the text, and the color of the node
-    #   It then draws ovals of diameter 20 on the x and y coordinates of the 
+    #   It then draws ovals of diameter 20 on the x and y coordinates of the
     #   dictionary.
     def plotPoint(self,dic,text,type):
         if(type == "channel"):
@@ -126,7 +133,7 @@ class Graph(tk.Frame):
 
         create_bot = tk.Button(self, text = "List Publishers",command=lambda: self.listPublishers())
         create_bot.place(x = 0, rely = .3, relwidth = .1, relheight = .05,anchor = 'w')
-      
+
         create_bot = tk.Button(self, text = "List Channels",command=lambda: self.listChannel())
         create_bot.place(x = 0, rely = .5, relwidth = .1, relheight = .05,anchor = 'w')
 
@@ -144,7 +151,7 @@ class Graph(tk.Frame):
             print(key)
             list.insert('end',key)
         list.place(relx = 1, y = 10, anchor = 'ne')
- 
+
     def listChannel(self):
         x_position = int(WIDTH)
 
@@ -163,8 +170,8 @@ class Graph(tk.Frame):
             list.insert('end',key)
         list.place(relx = 1, y = 10, anchor = 'ne')
 
-# Resizingcanvas 
-# A TK Canvas class that resizes a canvas and 
+# Resizingcanvas
+# A TK Canvas class that resizes a canvas and
 # its elements when a user resizes a window.
 class ResizingCanvas(tk.Canvas):
     def __init__(self,parent,**kwargs):
@@ -179,7 +186,7 @@ class ResizingCanvas(tk.Canvas):
         hscale = float(event.height)/self.height
         self.width = event.width
         self.height = event.height
-        # resize the canvas 
+        # resize the canvas
         self.config(width=self.width, height=self.height)
         # rescale all the objects tagged with the "all" tag
         self.scale("all",0,0,wscale,hscale)

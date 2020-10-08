@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from graph import *
+from .graph import *
 
 
 LARGE_FONT= ("Verdana", 20)
@@ -22,13 +22,12 @@ class ManageFrames(tk.Tk):
         frame_container.place(relx = .5, rely = 0.5, relwidth = 1, relheight = 1,anchor = 'center')
 
 
-        for page in (Window,Graph):
 
-            frame = page(frame_container, self)
+        frame = Window(frame_container, self)
 
-            self.frames[page] = frame
+        self.frames[Window] = frame
 
-            frame.grid(row=0, column=0, sticky="nsew")
+        frame.grid(row=0, column=0, sticky="nsew")
 
         self.topFrame(Window)
 
@@ -46,10 +45,10 @@ class Window(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
 
-        self.ip = tk.StringVar() 
+        self.ip = tk.StringVar()
         self.port = tk.StringVar()
         self.parent = parent
-        self.controller = controller 
+        self.controller = controller
         self.createDisplay()
 
 
@@ -87,18 +86,19 @@ class Window(tk.Frame):
         port_entry = tk.Entry(self, bg = 'white', textvariable = self.port)
         port_entry.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
 
-        connect_bot = tk.Button(self, text = "Connect", command=lambda: [self.controller.topFrame(Graph), self.setMaster() ])
+        connect_bot = tk.Button(self, text = "Connect", command=lambda: [self.setMaster()])
         connect_bot.place(x = img.width()/2, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
 
 
     def setMaster(self):
-        MASTERIP = self.ip.get() 
-        MASTERPORT = self.port.get() 
+        MASTERIP = self.ip.get()
+        MASTERPORT = self.port.get()
+        frame = Graph(self.parent, self, MASTERIP, MASTERPORT)
+        self.controller.frames[Graph] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        self.controller.topFrame(Graph)
 
-    
 
 def gui():
     app = ManageFrames()
     app.mainloop()
-
-

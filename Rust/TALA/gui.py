@@ -60,19 +60,13 @@ class Window(tk.Frame):
 
         self.parent.one = img
         canvas.create_image(0,0, anchor='nw', image=img)
-
-        canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,
-                        text="TALA")
-
+        canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,text="TALA")
 
         create_label = tk.Label(self, text = "Create new Host", bg = "white")
         create_label.place(x = img.width()/2, rely = .45, relwidth = .1, relheight = .05 ,anchor = 'n')
 
         create_bot = tk.Button(self, text = "Create")
         create_bot.place(x = img.width()/2, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
-
-        canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,
-                        text="TALA")
 
         ip_label = tk.Label(self, text = "IP of Host", bg = "white")
         ip_label.place(x = img.width()/2, rely = .65, width = 100, height = 25 ,anchor = 's')
@@ -91,9 +85,9 @@ class Window(tk.Frame):
 
 
     def setMaster(self):
-        MASTERIP = self.ip.get()
-        MASTERPORT = self.port.get()
-        frame = Graph(self.parent, self, MASTERIP, MASTERPORT)
+        master_ip = self.ip.get()
+        master_port = self.port.get()
+        frame = Graph(self.parent, self, master_ip, master_port)
         self.controller.frames[Graph] = frame
         frame.grid(row=0, column=0, sticky="nsew")
         self.controller.topFrame(Graph)

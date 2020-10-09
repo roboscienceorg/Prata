@@ -1,6 +1,9 @@
 import tkinter as tk
 from .TALA import Master, connect
 import json
+from .listbox import *
+
+
 HEIGHT = 700
 WIDTH = 800
 MASTERIP = ""
@@ -29,9 +32,11 @@ class ConnectionData():
                 subscribers.append(subs)
             self.channels[key] = [info, publishers,subscribers,cords]
 
-
     def connectMaster(self):
-        self.jsondata = json.loads(connect(self.master_ip, self.master_port).serialize())
+        self.master = connect(self.master_ip, self.master_port)
+
+    def retrieveData(self):
+        self.jsondata = json.loads(self.master.serialize()) 
 
 
 class Graph(tk.Frame):
@@ -44,17 +49,22 @@ class Graph(tk.Frame):
         self.subscribers = {}
         self.channels = {}
 
-        connection = ConnectionData()
-        connection.master_ip = ip
-        connection.master_port = int(port)
-        connection.connectMaster()
-        connection.parseJson()
-        self.channels = connection.channels
+        self.connection = ConnectionData()
+        self.connection.master_ip = ip
+        self.connection.master_port = int(port)
+        self.connection.connectMaster()
 
+        self.getData()
+
+
+    def getData(self):
+        self.connection.retrieveData()
+        self.connection.parseJson()
+        self.channels = self.connection.channels
+            
         self.parseChannels()
         self.createGraph()
         self.buttons()
-
 
     #   createGraph(self,channels,canvas)
     #       Takes in a dictionary of channels and a canvas.It then
@@ -75,13 +85,11 @@ class Graph(tk.Frame):
             for subs in self.channels[channel][2]:
                 self.drawArrow(self.channels[channel][3],self.subscribers[subs[0]][1])
 
-
     #   drawArror(self,canvas,start,end)
     #   Takes in a canvas and the start and end points of the arror.
     #   Then draws an arrow from the starting point to the ending point.
     def drawArrow(self,start,end):
         self.canvas.create_line(start[0]+20, start[1]+10, end[0], end[1]+10, arrow=tk.LAST)
-
 
     def parseChannels(self):
         channel_count = 0
@@ -144,9 +152,6 @@ class Graph(tk.Frame):
               text=str(port), anchor='w')
             object_count += 1
 
-
-
-
     def buttons(self):
         x_position = int(1*WIDTH / 6)
 
@@ -162,38 +167,43 @@ class Graph(tk.Frame):
         create_bot = tk.Button(self, text = "List Subscribers",command=lambda: self.listSubscribers())
         create_bot.place(x = 0, rely = .7, relwidth = .1, relheight = .05,anchor = 'w')
 
-        create_bot = tk.Button(self, text = "Show BlackList")
+        create_bot = tk.Button(self, text = "Show BlackList", command=lambda: self.getData())
         create_bot.place(x = 0, rely = .9, relwidth = .1, relheight = .05,anchor = 'w',)
-
+    
 
     def listChannel(self):
-        x_position = int(WIDTH)
+        list = MultiListbox(self, ['Name','IP', 'Port'], width = 10,highlightthickness=0, border=0)
+        data = []
 
-        list = tk.Listbox(self.canvas)
-        for key in channels:
-            print(key)
-            list.insert('end',key)
+        for key in self.channels:
+            data.append(key)
+            data.append(self.channels[key][0][0])
+            data.append(self.channels[key][0][1])
+
+
+        list.add_data(data)
         list.place(relx = 1, y = 10, anchor = 'ne')
-        
+
     def listPublishers(self):
-        x_position = int(WIDTH)
+        list = MultiListbox(self, ['IP', 'Port'], width = 15,highlightthickness=0, border=0)
+        data = []
 
-        list = tk.Listbox(self.canvas)
-        print(self.publishers)
         for key in self.publishers:
-            print(key)
-            list.insert('end',key)
+            data.append(key)
+            data.append(self.publishers[key][0])
+
+        list.add_data(data)
         list.place(relx = 1, y = 10, anchor = 'ne')
-
-
 
     def listSubscribers(self):
-        x_position = int(WIDTH)
+        list = MultiListbox(self, ['IP', 'Port'], width = 15,highlightthickness=0, border=0)
+        data = []
 
-        list = tk.Listbox(self.canvas)
         for key in self.subscribers:
-            print(key)
-            list.insert('end',key)
+            data.append(key)
+            data.append(self.subscribers[key][0])
+
+        list.add_data(data)
         list.place(relx = 1, y = 10, anchor = 'ne')
 
 # Resizingcanvas

@@ -21,8 +21,6 @@ class ManageFrames(tk.Tk):
         frame_container.grid_columnconfigure(0, weight=1)
         frame_container.place(relx = .5, rely = 0.5, relwidth = 1, relheight = 1,anchor = 'center')
 
-
-
         frame = Window(frame_container, self)
 
         self.frames[Window] = frame
@@ -85,13 +83,15 @@ class Window(tk.Frame):
 
 
     def setMaster(self):
-        master_ip = self.ip.get()
-        master_port = self.port.get()
-        frame = Graph(self.parent, self, master_ip, master_port)
+        self.master_ip = self.ip.get()
+        self.master_port = self.port.get()
+
+    def createGraph(self): 
+        frame = Graph(self.parent, self, self.master_ip, self.master_port)
         self.controller.frames[Graph] = frame
         frame.grid(row=0, column=0, sticky="nsew")
         self.controller.topFrame(Graph)
-
+        
 
 def gui():
     app = ManageFrames()

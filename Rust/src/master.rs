@@ -1,4 +1,5 @@
 #[path = "master_process.rs"] mod master_process;
+#[path = "messaging.rs"] mod messaging;
 //mod master_process::MasterProcess;
 use std::collections::HashMap;
 use pyo3::prelude::*;
@@ -40,6 +41,7 @@ impl Master
 {
    pub fn serialize(&self) -> String
    {
+      /*
       let context = zmq::Context::new();
       let responder = context.socket(zmq::REQ).unwrap();
 
@@ -65,8 +67,10 @@ impl Master
       let res = serde_json::from_str(data);
       //json deserialized stored inside p value
       let json_data: Message = res.unwrap();
-
-      return json_data.message;
+      */
+      let m = messaging::Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+      let m2 = messaging::send(self.ipAddress.to_string(), self.port, m);
+      return m2.message;
       }
 
    pub fn setThreading( &mut self, value: bool)
@@ -176,7 +180,7 @@ impl Master
       let mut ip = "".to_string();
       let start = 127;
 
-      let ninfo = get_if_addrs::get_if_addrs().unwrap();
+      //let ninfo = get_if_addrs::get_if_addrs().unwrap();
       // println!("{:?}", ninfo);
 
 
@@ -192,7 +196,7 @@ impl Master
                  {
                     match dns
                     {
-                      std::net::IpAddr::V4(value) =>
+                      std::net::IpAddr::V4(_value) =>
                       match ips
                      {
                        std::net::IpAddr::V4(value) =>

@@ -65,7 +65,7 @@ impl MasterProcess
       let fail_status = panic::catch_unwind(|| {repSocket.bind( &(full_address) ).expect("fail");});
       match fail_status
       {
-         Ok(fail_status) => println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
+         Ok(_fail_status) => println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
          Err(_) => println!("Invalid IP and Port combination, cannot host"),
       }
       //println!("{:?}", repSocket.expect());

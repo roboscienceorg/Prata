@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 //use serde_json::Result;
 //use serde_json::Value as JsonValue;
 use pyo3::prelude::*;
-
+#[path = "messaging.rs"] mod messaging;
 //#[derive(Debug)]
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
@@ -58,6 +58,7 @@ impl Subscriber {
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
         else
         {
+            /*
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -83,10 +84,12 @@ impl Subscriber {
         let res = serde_json::from_str(data);
 
         let inbound : Message = res.unwrap();
+*/
+        let mx = messaging::Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
+        let m2 = messaging::send(self.masterip.to_string(), self.masterport, mx);
         //add the information to the channelInfo Object
-
-        self.add(Name, inbound.ip, inbound.port);
-
+        self.add(Name, m2.ip, m2.port);
+        //self.add(Name, inbound.ip, inbound.port);
         }
     }
     //adds ip address to addressbook with default port range 0-max
@@ -134,10 +137,12 @@ impl Subscriber {
         }
 
         let chanInfo = self.channelInfo.get(&ChannelName).unwrap();
-
-        let chanIP = &chanInfo.0;
-        let chanPort = &chanInfo.1;
-
+        let m = messaging::Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+        let m2 = messaging::send(chanInfo.0.to_string(), chanInfo.1, m);
+        return m2.message;
+        //add the information to the channelInfo Object
+        //self.add(Name, m2.ip, m2.port);
+/*
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -162,7 +167,7 @@ impl Subscriber {
         //json deserialized stored inside p value
         let inbound: Message = res.unwrap();
         return inbound.message;
-
+*/
     }
 
 }

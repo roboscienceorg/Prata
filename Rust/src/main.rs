@@ -4,7 +4,7 @@
 //mod TEST_Channel;
 mod channel;
 mod master;
-
+mod TEST_Channel;
 //use std::thread;
 
 //use port_scanner::request_open_port;
@@ -12,7 +12,7 @@ mod master;
 fn main() {
 
     // Print the ip addresses and dns servers of all adapters:
-
+    //TEST_Channel::test();
 
 
     //println!("stuff = {:?}", x);

@@ -36,14 +36,14 @@ fn add_data_test()
     c.addData("data element 4".to_string());
 
     //println!("{:?}",c.getData());
-    assert!(c.getData() == "data element 1data element 2data element 3data element 4", "TEST: get data fail");
+    assert!(c.getData() == "data element 1data element 2", "TEST: get data fail");
 
     c.addData("the big\nhouse".to_string());
     c.addData("\"what\" are you doing".to_string());
     c.addData("\t\t\r\n".to_string());
     c.addData("2 9 {{}}".to_string());
 
-    assert!(c.getData() == "the big\nhouse\"what\" are you doing\t\t\r\n2 9 {{}}", "TEST: get data 2 fail")
+    assert!(c.getData() == "data element 3data element 4", "TEST: get data 2 fail")
 }
 fn basic_test()
 {

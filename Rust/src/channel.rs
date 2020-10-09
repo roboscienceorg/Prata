@@ -510,13 +510,18 @@ mod data
           pub fn get(&mut self) -> String
           {
                let mut retval = String::from("");
+               /*
                for i in &self.info
                {
                     retval.push_str(i);
                     //retval = [retval, i].concat();
                }
                self.info.clear();
+
+               retval.push_str((&self.info.pop_front()).unwrap());
                return retval;
+                              */
+               return self.info.pop_front().unwrap();
           }
           /**
           * New call to return new object

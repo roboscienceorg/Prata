@@ -98,6 +98,7 @@ impl Master
 
    pub fn host(&self)
    {
+      
       let s = self.ipAddress.to_string();
       let p = self.port;
       //let p = self.port;
@@ -181,7 +182,7 @@ impl Master
 
       for card in network_info
       {
-         println!("{:?}\n\n", card);
+         //println!("{:?}\n\n", card);
           for ips in card.ip_addresses()
           {
               //println!("{:?}", ips);
@@ -218,7 +219,7 @@ impl Master
       }
 
 
-   println!("\n\n\n\n{:?}\n\n\n", ip);
+   //println!("\n\n\n\n{:?}\n\n\n", ip);
    return ip.to_string();
    }
 }

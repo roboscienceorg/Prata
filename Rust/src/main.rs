@@ -22,6 +22,8 @@ fn main() {
 
     let mut sub_ = m.subscriber();
     let mut pub_ = m.publisher();
+    println!("{}", sub_.to_string());
+    println!("{}", pub_.to_string());
     let mut line = String::new();
     let b1 = std::io::stdin().read_line(&mut line).unwrap();
     //pub_.connect("test".to_string());

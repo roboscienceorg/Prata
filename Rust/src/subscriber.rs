@@ -39,6 +39,10 @@ pub struct Subscriber
 #[pymethods]
 impl Subscriber {
 
+    pub fn to_string(&mut self) -> String
+    {
+        return format!("Construct Sub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
+    }
     //fn for adding a channel / master info to the map being used for data storage
     pub fn add(&mut self, Name: String, IP: String, Port: u16)
     {
@@ -168,8 +172,10 @@ impl Subscriber
     //constructor for Publisher Object
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
     {
-        println!("Construct Sub: Master({}, {}) Self({}, {})", MasterIP, MasterPort, IP, Port);
+        
         return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }
+
+
 
 }

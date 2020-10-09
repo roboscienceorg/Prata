@@ -43,8 +43,11 @@ impl Publisher
     //constructor for Publisher Object
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Publisher
     {
-        println!("Construct Pub: Master({}, {}) Self({}, {})", MasterIP, MasterPort, IP, Port);
         return Publisher{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
+    }
+    pub fn to_string(&mut self) -> String
+    {
+        return format!("Construct Sub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
     }
     //fn for adding a channel info to the map being used for data storage
     pub fn add(&mut self, Name: String, IP: String, Port: u16)

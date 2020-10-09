@@ -4,11 +4,25 @@
 mod TEST_Channel;
 mod channel;
 mod master;
+
 //use std::thread;
 
 //use port_scanner::request_open_port;
 
 fn main() {
+
+    // Print the ip addresses and dns servers of all adapters:
+
+
+
+    //println!("stuff = {:?}", x);
+    //let m = master::Master::new();
+    //let m = master::Master {ipAddress: "192.168.0.122".to_string(), port: 25565, threading: false};
+    //m.host();
+    //
+    
+
+        /*
     //println!("ChannelTests");
 
     TEST_Channel::test();
@@ -55,7 +69,7 @@ fn main() {
     m.terminate();
 
     println!("Finished mains");
-    /*
+
     let mut publisher = m.publisher();
     let channel = "X92.FM".to_string();
     let message = "FirstMessage".to_string();

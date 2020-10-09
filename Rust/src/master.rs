@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
 use std::thread;
-
+extern crate ipconfig;
 #[path = "subscriber.rs"] mod subscriber;
 #[path = "publisher.rs"] mod publisher;
 
@@ -179,7 +179,27 @@ impl Master
 
    /* Return a subscriber object */
 
+   pub fn getLocalIp( &self )
+   {
+      let network_info = ipconfig::get_adapters().unwrap();
 
+      let mut ip = "".to_string();
+      let start = 127;
+      for cards in network_info{
+          for ips in cards.ip_addresses()
+          {
+              //println!("{:?}", ips);
+              match ips {
+                  std::net::IpAddr::V4(value) => 
+                      if value.octets()[0] != start
+                      {
+                          ip = value.to_string();
+                      },
+                  _ => (),
+              }
+          }
+      }
+   }
 
 }
 /* Saves the credentials for the remote master process*/

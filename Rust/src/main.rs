@@ -24,6 +24,12 @@ fn main() {
     let mut pub_ = m.publisher();
     let mut line = String::new();
     let b1 = std::io::stdin().read_line(&mut line).unwrap();
+    pub_.connect("test".to_string());
+    pub_.publish("test".to_string(),"testing message 1=======".to_string());
+
+    let b1 = std::io::stdin().read_line(&mut line).unwrap();
+    sub_.connect("test".to_string());
+    println!("listen 1 {}", sub_.listen("test".to_string()));
     //
     
 

@@ -66,7 +66,7 @@ impl MasterProcess
       match fail_status
       {
          Ok(_fail_status) => println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
-         Err(_) => println!("Invalid IP and Port combination, cannot host"),
+         Err(_) => {println!("Invalid IP and Port combination, cannot host"); return;},
       }
       //println!("{:?}", repSocket.expect());
          //.connect("tcp://0.0.0.0:7000")

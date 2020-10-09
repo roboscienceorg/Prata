@@ -10,6 +10,7 @@ use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
 use std::thread;
 extern crate ipconfig;
+
 #[path = "subscriber.rs"] mod subscriber;
 #[path = "publisher.rs"] mod publisher;
 
@@ -75,22 +76,9 @@ impl Master
 
   pub fn subscriber( &self) -> subscriber::Subscriber
    {
-      //just need subscriber constructor
       let port = request_open_port().unwrap_or(0);
-      //let octets = (Ipv4Addr::LOCALHOST).octets();
-      let addr = (Ipv4Addr::LOCALHOST).to_string();
-/*
-      let mut addr = String::from("");
-      for i in &octets
-      {
-           addr.push_str(i.to_string());
-           addr.push_str(".".to_string());
-      }
-      let len = addr.len();
-      addr.truncate(len - 1);
-      self.info.clear();
-      return retval;
-*/
+      let addr = self.getLocalIp().to_string();
+
 
       return subscriber::Subscriber::new(self.ipAddress.to_string(), self.port, addr,port);
    }
@@ -102,7 +90,7 @@ impl Master
    {
       //just need publisher constructor
       let port = request_open_port().unwrap_or(0);
-      let addr = (Ipv4Addr::LOCALHOST).to_string();
+      let addr = self.getLocalIp().to_string();
 
       return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
@@ -179,17 +167,19 @@ impl Master
 
    /* Return a subscriber object */
 
-   pub fn getLocalIp( &self )
+   pub fn getLocalIp( &self ) -> String
    {
       let network_info = ipconfig::get_adapters().unwrap();
 
       let mut ip = "".to_string();
       let start = 127;
-      for cards in network_info{
+      for cards in network_info
+      {
           for ips in cards.ip_addresses()
           {
               //println!("{:?}", ips);
-              match ips {
+              match ips 
+              {
                   std::net::IpAddr::V4(value) => 
                       if value.octets()[0] != start
                       {
@@ -199,8 +189,10 @@ impl Master
               }
           }
       }
-   }
+   
 
+   return ip.to_string();
+   }
 }
 /* Saves the credentials for the remote master process*/
 #[allow(dead_code)]

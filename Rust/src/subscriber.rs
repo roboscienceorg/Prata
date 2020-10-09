@@ -193,6 +193,7 @@ impl Subscriber
     //constructor for Publisher Object
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
     {
+        println!("Construct Sub: Master({}, {}) Self({}, {})", MasterIP, MasterPort, IP, Port);
         return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }
 

@@ -17,8 +17,13 @@ fn main() {
 
     //println!("stuff = {:?}", x);
     //let m = master::Master::new();
-    //let m = master::Master {ipAddress: "192.168.0.122".to_string(), port: 25565, threading: false};
-    //m.host();
+    let m = master::Master {ipAddress: "192.168.0.122".to_string(), port: 25565, threading: true};
+    m.host();
+
+    let mut sub_ = m.subscriber();
+    let mut pub_ = m.publisher();
+    let mut line = String::new();
+    let b1 = std::io::stdin().read_line(&mut line).unwrap();
     //
     
 

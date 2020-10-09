@@ -43,6 +43,7 @@ impl Publisher
     //constructor for Publisher Object
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Publisher
     {
+        println!("Construct Sub: Master({}, {}) Self({}, {})", MasterIP, MasterPort, IP, Port);
         return Publisher{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }
     //fn for adding a channel info to the map being used for data storage
@@ -66,52 +67,7 @@ impl Publisher{
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
         else
         {
-        //     //set up the socket so we can connect to publishers and subscribers
-        //     let mut full_address = "tcp://".to_string();
-        //     full_address.push_str(&self.masterip);
-        //     full_address.push_str(&":");
-        //     full_address.push_str(&self.masterport.to_string());
-        //     let context = zmq::Context::new();
-        //     let reqSocket = context.socket(zmq::REQ).unwrap();
-        //     //let port = request_open_port().unwrap_or(0);
-        //     reqSocket
-        //     .connect( &(full_address) )
-        //     //.connect("tcp://0.0.0.0:7000")
-        //     .expect("failed binding socket");
-        //     println!("repSocket bound");
-        //     //thread::sleep(Duration::from_millis(1));
-        //
-        //     //get the port that we are bound to
-        //     let lastEndpoint = match reqSocket.get_last_endpoint()
-        //     {
-        //     Ok(lastEndpoint) => {
-        //     match lastEndpoint {
-        //         Ok(lastEndpoint) => lastEndpoint,
-        //         Err(_e) => String::new(),
-        //     }
-        //     },
-        //     Err(_e) => "failed".to_string(),
-        //     };
-        //
-        // println!("publisher on {}", lastEndpoint);
-        //
-        // let m = Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
-        // let res = serde_json::to_string(&m);
-        // let serial_message: String = res.unwrap();
-        //
-        // println!("sending {}", lastEndpoint);
-        //
-        // reqSocket.send(&serial_message, 0).unwrap();
-        //
-        // println!("sent{}", lastEndpoint);
-        //
-        //     //wait for the response from master so that I can store the message into the message object
-        // let mut msg = zmq::Message::new();
-        //
-        // println!("recieveing{}", lastEndpoint);
-        // reqSocket.recv(&mut msg,0).unwrap();
-        // println!("recieved{}", lastEndpoint);
-//=====================================
+
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 

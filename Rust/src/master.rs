@@ -41,36 +41,11 @@ impl Master
 {
    pub fn serialize(&self) -> String
    {
-      /*
-      let context = zmq::Context::new();
-      let responder = context.socket(zmq::REQ).unwrap();
-
-      let protocol = "tcp://".to_string();
-      let str1 = String::from(&self.ipAddress);
-      let str2 = String::from(":");
-      let str_with_port = self.port.to_string();
-      let address = [protocol, str1, str2, str_with_port].concat();
-
-      assert!(responder.connect(&address).is_ok());
-      let m = Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-
-      let res = serde_json::to_string(&m);
-      let serial_message: String = res.unwrap();
-      let mut msg = zmq::Message::new();
-
-      responder.send(&serial_message, 0).unwrap();
-
-      responder.recv(&mut msg, 0).unwrap();
-
-      //data as string
-      let data = msg.as_str().unwrap();
-      let res = serde_json::from_str(data);
-      //json deserialized stored inside p value
-      let json_data: Message = res.unwrap();
-      */
+      
       let m = messaging::Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
       let m2 = messaging::send(self.ipAddress.to_string(), self.port, m);
       return m2.message;
+      
       }
 
    pub fn setThreading( &mut self, value: bool)

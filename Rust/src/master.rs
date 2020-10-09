@@ -10,6 +10,7 @@ use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
 use std::thread;
 extern crate ipconfig;
+extern crate get_if_addrs;
 
 #[path = "subscriber.rs"] mod subscriber;
 #[path = "publisher.rs"] mod publisher;
@@ -170,27 +171,54 @@ impl Master
    pub fn getLocalIp( &self ) -> String
    {
       let network_info = ipconfig::get_adapters().unwrap();
-
+      // println!("{:?}", network_info);
       let mut ip = "".to_string();
       let start = 127;
-      for cards in network_info
+
+      let ninfo = get_if_addrs::get_if_addrs().unwrap();
+      // println!("{:?}", ninfo);
+
+
+      for card in network_info
       {
-          for ips in cards.ip_addresses()
+         println!("{:?}\n\n", card);
+          for ips in card.ip_addresses()
           {
               //println!("{:?}", ips);
-              match ips 
+              if card.oper_status() == ipconfig::OperStatus::IfOperStatusUp
               {
-                  std::net::IpAddr::V4(value) => 
-                      if value.octets()[0] != start
-                      {
-                          ip = value.to_string();
-                      },
-                  _ => (),
+                 for dns in card.dns_servers()
+                 {
+                    match dns
+                    {
+                      std::net::IpAddr::V4(value) =>
+                      match ips
+                     {
+                       std::net::IpAddr::V4(value) =>
+                           if value.octets()[0] != start
+                           {
+                                ip = value.to_string();
+                           },
+                       _ => (),
+                     },
+                      _ => (),
+                    }
+
+
+                 }
+
               }
+              //println!("{:?}", ip);
           }
       }
-   
 
+      if ip == "".to_string()
+      {
+         ip = "127.0.0.1".to_string();
+      }
+
+
+   println!("\n\n\n\n{:?}\n\n\n", ip);
    return ip.to_string();
    }
 }

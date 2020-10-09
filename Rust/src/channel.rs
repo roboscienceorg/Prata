@@ -509,7 +509,7 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
-               let mut retval = String::from("");
+               //let mut retval = String::from("");
                /*
                for i in &self.info
                {

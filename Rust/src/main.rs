@@ -4,7 +4,7 @@
 //mod TEST_Channel;
 mod channel;
 mod master;
-mod TEST_Channel;
+
 //use std::thread;
 
 //use port_scanner::request_open_port;

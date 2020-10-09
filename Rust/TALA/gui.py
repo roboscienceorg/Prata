@@ -85,8 +85,6 @@ class Window(tk.Frame):
     def setMaster(self):
         self.master_ip = self.ip.get()
         self.master_port = self.port.get()
-
-    def createGraph(self): 
         frame = Graph(self.parent, self, self.master_ip, self.master_port)
         self.controller.frames[Graph] = frame
         frame.grid(row=0, column=0, sticky="nsew")

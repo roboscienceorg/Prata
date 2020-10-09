@@ -54,10 +54,6 @@ class Graph(tk.Frame):
         self.connection.master_port = int(port)
         self.connection.connectMaster()
 
-        self.getData()
-
-
-    def getData(self):
         self.connection.retrieveData()
         self.connection.parseJson()
         self.channels = self.connection.channels

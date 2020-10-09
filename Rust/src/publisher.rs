@@ -1,16 +1,13 @@
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
-//use std::time::Duration;
-//use std::collections::HashMap;
-use std::collections::HashMap;
-//use std::thread;
-//use std::time::Duration;
-use serde::{Deserialize, Serialize};
-//use serde_json::Result;
-//use serde_json::Value as JsonValue;
-use pyo3::prelude::*;
 
+use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+
+use pyo3::prelude::*;
+#[path = "messaging.rs"] mod messaging;
 //#[derive(Debug)]
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
@@ -70,7 +67,11 @@ impl Publisher{
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
         else
         {
-
+            let mx = messaging::Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
+            let m2 = messaging::send(self.masterip.to_string(), self.masterport, mx);
+            //add the information to the channelInfo Object
+            self.add(Name, m2.ip, m2.port);
+/*
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -99,6 +100,7 @@ impl Publisher{
         let inbound : Message = res.unwrap();
         //add the information to the channelInfo Object
         self.add(Name, inbound.ip, inbound.port);
+        */
         }
     }
     //adds ip address to addressbook with default port range 0-max
@@ -107,32 +109,38 @@ impl Publisher{
         //Check if channel is stored in hashmap
         if  self.channelInfo.contains_key(&Name)
         {
-        // setup the socket for the client
-        let context = zmq::Context::new();
-        let client = context.socket(zmq::REQ).unwrap();
+            
+            let mx = messaging::Message {messageType: 'd',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};
+            let _ = messaging::send(self.masterip.to_string(), self.masterport, mx);
+            self.channelInfo.remove(&Name);
+            /*
+            // setup the socket for the client
+            let context = zmq::Context::new();
+            let client = context.socket(zmq::REQ).unwrap();
 
-        //serialize message for transmission
-        let messageSent = Message{messageType: 'd',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
-        let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
+            //serialize message for transmission
+            let messageSent = Message{messageType: 'd',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
+            let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
 
-        //concatenate "tcp://" "IP" ":" "PORT" together
+            //concatenate "tcp://" "IP" ":" "PORT" together
 
-        let mut a = "tcp://".to_string();
-        a.push_str(&self.masterip.to_string());
-        a.push_str(&":");
-        a.push_str(&self.masterport.to_string());
+            let mut a = "tcp://".to_string();
+            a.push_str(&self.masterip.to_string());
+            a.push_str(&":");
+            a.push_str(&self.masterport.to_string());
 
-         //connect to the master object
-        assert!(client.connect(&a).is_ok());
+            //connect to the master object
+            assert!(client.connect(&a).is_ok());
 
-         //send the message that has been serialized to the master
-        client.send(&serialMessage,0).unwrap();
+            //send the message that has been serialized to the master
+            client.send(&serialMessage,0).unwrap();
 
-         //wait for the response from master so that I can store the message into the message object
-        let mut msg = zmq::Message::new();
-        client.recv(&mut msg,0).unwrap();
+            //wait for the response from master so that I can store the message into the message object
+            let mut msg = zmq::Message::new();
+            client.recv(&mut msg,0).unwrap();
 
-        self.channelInfo.remove(&Name);
+            self.channelInfo.remove(&Name);
+            */
         }
         else    //If the channel does not exist in the publisher then don't do anything
         {
@@ -149,7 +157,9 @@ impl Publisher{
 
 
         let chanInfo = self.channelInfo.get(&ChannelName).unwrap();
-
+        let mx = messaging::Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: Mess.to_string() };
+        let _ = messaging::send(chanInfo.0.to_string(), chanInfo.1, mx);
+/*
         let chanIP = &chanInfo.0;
         let chanPort = &chanInfo.1;
 
@@ -173,5 +183,9 @@ impl Publisher{
 
         responder.send(&serial_message, 0).unwrap();
         responder.recv(&mut msg, 0).unwrap();
+        */
+
+
+
     }
 }

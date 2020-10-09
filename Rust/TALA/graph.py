@@ -90,7 +90,10 @@ class Graph(tk.Frame):
     def parseChannels(self):
         channel_count = 0
         x_channel = int(3*WIDTH / 6)
-        y_channel = int(HEIGHT / (len(self.channels)*2))
+        y_channel = 0
+        if len(self.channels) != 0:
+            y_channel = int(HEIGHT / (len(self.channels)*2))
+
         for channel in self.channels:
             for pubs in self.channels[channel][1]:
                 if pubs[0] not in self.publishers:
@@ -116,7 +119,9 @@ class Graph(tk.Frame):
 
     def plotPublishers(self):
         x_pub = int(1.5 * WIDTH / 6)
-        y_pub = int(HEIGHT / (len(self.publishers)*2))
+        y_pub = 0
+        if len(self.publishers) != 0:
+            y_pub = int(HEIGHT / (len(self.publishers)*2))
         object_count = 0
         for ip in self.publishers:
             self.publishers[ip][1] = [x_pub,y_pub*object_count+20]
@@ -132,11 +137,13 @@ class Graph(tk.Frame):
             object_count += 1
 
     def plotSubscriber(self):
-        x_pub = int(4.5 * WIDTH / 6)
-        y_pub = int(HEIGHT / (len(self.subscribers)*2))
+        x_sub = int(4.5 * WIDTH / 6)
+        y_sub = 0
+        if len(self.subscribers) != 0:
+            y_sub = int(HEIGHT / (len(self.subscribers)*2))
         object_count = 0
         for ip in self.subscribers:
-            self.subscribers[ip][1] = [x_pub,y_pub*object_count+20]
+            self.subscribers[ip][1] = [x_sub,y_sub*object_count+20]
             coords = self.subscribers[ip][1]
             port = "port: " + str(self.subscribers[ip][0])
 

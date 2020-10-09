@@ -48,7 +48,7 @@ impl Master
       let str_with_port = self.port.to_string();
       let address = [protocol, str1, str2, str_with_port].concat();
 
-      assert!(responder.bind(&address).is_ok());
+      assert!(responder.connect(&address).is_ok());
       let m = Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
 
       let res = serde_json::to_string(&m);
@@ -126,7 +126,7 @@ impl Master
       let str_with_port = self.port.to_string();
       let address = [protocol, str1, str2, str_with_port].concat();
 
-      assert!(responder.bind(&address).is_ok());
+      assert!(responder.connect(&address).is_ok());
       let m = Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
 
       let res = serde_json::to_string(&m);

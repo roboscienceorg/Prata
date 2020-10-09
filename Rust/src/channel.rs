@@ -383,7 +383,7 @@ impl Channel
           let context = zmq::Context::new();
           let responder = context.socket(zmq::REP).unwrap();
           responder
-               .connect( &(full_address) )
+               .bind( &(full_address) )
                //.connect("tcp://0.0.0.0:7000")
                .expect("failed binding socket");
           //thread::sleep(Duration::from_millis(1));

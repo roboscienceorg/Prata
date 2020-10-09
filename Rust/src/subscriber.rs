@@ -54,31 +54,6 @@ impl Subscriber {
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
         else
         {
-         // setup the socket for the client
-        // let context = zmq::Context::new();
-        // let client = context.socket(zmq::REQ).unwrap();
-        //
-        // //serialize message for transmission
-        // let messageSent = Message{messageType: 'C',ip: self.ip.to_string(),port: self.port, message: Name.to_string()};         // create message object
-        // let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
-        //
-        // //concatenate "tcp://" "IP" ":" "PORT" together
-        //
-        // let mut a = "tcp://".to_string();
-        // a.push_str(&self.masterip.to_string());
-        // a.push_str(&":");
-        // a.push_str(&self.masterport.to_string());
-        //
-        // //connect to the master object
-        // client.connect(&a);
-        //
-        // //send the message that has been serialized to the master
-        // client.send(&serialMessage,0).unwrap();
-        //
-        // //wait for the response from master so that I can store the message into the message object
-        // let mut msg = zmq::Message::new();
-        // client.recv(&mut msg,0).unwrap();
-
         let context = zmq::Context::new();
         let responder = context.socket(zmq::REQ).unwrap();
 
@@ -88,7 +63,7 @@ impl Subscriber {
         let str_with_port = self.masterport.to_string();
         let address = [protocol, str1, str2, str_with_port].concat();
 
-        assert!(responder.bind(&address).is_ok());
+        assert!(responder.connect(&address).is_ok());
         let m = Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
 
         let res = serde_json::to_string(&m);
@@ -132,7 +107,7 @@ impl Subscriber {
          a.push_str(&self.masterport.to_string());
 
          //connect to the master object
-         assert!(client.bind(&a).is_ok());
+         assert!(client.connect(&a).is_ok());
 
          //send the message that has been serialized to the master
          client.send(&serialMessage,0).unwrap();
@@ -168,7 +143,7 @@ impl Subscriber {
         let str_with_port = chanPort.to_string();
         let address = [protocol, str1, str2, str_with_port].concat();
 
-        assert!(responder.bind(&address).is_ok());
+        assert!(responder.connect(&address).is_ok());
         let m = Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
 
         let res = serde_json::to_string(&m);

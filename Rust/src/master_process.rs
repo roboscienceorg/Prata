@@ -59,7 +59,7 @@ impl MasterProcess
       let repSocket = context.socket(zmq::REP).unwrap();
       //let port = request_open_port().unwrap_or(0);
       repSocket
-         .connect( &(full_address) )
+         .bind( &(full_address) )
          //.connect("tcp://0.0.0.0:7000")
          .expect("failed binding socket");
       thread::sleep(Duration::from_millis(1));

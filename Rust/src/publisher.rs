@@ -43,7 +43,7 @@ impl Publisher
     //constructor for Publisher Object
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Publisher
     {
-        println!("Construct Sub: Master({}, {}) Self({}, {})", MasterIP, MasterPort, IP, Port);
+        println!("Construct Pub: Master({}, {}) Self({}, {})", MasterIP, MasterPort, IP, Port);
         return Publisher{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }
     //fn for adding a channel info to the map being used for data storage
@@ -77,7 +77,7 @@ impl Publisher{
         let str_with_port = self.masterport.to_string();
         let address = [protocol, str1, str2, str_with_port].concat();
 
-        assert!(responder.bind(&address).is_ok());
+        assert!(responder.connect(&address).is_ok());
         let m = Message { messageType: 'c', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
 
         let res = serde_json::to_string(&m);
@@ -120,7 +120,7 @@ impl Publisher{
         a.push_str(&self.masterport.to_string());
 
          //connect to the master object
-        assert!(client.bind(&a).is_ok());
+        assert!(client.connect(&a).is_ok());
 
          //send the message that has been serialized to the master
         client.send(&serialMessage,0).unwrap();
@@ -159,7 +159,7 @@ impl Publisher{
         let str_with_port = chanPort.to_string();
         let address = [protocol, str1, str2, str_with_port].concat();
 
-        assert!(responder.bind(&address).is_ok());
+        assert!(responder.connect(&address).is_ok());
         let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: Mess.to_string() };
 
         let res = serde_json::to_string(&m);

@@ -13,3 +13,27 @@ Subscribers will only be able to receive data from a Channel, they are also able
 Channels will handle the storage of data independently from Publishers and Subscribers.
 
 ![Figure 2](Documentation/Images/flowchart2.jpg)
+
+
+### Requirements/Building/Installation
+
+##### Requirements
+Cargo \
+Maturin  \
+Python 3.X \
+pip \
+Julia \
+Python Deps:
+    1. Pillow \
+    2. NumPy \
+Windows/Linux \
+
+##### Steps for Building and Installing from Source
+1. On Windows run install.bat, on Linux run install.sh they are located in the tala/Rust folder. This should take some time since it is installing and building everything. They will also tell you if you are missing any requirements.
+2. Go to Build for direct libraries, Build/Wheel for Python wheels. <br>
+3. If you want to use the direct libraries move the TALA.pyd into the location of the Python script and import TALA as usual. If you want to install TALA go into the Build/Wheels folder and run `pip install [Wheel Name].whl`. The wheel name will changed based on your system and Python Version. <br>
+4. For Julia, go into the Build/Julia folder, launch the Julia REPL press `]`, then type `activate TALA.jl`, backspace until Julia is seen again and do `using TALA` then TALA should be installed.
+
+
+### Using TALA
+[How to use this should come soon]

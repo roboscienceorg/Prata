@@ -14,7 +14,7 @@ Channels will handle the storage of data independently from Publishers and Subsc
 
 ![Figure 2](Documentation/Images/flowchart2.jpg)
 
-<!-- This is all temporary 
+
 ### Requirements/Building/Installation
 
 ##### Requirements
@@ -24,6 +24,9 @@ Maturin >=0.8.3 \
 Python 3.X \
 PIP >=20.2.3 \
 Julia >=1.5.1 \
+Python Deps:
+    Pillow \
+    NumPy \
 Windows/Linux \
 
 ##### Steps for Building from Source
@@ -31,6 +34,8 @@ Windows/Linux \
 [Add any special commands for building]
 1. On Windows run install.bat, on Linux run install.sh. This should take some time since it is installing and building everything
 2. Go to Build/Libs for direct libraries, Build/Wheel for Python wheels. <br><br>
+3. If you want to use the direct libraries move the TALA.pyd into the location of the Python script and import TALA as usual, if you want to install TALA go into the Build/Wheels folder and run `pip install [wheel name].whl` and put the wheel name in, it will change based on Python version and OS being used.
+4. For Julia, go into the Build/Julia folder, launch the Julia REPL press `]`, then type `activate TALA.jl`, backspace until Julia is seen again and do `using TALA` then TALA should be installed.
 
 ##### Installation
 [For these maybe even have a script to install by langauge (python/julia])]\
@@ -39,4 +44,3 @@ Julia: [Figure this one out][probably a julia script to run]
 
 ### Using TALA
 [How to use this should come soon]
--->

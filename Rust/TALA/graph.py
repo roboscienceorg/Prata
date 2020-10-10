@@ -43,16 +43,19 @@ class Graph(tk.Frame):
 
     def __init__(self, parent, controller, ip, port):
         tk.Frame.__init__(self,parent)
-        self.canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
-        self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
-        self.publishers = {}
-        self.subscribers = {}
-        self.channels = {}
-
         self.connection = ConnectionData()
         self.connection.master_ip = ip
         self.connection.master_port = int(port)
         self.connection.connectMaster()
+
+        self.publishers = {}
+        self.subscribers = {}
+        self.channels = {}
+        self.startGraph()
+
+    def startGraph(self):
+        self.canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
+        self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
 
         self.connection.retrieveData()
         self.connection.parseJson()
@@ -61,6 +64,13 @@ class Graph(tk.Frame):
         self.parseChannels()
         self.createGraph()
         self.buttons()
+
+
+
+    def refresh(self):
+        print("Refresh")
+        self.canvas.delete(all)
+        self.startGraph()
 
     #   createGraph(self,channels,canvas)
     #       Takes in a dictionary of channels and a canvas.It then
@@ -77,9 +87,9 @@ class Graph(tk.Frame):
 
         for channel in self.channels:
             for pubs in self.channels[channel][1]:
-                self.drawArrow(self.publishers[pubs[0]][1],self.channels[channel][3])
+                self.drawArrow(self.publishers[pubs[1]][1],self.channels[channel][3])
             for subs in self.channels[channel][2]:
-                self.drawArrow(self.channels[channel][3],self.subscribers[subs[0]][1])
+                self.drawArrow(self.channels[channel][3],self.subscribers[subs[1]][1])
 
     #   drawArror(self,canvas,start,end)
     #   Takes in a canvas and the start and end points of the arror.
@@ -96,12 +106,11 @@ class Graph(tk.Frame):
 
         for channel in self.channels:
             for pubs in self.channels[channel][1]:
-                if pubs[0] not in self.publishers:
-                    self.publishers[pubs[0]] = [pubs[1],[0,0]]
-
+                if pubs[1] not in self.publishers:
+                    self.publishers[pubs[1]] = [pubs[0],[0,0]]
             for subs in self.channels[channel][2]:
-                if subs[0] not in self.subscribers:
-                    self.subscribers[subs[0]] = [subs[1],[0,0]]
+                if subs[1] not in self.subscribers:
+                    self.subscribers[subs[1]] = [subs[0],[0,0]]
 
             self.channels[channel][3] = [x_channel, y_channel * channel_count + 20]
             channel_count += 1
@@ -123,17 +132,17 @@ class Graph(tk.Frame):
         if len(self.publishers) != 0:
             y_pub = int(HEIGHT / (len(self.publishers)*2))
         object_count = 0
-        for ip in self.publishers:
-            self.publishers[ip][1] = [x_pub,y_pub*object_count+20]
-            coords = self.publishers[ip][1]
-            port = "port: " + str(self.publishers[ip][0])
+        for port in self.publishers:
+            self.publishers[port][1] = [x_pub,y_pub*object_count+20]
+            coords = self.publishers[port][1]
+            ip = self.publishers[port][0]
 
             self.canvas.create_oval(coords[0], coords[1],coords[0]+20, coords[1]+20,\
              fill="#d926b6")
             self.canvas.create_text(coords[0]-10, coords[1],\
-              text=str("ip: " + ip), anchor='e')
+              text=str("port: " + str(port)), anchor='e')
             self.canvas.create_text(coords[0]-10, coords[1] + 10,\
-              text=str(port), anchor='e')
+              text=str("ip: " + ip), anchor='e')
             object_count += 1
 
     def plotSubscriber(self):
@@ -142,36 +151,40 @@ class Graph(tk.Frame):
         if len(self.subscribers) != 0:
             y_sub = int(HEIGHT / (len(self.subscribers)*2))
         object_count = 0
-        for ip in self.subscribers:
-            self.subscribers[ip][1] = [x_sub,y_sub*object_count+20]
-            coords = self.subscribers[ip][1]
-            port = "port: " + str(self.subscribers[ip][0])
+        for port in self.subscribers:
+            self.subscribers[port][1] = [x_sub,y_sub*object_count+20]
+            coords = self.subscribers[port][1]
+            ip = self.subscribers[port][0]
 
             self.canvas.create_oval(coords[0], coords[1],coords[0]+20, coords[1]+20,\
              fill="#d926b6")
             self.canvas.create_text(coords[0] + 30, coords[1],\
-              text=str("ip: " + ip), anchor='w')
+              text=str("port: " + str(port)), anchor='w')
             self.canvas.create_text(coords[0] + 30, coords[1] + 10,\
-              text=str(port), anchor='w')
+              text=str("ip: " + ip), anchor='w')
             object_count += 1
 
+
+
     def buttons(self):
+        button_canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
+        button_canvas.place(relx = 0, rely = 0, relwidth = .1, relheight = 1,anchor = 'nw')
         x_position = int(1*WIDTH / 6)
 
-        create_bot = tk.Button(self, text = "Port Ranges")
-        create_bot.place(x = 0, rely = .1, relwidth = .1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "Port Ranges")
+        create_bot.place(x = 0, rely = .1, relwidth = 1, relheight = .05,anchor = 'w')
 
-        create_bot = tk.Button(self, text = "List Publishers",command=lambda: self.listPublishers())
-        create_bot.place(x = 0, rely = .3, relwidth = .1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "List Publishers",command=lambda: self.listPublishers())
+        create_bot.place(x = 0, rely = .3, relwidth = 1, relheight = .05,anchor = 'w')
 
-        create_bot = tk.Button(self, text = "List Channels",command=lambda: self.listChannel())
-        create_bot.place(x = 0, rely = .5, relwidth = .1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "List Channels",command=lambda: self.listChannel())
+        create_bot.place(x = 0, rely = .5, relwidth = 1, relheight = .05,anchor = 'w')
 
-        create_bot = tk.Button(self, text = "List Subscribers",command=lambda: self.listSubscribers())
-        create_bot.place(x = 0, rely = .7, relwidth = .1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "List Subscribers",command=lambda: self.listSubscribers())
+        create_bot.place(x = 0, rely = .7, relwidth = 1, relheight = .05,anchor = 'w')
 
-        create_bot = tk.Button(self, text = "Show BlackList", command=lambda: self.getData())
-        create_bot.place(x = 0, rely = .9, relwidth = .1, relheight = .05,anchor = 'w',)
+        create_bot = tk.Button(button_canvas, text = "Refresh", command=lambda: self.refresh())
+        create_bot.place(x = 0, rely = .9, relwidth = 1, relheight = .05,anchor = 'w',)
     
 
     def listChannel(self):
@@ -192,8 +205,9 @@ class Graph(tk.Frame):
         data = []
 
         for key in self.publishers:
-            data.append(key)
             data.append(self.publishers[key][0])
+            data.append(key)
+
 
         list.add_data(data)
         list.place(relx = 1, y = 10, anchor = 'ne')
@@ -203,8 +217,8 @@ class Graph(tk.Frame):
         data = []
 
         for key in self.subscribers:
-            data.append(key)
             data.append(self.subscribers[key][0])
+            data.append(key)
 
         list.add_data(data)
         list.place(relx = 1, y = 10, anchor = 'ne')

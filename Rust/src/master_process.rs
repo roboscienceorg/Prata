@@ -8,6 +8,7 @@ use port_scanner::request_open_port;
 use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
+use std::panic;
 
 //use serde_json::Result;
 //use serde_json::Value as JsonValue;
@@ -58,10 +59,18 @@ impl MasterProcess
       let context = zmq::Context::new();
       let repSocket = context.socket(zmq::REP).unwrap();
       //let port = request_open_port().unwrap_or(0);
-      repSocket
-         .connect( &(full_address) )
+          panic::set_hook(Box::new(|_info| {
+        // do nothing
+    }));
+      let fail_status = panic::catch_unwind(|| {repSocket.bind( &(full_address) ).expect("fail");});
+      match fail_status
+      {
+         Ok(_fail_status) => println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
+         Err(_) => {println!("Invalid IP and Port combination, cannot host"); return;},
+      }
+      //println!("{:?}", repSocket.expect());
          //.connect("tcp://0.0.0.0:7000")
-         .expect("failed binding socket");
+         //.expect("failed binding socket XXX");
       thread::sleep(Duration::from_millis(1));
 
       //get the port that we are bound to
@@ -93,7 +102,6 @@ impl MasterProcess
 
 
          //let reqType = msg.messageType;
-
          if  msg.messageType == 'T'
          {
             //terminate host
@@ -182,7 +190,10 @@ impl MasterProcess
          else if msg.messageType == 'J'
          {
             //handle returning a json in message
-            let res = serde_json::to_string(&self);
+            let me = serde_json::to_string(&self);
+            let meserl: String = me.unwrap();
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: meserl.to_string() };
+            let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
          }

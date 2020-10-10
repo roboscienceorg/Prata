@@ -383,7 +383,7 @@ impl Channel
           let context = zmq::Context::new();
           let responder = context.socket(zmq::REP).unwrap();
           responder
-               .connect( &(full_address) )
+               .bind( &(full_address) )
                //.connect("tcp://0.0.0.0:7000")
                .expect("failed binding socket");
           //thread::sleep(Duration::from_millis(1));
@@ -509,14 +509,19 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
-               let mut retval = String::from("");
+               //let mut retval = String::from("");
+               /*
                for i in &self.info
                {
                     retval.push_str(i);
                     //retval = [retval, i].concat();
                }
                self.info.clear();
+
+               retval.push_str((&self.info.pop_front()).unwrap());
                return retval;
+                              */
+               return self.info.pop_front().unwrap();
           }
           /**
           * New call to return new object

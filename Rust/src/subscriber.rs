@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 //use serde_json::Result;
 //use serde_json::Value as JsonValue;
 use pyo3::prelude::*;
-
+#[path = "messaging.rs"] mod messaging;
 //#[derive(Debug)]
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
@@ -39,6 +39,10 @@ pub struct Subscriber
 #[pymethods]
 impl Subscriber {
 
+    pub fn to_string(&mut self) -> String
+    {
+        return format!("Construct Sub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
+    }
     //fn for adding a channel / master info to the map being used for data storage
     pub fn add(&mut self, Name: String, IP: String, Port: u16)
     {
@@ -47,67 +51,13 @@ impl Subscriber {
     //function for connecting to a channel
     pub fn connect(&mut self, Name: String)
     {
-        //check the currently stored channels to see if it is stored there
-        if  self.channelInfo.contains_key(&Name)
-        {
-        }
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
-        else
+        if  self.channelInfo.contains_key(&Name) == false
         {
-         // setup the socket for the client
-        // let context = zmq::Context::new();
-        // let client = context.socket(zmq::REQ).unwrap();
-        //
-        // //serialize message for transmission
-        // let messageSent = Message{messageType: 'C',ip: self.ip.to_string(),port: self.port, message: Name.to_string()};         // create message object
-        // let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
-        //
-        // //concatenate "tcp://" "IP" ":" "PORT" together
-        //
-        // let mut a = "tcp://".to_string();
-        // a.push_str(&self.masterip.to_string());
-        // a.push_str(&":");
-        // a.push_str(&self.masterport.to_string());
-        //
-        // //connect to the master object
-        // client.connect(&a);
-        //
-        // //send the message that has been serialized to the master
-        // client.send(&serialMessage,0).unwrap();
-        //
-        // //wait for the response from master so that I can store the message into the message object
-        // let mut msg = zmq::Message::new();
-        // client.recv(&mut msg,0).unwrap();
-
-        let context = zmq::Context::new();
-        let responder = context.socket(zmq::REQ).unwrap();
-
-        let protocol = "tcp://".to_string();
-        let str1 = String::from(&self.masterip);
-        let str2 = String::from(":");
-        let str_with_port = self.masterport.to_string();
-        let address = [protocol, str1, str2, str_with_port].concat();
-
-        assert!(responder.bind(&address).is_ok());
-        let m = Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
-
-        let res = serde_json::to_string(&m);
-        let serial_message: String = res.unwrap();
-        let mut msg = zmq::Message::new();
-
-        responder.send(&serial_message, 0).unwrap();
-        responder.recv(&mut msg, 0).unwrap();
-
-        //deserialize the information
-
-        let data = msg.as_str().unwrap();
-        let res = serde_json::from_str(data);
-
-        let inbound : Message = res.unwrap();
+        let mx = messaging::Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
+        let m2 = messaging::send(self.masterip.to_string(), self.masterport, mx);
         //add the information to the channelInfo Object
-
-        self.add(Name, inbound.ip, inbound.port);
-
+        self.add(Name, m2.ip, m2.port);
         }
     }
     //adds ip address to addressbook with default port range 0-max
@@ -132,7 +82,7 @@ impl Subscriber {
          a.push_str(&self.masterport.to_string());
 
          //connect to the master object
-         assert!(client.bind(&a).is_ok());
+         assert!(client.connect(&a).is_ok());
 
          //send the message that has been serialized to the master
          client.send(&serialMessage,0).unwrap();
@@ -155,35 +105,9 @@ impl Subscriber {
         }
 
         let chanInfo = self.channelInfo.get(&ChannelName).unwrap();
-
-        let chanIP = &chanInfo.0;
-        let chanPort = &chanInfo.1;
-
-        let context = zmq::Context::new();
-        let responder = context.socket(zmq::REQ).unwrap();
-
-        let protocol = "tcp://".to_string();
-        let str1 = String::from(chanIP.to_string());
-        let str2 = String::from(":");
-        let str_with_port = chanPort.to_string();
-        let address = [protocol, str1, str2, str_with_port].concat();
-
-        assert!(responder.bind(&address).is_ok());
-        let m = Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
-
-        let res = serde_json::to_string(&m);
-        let serial_message: String = res.unwrap();
-        let mut msg = zmq::Message::new();
-
-        responder.send(&serial_message, 0).unwrap();
-        responder.recv(&mut msg, 0).unwrap();
-        let data = msg.as_str().unwrap();
-        let res = serde_json::from_str(data);
-
-        //json deserialized stored inside p value
-        let inbound: Message = res.unwrap();
-        return inbound.message;
-
+        let m = messaging::Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+        let m2 = messaging::send(chanInfo.0.to_string(), chanInfo.1, m);
+        return m2.message;
     }
 
 }
@@ -193,7 +117,10 @@ impl Subscriber
     //constructor for Publisher Object
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
     {
+        
         return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }
+
+
 
 }

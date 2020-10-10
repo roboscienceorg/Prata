@@ -31,7 +31,7 @@ fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
 
         // let p = request_open_port().unwrap_or(0);
         // let addr = (Ipv4Addr::LOCALHOST).to_string();
-        Py::new(py, Master{ipAddress: IP, port: p}).unwrap()
+        Py::new(py, Master{ipAddress: IP, port: p, threading: true}).unwrap()
     }
 
     m.add_class::<Master>()?;

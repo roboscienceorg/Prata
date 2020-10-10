@@ -12,7 +12,7 @@ use port_scanner::request_open_port;
 use std::thread;
 extern crate ipconfig;
 extern crate get_if_addrs;
-
+extern crate local_ipaddress;
 #[path = "subscriber.rs"] mod subscriber;
 #[path = "publisher.rs"] mod publisher;
 
@@ -150,15 +150,15 @@ impl Master
 
    pub fn getLocalIp( &self ) -> String
    {
-      let network_info = ipconfig::get_adapters().unwrap();
+      //let network_info = ipconfig::get_adapters().unwrap();
       // println!("{:?}", network_info);
-      let mut ip = "".to_string();
-      let start = 127;
+      let ip = local_ipaddress::get().unwrap().to_string();
+      //let start = 127;
 
       //let ninfo = get_if_addrs::get_if_addrs().unwrap();
-      // println!("{:?}", ninfo);
 
 
+/*
       for card in network_info
       {
          //println!("{:?}\n\n", card);
@@ -199,6 +199,7 @@ impl Master
 
 
    //println!("\n\n\n\n{:?}\n\n\n", ip);
+   */
    return ip.to_string();
    }
 }

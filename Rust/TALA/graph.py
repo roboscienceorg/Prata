@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from .TALA import Master, connect
 import json
 from .listbox import *
@@ -56,6 +57,7 @@ class Graph(tk.Frame):
     def startGraph(self):
         self.canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
         self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
+        self.channels.clear()
 
         self.connection.retrieveData()
         self.connection.parseJson()
@@ -194,7 +196,7 @@ class Graph(tk.Frame):
         remove_entry = tk.Entry(self, bg = 'white', textvariable = remove)
         remove_entry.place(relx = 1, rely = .1, relwidth = .1, relheight = .05,anchor = 'e')
         
-        delete_chan_bot = tk.Button(right_button_canvas, text = "Remove Channel", command=lambda: self.removeChannel(remove))
+        delete_chan_bot = tk.Button(right_button_canvas, text = "Remove Channel", command=lambda: self.removeChan(remove))
         delete_chan_bot.place(relx = 1, rely = .7, relwidth = 1, relheight = .05,anchor = 'e',)
 
         refresh_bot = tk.Button(right_button_canvas, text = "Refresh", command=lambda: self.refresh())
@@ -238,13 +240,12 @@ class Graph(tk.Frame):
         list.place(relx = 0, rely = 1, anchor = 'sw')
 
 
-    def removeChannel(self,remove):
+    def removeChan(self,remove):
         channel = str(remove.get())
         try:
-            removeChannel(channel)
-            print("removing " + str(channel))
+            self.connection.master.removeChannel(channel)
         except:
-            print("Couldn't Remove " + str(channel))
+            tk.messagebox.showerror("Error", "Invalid Channel")
 # Resizingcanvas
 # A TK Canvas class that resizes a canvas and
 # its elements when a user resizes a window.

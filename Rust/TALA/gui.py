@@ -88,15 +88,16 @@ class Window(tk.Frame):
         connect_bot.place(x = img.width()/2, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
 
 
-    def setMaster(self):
+    def setMaster(self):       
+        self.master_ip = self.ip.get()
+        self.master_port = self.port.get()
         try:
-            self.master_ip = self.ip.get()
-            self.master_port = self.port.get()
             frame = Graph(self.parent, self, self.master_ip, self.master_port)
             self.controller.frames[Graph] = frame
             frame.grid(row=0, column=0, sticky="nsew")
             self.controller.topFrame(Graph)
         except:
+            print("Error")
             tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
             self.createDisplay()
 

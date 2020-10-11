@@ -8,7 +8,8 @@ use port_scanner::request_open_port;
 use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
-
+use std::panic;
+#[path = "messaging.rs"] mod messaging;
 //use serde_json::Result;
 //use serde_json::Value as JsonValue;
 
@@ -58,10 +59,18 @@ impl MasterProcess
       let context = zmq::Context::new();
       let repSocket = context.socket(zmq::REP).unwrap();
       //let port = request_open_port().unwrap_or(0);
-      repSocket
-         .connect( &(full_address) )
+          panic::set_hook(Box::new(|_info| {
+        // do nothing
+    }));
+      let fail_status = panic::catch_unwind(|| {repSocket.bind( &(full_address) ).expect("fail");});
+      match fail_status
+      {
+         Ok(_fail_status) => println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
+         Err(_) => {println!("Invalid IP and Port combination, cannot host"); return;},
+      }
+      //println!("{:?}", repSocket.expect());
          //.connect("tcp://0.0.0.0:7000")
-         .expect("failed binding socket");
+         //.expect("failed binding socket XXX");
       thread::sleep(Duration::from_millis(1));
 
       //get the port that we are bound to
@@ -91,7 +100,7 @@ impl MasterProcess
          //deserialize into message struct
          let msg: Message = msg_string.unwrap();
 
-
+         println!("mp: {}", msg.messageType);
          //let reqType = msg.messageType;
          if  msg.messageType == 'T'
          {
@@ -188,33 +197,19 @@ impl MasterProcess
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
          }
-/*
-         //if the channel doesn't already exist, create it
-         if self.channels.contains_key(&channelName) == false
+         else if msg.messageType == 'R'
          {
-            self.channels.insert(channelName.clone(), MasterProcess::newChannel( self.ipAddress.clone(), channelName.clone() )) ;
+            //Rmove a channel listed
+            println!("mp: in R");
+            self.terminateChannel(msg.message);
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let res = serde_json::to_string(&m);
+            let serial_message: String = res.unwrap();
+            println!("mp: sending ACK");
+            repSocket.send(&serial_message, 0).unwrap();
+            println!("mp: sending ACK complete");
          }
 
-         //get the channel information
-         let channelInfo = &self.channels[&channelName].clone();
-
-         //convert the ip address of the channel to a byte array
-         //let channelIP = &channelInfo.info.0.as_bytes();
-         let channelPort = &channelInfo.info.1.to_be_bytes();
-
-
-         //send data back to node
-         let msg = Message {
-            messageType: 'M',
-            ip: nodeIP,
-            port: nodePort,
-            message: channelName,
-
-          };
-         let msg_str = serde_json::to_string(&msg);
-         let serial_message: String = msg_str.unwrap();
-         repSocket.send(&serial_message, 0).unwrap();
-*/
          /* if we want to exit, call break; */
       };
 
@@ -223,7 +218,18 @@ impl MasterProcess
    }
 
    /********************** PRIVATE ******************/
-
+   fn terminateChannel( &mut self, name: String)
+   {
+      if  self.channels.contains_key(&name)
+      {
+         let chanInfo = self.channels.get(&name).unwrap();
+         let p = self.port;
+         let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: p,  message: "".to_string() };
+         println!("terminating channel {}: {}. {}", name, chanInfo.info.0.to_string(), chanInfo.info.1);
+         messaging::send(chanInfo.info.0.to_string(), chanInfo.info.1, m);
+         self.channels.remove(&name);
+      }
+   }
    /* Creates a new channel process */
    fn newChannel(ipAddress: String, port: u16, channelName: String) -> ChannelInfo
    {

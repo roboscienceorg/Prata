@@ -383,7 +383,7 @@ impl Channel
           let context = zmq::Context::new();
           let responder = context.socket(zmq::REP).unwrap();
           responder
-               .connect( &(full_address) )
+               .bind( &(full_address) )
                //.connect("tcp://0.0.0.0:7000")
                .expect("failed binding socket");
           //thread::sleep(Duration::from_millis(1));
@@ -456,7 +456,15 @@ impl Channel
                }
                else if inbound.messageType == 'T'
                {
+
                     //terminate channel listening and return to caller
+                    let m = Message { messageType: 'A', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+
+                    let res = serde_json::to_string(&m);
+                    //let res = serde_json::to_string(&self.status);
+                    let serial_message: String = res.unwrap();
+                    responder.send(&serial_message, 0).unwrap();
+                    println!("channel closed");
                     return;
                }
 
@@ -509,14 +517,19 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
-               let mut retval = String::from("");
+               //let mut retval = String::from("");
+               /*
                for i in &self.info
                {
                     retval.push_str(i);
                     //retval = [retval, i].concat();
                }
                self.info.clear();
+
+               retval.push_str((&self.info.pop_front()).unwrap());
                return retval;
+                              */
+               return self.info.pop_front().unwrap();
           }
           /**
           * New call to return new object

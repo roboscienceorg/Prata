@@ -464,7 +464,7 @@ impl Channel
                     //let res = serde_json::to_string(&self.status);
                     let serial_message: String = res.unwrap();
                     responder.send(&serial_message, 0).unwrap();
-                    println!("channel closed");
+                    //println!("channel closed");
                     return;
                }
 
@@ -508,7 +508,7 @@ mod data
                self.info.push_back(bytes);
           }
           /**
-          * gets a string to the fifo structure
+          * get a string to the fifo structure
           *
           * param none
           *
@@ -529,7 +529,13 @@ mod data
                retval.push_str((&self.info.pop_front()).unwrap());
                return retval;
                               */
-               return self.info.pop_front().unwrap();
+              let x = self.info.pop_front();
+              if x.is_some(){
+                  return x.unwrap()
+              }else
+              {
+                  return "".to_string();
+              }
           }
           /**
           * New call to return new object

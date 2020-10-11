@@ -100,7 +100,7 @@ impl MasterProcess
          //deserialize into message struct
          let msg: Message = msg_string.unwrap();
 
-         println!("mp: {}", msg.messageType);
+      //   println!("mp: {}", msg.messageType);
          //let reqType = msg.messageType;
          if  msg.messageType == 'T'
          {
@@ -200,14 +200,15 @@ impl MasterProcess
          else if msg.messageType == 'R'
          {
             //Rmove a channel listed
-            println!("mp: in R");
-            self.terminateChannel(msg.message);
+            //println!("mp: in R");
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
-            println!("mp: sending ACK");
+            self.terminateChannel(msg.message);
             repSocket.send(&serial_message, 0).unwrap();
-            println!("mp: sending ACK complete");
+            // println!("mp: sending ACK");
+            //
+            // println!("mp: sending ACK complete");
          }
 
          /* if we want to exit, call break; */
@@ -225,7 +226,7 @@ impl MasterProcess
          let chanInfo = self.channels.get(&name).unwrap();
          let p = self.port;
          let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: p,  message: "".to_string() };
-         println!("terminating channel {}: {}. {}", name, chanInfo.info.0.to_string(), chanInfo.info.1);
+         //println!("terminating channel {}: {}. {}", name, chanInfo.info.0.to_string(), chanInfo.info.1);
          messaging::send(chanInfo.info.0.to_string(), chanInfo.info.1, m);
          self.channels.remove(&name);
       }

@@ -140,14 +140,22 @@ impl Master
    /* Starts a host process in this thread. */
 
 
-   
+
    /* Return a subscriber object */
 
    pub fn getLocalIp( &self ) -> String
    {
       //let network_info = ipconfig::get_adapters().unwrap();
       // println!("{:?}", network_info);
-      let ip = local_ipaddress::get().unwrap().to_string();
+      #[allow(unused_assignments)]
+      let mut ip = "".to_string();
+      if self.ipAddress == "127.0.0.1"{
+          ip = "127.0.0.1".to_string()
+      }else
+      {
+         ip = local_ipaddress::get().unwrap().to_string();
+      }
+
       //let start = 127;
 
       //let ninfo = get_if_addrs::get_if_addrs().unwrap();

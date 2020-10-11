@@ -239,8 +239,9 @@ class Graph(tk.Frame):
 
 
     def removeChannel(self,remove):
-        channel = remove.get()
+        channel = str(remove.get())
         try:
+            removeChannel(channel)
             print("removing " + str(channel))
         except:
             print("Couldn't Remove " + str(channel))

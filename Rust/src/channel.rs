@@ -456,7 +456,15 @@ impl Channel
                }
                else if inbound.messageType == 'T'
                {
+
                     //terminate channel listening and return to caller
+                    let m = Message { messageType: 'A', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
+
+                    let res = serde_json::to_string(&m);
+                    //let res = serde_json::to_string(&self.status);
+                    let serial_message: String = res.unwrap();
+                    responder.send(&serial_message, 0).unwrap();
+                    println!("channel closed");
                     return;
                }
 

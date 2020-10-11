@@ -46,7 +46,14 @@ impl Master
       let m2 = messaging::send(self.ipAddress.to_string(), self.port, m);
       return m2.message;
       
-      }
+   }
+
+   pub fn removeChannel(&self, name: String)
+   {
+      let m = messaging::Message { messageType: 'R', ip: self.ipAddress.to_string(), port: self.port,  message: name.to_string() };
+      messaging::send(self.ipAddress.to_string(), self.port, m);
+      println!("back from send in master");
+   }
 
    pub fn setThreading( &mut self, value: bool)
    {

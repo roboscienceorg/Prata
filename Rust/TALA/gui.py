@@ -1,6 +1,11 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from .graph import *
+from os.path import split
+loc = split(__file__)[0]
+
+ansuzPNG = loc + "\\ansuz.png"
+ansuzICO = loc + "\\ansuz.ico"
 
 
 LARGE_FONT= ("Verdana", 20)
@@ -11,7 +16,7 @@ class ManageFrames(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Tala")
-        tk.Tk.iconbitmap(self, default = "ansuz.ico")
+        tk.Tk.iconbitmap(self, default = ansuzICO)
         self.geometry("1300x800")
         frame_container = tk.Frame(self)
         self.frames = {}
@@ -51,7 +56,7 @@ class Window(tk.Frame):
 
 
     def createDisplay(self,):
-        img = ImageTk.PhotoImage(file="ansuz.png")
+        img = ImageTk.PhotoImage(file=ansuzPNG)
 
         canvas = tk.Canvas(self, width = img.width(), height = img.height())
         canvas.place(relx = .5, rely = .45, relwidth = 1, relheight = 1,anchor = 'center')
@@ -85,11 +90,16 @@ class Window(tk.Frame):
     def setMaster(self):
         self.master_ip = self.ip.get()
         self.master_port = self.port.get()
-        frame = Graph(self.parent, self, self.master_ip, self.master_port)
-        self.controller.frames[Graph] = frame
-        frame.grid(row=0, column=0, sticky="nsew")
-        self.controller.topFrame(Graph)
         
+        try:
+            frame = Graph(self.parent, self, self.master_ip, self.master_port)
+            self.controller.frames[Graph] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+            self.controller.topFrame(Graph)
+        except:
+            print("Error")
+            tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
+            self.createDisplay()
 
 def gui():
     app = ManageFrames()

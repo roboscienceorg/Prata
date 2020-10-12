@@ -41,12 +41,19 @@ impl Master
 {
    pub fn serialize(&self) -> String
    {
-      
+
       let m = messaging::Message { messageType: 'J', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
       let m2 = messaging::send(self.ipAddress.to_string(), self.port, m);
       return m2.message;
-      
-      }
+
+   }
+
+   pub fn removeChannel(&self, name: String)
+   {
+      let m = messaging::Message { messageType: 'R', ip: self.ipAddress.to_string(), port: self.port,  message: name.to_string() };
+      messaging::send(self.ipAddress.to_string(), self.port, m);
+      //println!("back from send in master");
+   }
 
    pub fn setThreading( &mut self, value: bool)
    {
@@ -77,7 +84,7 @@ impl Master
 
    pub fn host(&self)
    {
-      
+
       let s = self.ipAddress.to_string();
       let p = self.port;
       //let p = self.port;
@@ -133,18 +140,6 @@ impl Master
    /* Starts a host process in this thread. */
 
 
-   /* Launch gui for current master
-      Return error if no master */
-   pub fn gui( self)
-   {
-      //gui launch
-   }
-
-   /* Disconnect from master */
-   pub fn disconnect( &self)
-   {
-
-   }
 
    /* Return a subscriber object */
 
@@ -152,54 +147,15 @@ impl Master
    {
       //let network_info = ipconfig::get_adapters().unwrap();
       // println!("{:?}", network_info);
-      let ip = local_ipaddress::get().unwrap().to_string();
-      //let start = 127;
-
-      //let ninfo = get_if_addrs::get_if_addrs().unwrap();
-
-
-/*
-      for card in network_info
+      #[allow(unused_assignments)]
+      let mut ip = "".to_string();
+      if self.ipAddress == "127.0.0.1"{
+          ip = "127.0.0.1".to_string()
+      }else
       {
-         //println!("{:?}\n\n", card);
-          for ips in card.ip_addresses()
-          {
-              //println!("{:?}", ips);
-              if card.oper_status() == ipconfig::OperStatus::IfOperStatusUp
-              {
-                 for dns in card.dns_servers()
-                 {
-                    match dns
-                    {
-                      std::net::IpAddr::V4(_value) =>
-                      match ips
-                     {
-                       std::net::IpAddr::V4(value) =>
-                           if value.octets()[0] != start
-                           {
-                                ip = value.to_string();
-                           },
-                       _ => (),
-                     },
-                      _ => (),
-                    }
-
-
-                 }
-
-              }
-              //println!("{:?}", ip);
-          }
+         ip = local_ipaddress::get().unwrap().to_string();
       }
 
-      if ip == "".to_string()
-      {
-         ip = "127.0.0.1".to_string();
-      }
-
-
-   //println!("\n\n\n\n{:?}\n\n\n", ip);
-   */
    return ip.to_string();
    }
 }

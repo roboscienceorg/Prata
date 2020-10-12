@@ -74,11 +74,9 @@ impl Publisher{
         //Check if channel is stored in hashmap
         if  self.channelInfo.contains_key(&Name)
         {
-
             let mx = messaging::Message {messageType: 'd',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};
             let _ = messaging::send(self.masterip.to_string(), self.masterport, mx);
             self.channelInfo.remove(&Name);
-
         }
         else    //If the channel does not exist in the publisher then don't do anything
         {

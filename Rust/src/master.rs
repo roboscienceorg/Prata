@@ -156,53 +156,6 @@ impl Master
          ip = local_ipaddress::get().unwrap().to_string();
       }
 
-      //let start = 127;
-
-      //let ninfo = get_if_addrs::get_if_addrs().unwrap();
-
-
-/*
-      for card in network_info
-      {
-         //println!("{:?}\n\n", card);
-          for ips in card.ip_addresses()
-          {
-              //println!("{:?}", ips);
-              if card.oper_status() == ipconfig::OperStatus::IfOperStatusUp
-              {
-                 for dns in card.dns_servers()
-                 {
-                    match dns
-                    {
-                      std::net::IpAddr::V4(_value) =>
-                      match ips
-                     {
-                       std::net::IpAddr::V4(value) =>
-                           if value.octets()[0] != start
-                           {
-                                ip = value.to_string();
-                           },
-                       _ => (),
-                     },
-                      _ => (),
-                    }
-
-
-                 }
-
-              }
-              //println!("{:?}", ip);
-          }
-      }
-
-      if ip == "".to_string()
-      {
-         ip = "127.0.0.1".to_string();
-      }
-
-
-   //println!("\n\n\n\n{:?}\n\n\n", ip);
-   */
    return ip.to_string();
    }
 }

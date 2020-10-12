@@ -529,6 +529,7 @@ mod data
                retval.push_str((&self.info.pop_front()).unwrap());
                return retval;
                               */
+
               let x = self.info.pop_front();
               if x.is_some(){
                   return x.unwrap()
@@ -536,6 +537,7 @@ mod data
               {
                   return "".to_string();
               }
+
           }
           /**
           * New call to return new object

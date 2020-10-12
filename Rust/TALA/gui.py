@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox
 from PIL import Image, ImageTk
 from .graph import *
 from os.path import split
@@ -91,6 +90,7 @@ class Window(tk.Frame):
     def setMaster(self):
         self.master_ip = self.ip.get()
         self.master_port = self.port.get()
+        
         try:
             frame = Graph(self.parent, self, self.master_ip, self.master_port)
             self.controller.frames[Graph] = frame
@@ -100,9 +100,6 @@ class Window(tk.Frame):
             print("Error")
             tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
             self.createDisplay()
-
-
-
 
 def gui():
     app = ManageFrames()

@@ -65,12 +65,12 @@ class Graph(tk.Frame):
 
         self.parseChannels()
         self.createGraph()
-        self.leftButtons()
-        self.rightButtons()
+        self.buttons()
 
 
 
     def refresh(self):
+        print("Refresh")
         self.canvas.delete(all)
         self.startGraph()
 
@@ -168,22 +168,22 @@ class Graph(tk.Frame):
 
 
 
-    def leftButtons(self):
-        left_button_canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
-        left_button_canvas.place(relx = 0, rely = 0, relwidth = .1, relheight = 1,anchor = 'nw')
+    def buttons(self):
+        button_canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
+        button_canvas.place(relx = 0, rely = 0, relwidth = .1, relheight = 1,anchor = 'nw')
         x_position = int(1*WIDTH / 6)
 
         # port_bot = tk.Button(left_button_canvas, text = "Port Ranges")
         # port_bot.place(x = 0, rely = .1, relwidth = 1, relheight = .05,anchor = 'w')
 
-        list_pub_bot = tk.Button(left_button_canvas, text = "List Publishers",command=lambda: self.listPublishers())
-        list_pub_bot.place(x = 0, rely = .3, relwidth = 1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "List Publishers",command=lambda: self.listPublishers())
+        create_bot.place(x = 0, rely = .3, relwidth = 1, relheight = .05,anchor = 'w')
 
-        list_chan_bot = tk.Button(left_button_canvas, text = "List Channels",command=lambda: self.listChannel())
-        list_chan_bot.place(x = 0, rely = .5, relwidth = 1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "List Channels",command=lambda: self.listChannel())
+        create_bot.place(x = 0, rely = .5, relwidth = 1, relheight = .05,anchor = 'w')
 
-        list_sub_bot = tk.Button(left_button_canvas, text = "List Subscribers",command=lambda: self.listSubscribers())
-        list_sub_bot.place(x = 0, rely = .7, relwidth = 1, relheight = .05,anchor = 'w')
+        create_bot = tk.Button(button_canvas, text = "List Subscribers",command=lambda: self.listSubscribers())
+        create_bot.place(x = 0, rely = .7, relwidth = 1, relheight = .05,anchor = 'w')
 
         list_sub_bot = tk.Button(left_button_canvas, text = "Terminate",command=lambda: self.terminate())
         list_sub_bot.place(x = 0, rely = .9, relwidth = 1, relheight = .05,anchor = 'w')
@@ -192,8 +192,6 @@ class Graph(tk.Frame):
     def terminate(self):
         self.connection.master.terminate()
         exit()
-
-
 
     def rightButtons(self):
         remove = tk.StringVar()
@@ -210,7 +208,9 @@ class Graph(tk.Frame):
         refresh_bot = tk.Button(right_button_canvas, text = "Refresh", command=lambda: self.refresh())
         refresh_bot.place(relx = .9, rely = .9, relwidth = 1, relheight = .05,anchor = 'e',)
 
-
+        create_bot = tk.Button(button_canvas, text = "Refresh", command=lambda: self.refresh())
+        create_bot.place(x = 0, rely = .9, relwidth = 1, relheight = .05,anchor = 'w',)
+    
     def listChannel(self):
         list = MultiListbox(self, ['Name','IP', 'Port'], width = 10,highlightthickness=0, border=0)
         data = []
@@ -222,7 +222,7 @@ class Graph(tk.Frame):
 
 
         list.add_data(data)
-        list.place(relx = 0, rely = 1, anchor = 'sw')
+        list.place(relx = 1, y = 10, anchor = 'ne')
 
     def listPublishers(self):
         list = MultiListbox(self, ['IP', 'Port'], width = 15,highlightthickness=0, border=0)
@@ -234,7 +234,7 @@ class Graph(tk.Frame):
 
 
         list.add_data(data)
-        list.place(relx = 0, rely = 1, anchor = 'sw')
+        list.place(relx = 1, y = 10, anchor = 'ne')
 
     def listSubscribers(self):
         list = MultiListbox(self, ['IP', 'Port'], width = 15,highlightthickness=0, border=0)
@@ -245,7 +245,7 @@ class Graph(tk.Frame):
             data.append(key)
 
         list.add_data(data)
-        list.place(relx = 0, rely = 1, anchor = 'sw')
+        list.place(relx = 1, y = 10, anchor = 'ne')
 
 
     def removeChan(self,remove):
@@ -255,6 +255,7 @@ class Graph(tk.Frame):
             self.refresh()
         except:
             tk.messagebox.showerror("Error", "Invalid Channel")
+
 # Resizingcanvas
 # A TK Canvas class that resizes a canvas and
 # its elements when a user resizes a window.

@@ -1,5 +1,5 @@
-
 //use std::{thread,time};
+
 use serde_json;
 use serde;
 //use serde_derive;
@@ -20,7 +20,7 @@ pub fn send(toAddress: String, toPort: u16, message: Message) -> Message
 {
      let context = zmq::Context::new();
      let responder = context.socket(zmq::REQ).unwrap();
-   //  let p = toAddress.to_string();
+
 
      let protocol = "tcp://".to_string();
      let str1 = String::from(toAddress);
@@ -34,6 +34,7 @@ pub fn send(toAddress: String, toPort: u16, message: Message) -> Message
      let res = serde_json::to_string(&m);
      let serial_message: String = res.unwrap();
      let mut msg = zmq::Message::new();
+
 
    //  println!("sending {:?} from {}:{} to {}:{}", message.messageType, message.ip, message.port, p, toPort);
 
@@ -79,3 +80,4 @@ pub fn send(toAddress: String, toPort: u16, message: Message) -> Message
           let m = res.unwrap();
           return m;
        }
+

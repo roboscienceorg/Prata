@@ -37,7 +37,7 @@ class ConnectionData():
         self.master = connect(self.master_ip, self.master_port)
 
     def retrieveData(self):
-        self.jsondata = json.loads(self.master.serialize()) 
+        self.jsondata = json.loads(self.master.serialize())
 
 
 class Graph(tk.Frame):
@@ -62,7 +62,7 @@ class Graph(tk.Frame):
         self.connection.retrieveData()
         self.connection.parseJson()
         self.channels = self.connection.channels
-            
+
         self.parseChannels()
         self.createGraph()
         self.leftButtons()
@@ -119,7 +119,7 @@ class Graph(tk.Frame):
 
     def plotChannel(self):
         for name in self.channels:
-            coords = self.channels[name][3] 
+            coords = self.channels[name][3]
             ip = "ip: " + str(self.channels[name][0][0])
             port = "port: " + str(self.channels[name][0][1])
             self.canvas.create_oval(coords[0], coords[1], coords[0]+20, \
@@ -173,8 +173,8 @@ class Graph(tk.Frame):
         left_button_canvas.place(relx = 0, rely = 0, relwidth = .1, relheight = 1,anchor = 'nw')
         x_position = int(1*WIDTH / 6)
 
-        port_bot = tk.Button(left_button_canvas, text = "Port Ranges")
-        port_bot.place(x = 0, rely = .1, relwidth = 1, relheight = .05,anchor = 'w')
+        # port_bot = tk.Button(left_button_canvas, text = "Port Ranges")
+        # port_bot.place(x = 0, rely = .1, relwidth = 1, relheight = .05,anchor = 'w')
 
         list_pub_bot = tk.Button(left_button_canvas, text = "List Publishers",command=lambda: self.listPublishers())
         list_pub_bot.place(x = 0, rely = .3, relwidth = 1, relheight = .05,anchor = 'w')
@@ -185,17 +185,25 @@ class Graph(tk.Frame):
         list_sub_bot = tk.Button(left_button_canvas, text = "List Subscribers",command=lambda: self.listSubscribers())
         list_sub_bot.place(x = 0, rely = .7, relwidth = 1, relheight = .05,anchor = 'w')
 
-    
+        list_sub_bot = tk.Button(left_button_canvas, text = "Terminate",command=lambda: self.terminate())
+        list_sub_bot.place(x = 0, rely = .9, relwidth = 1, relheight = .05,anchor = 'w')
+
+
+    def terminate(self):
+        self.connection.master.terminate()
+        exit()
+
+
 
     def rightButtons(self):
         remove = tk.StringVar()
         right_button_canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)
         right_button_canvas.place(relx = 1, rely = 1, relwidth = .1, relheight = 1,anchor = 'se')
         x_position = int(WIDTH)
-        
+
         remove_entry = tk.Entry(self, bg = 'white', textvariable = remove)
         remove_entry.place(relx = 1, rely = .1, relwidth = .1, relheight = .05,anchor = 'e')
-        
+
         delete_chan_bot = tk.Button(right_button_canvas, text = "Remove Channel", command=lambda: self.removeChan(remove))
         delete_chan_bot.place(relx = 1, rely = .7, relwidth = 1, relheight = .05,anchor = 'e',)
 
@@ -244,6 +252,7 @@ class Graph(tk.Frame):
         channel = str(remove.get())
         try:
             self.connection.master.removeChannel(channel)
+            self.refresh()
         except:
             tk.messagebox.showerror("Error", "Invalid Channel")
 # Resizingcanvas

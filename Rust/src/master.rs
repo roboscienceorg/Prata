@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
 use std::thread;
-extern crate ipconfig;
 extern crate get_if_addrs;
 extern crate local_ipaddress;
 #[path = "subscriber.rs"] mod subscriber;

@@ -36,8 +36,8 @@ mkdir ./Build/Wheels/ &>/dev/null
 
 
 $maturin build
-pip3 uninstall -y TALA
-pip3 install ./Build/Wheels/*.whl
+pip uninstall -y TALA
+pip install ./Build/Wheels/*.whl
 
 cp ./target/debug/libTALA.so ./Build/TALA.so
 cp ./Build/TALA.so ./Build/TALA.pyd

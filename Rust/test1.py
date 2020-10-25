@@ -2,7 +2,7 @@ import TALA as tl
 import time
 import json
 
-m = tl.connect("127.0.0.1", 25565)
+m = tl.connect("192.168.0.122", 25565)
 
 m.host()
 

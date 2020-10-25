@@ -33,6 +33,8 @@ pub struct Publisher
     pub masterport: u16,
     pub ip: String,
     pub port:   u16,
+
+    
 }
 
 impl Publisher

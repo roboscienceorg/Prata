@@ -1,5 +1,6 @@
 #[path = "master_process.rs"] mod master_process;
 #[path = "messaging.rs"] mod messaging;
+#[path = "channel.rs"] mod channel;
 //mod master_process::MasterProcess;
 use std::collections::HashMap;
 use pyo3::prelude::*;
@@ -47,6 +48,17 @@ impl Master
 
    }
 
+   
+   pub fn createChannel(&self, port_: u16, name_: String, style_: String, messageLimit_: u32)
+   {
+      let config = channel::ChannelConfiguration::new(self.ipAddress.to_string(), port_, name_.to_string(), style_.to_string(), messageLimit_);
+      let res = serde_json::to_string(&config);
+      let serial_message: String = res.unwrap();
+
+      let m = messaging::Message { messageType: 'N', ip: self.ipAddress.to_string(), port: self.port,  message: serial_message.to_string() };
+      messaging::send(self.ipAddress.to_string(), self.port, m);
+
+   }
    pub fn removeChannel(&self, name: String)
    {
       let m = messaging::Message { messageType: 'R', ip: self.ipAddress.to_string(), port: self.port,  message: name.to_string() };

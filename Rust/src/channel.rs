@@ -4,7 +4,7 @@
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
-
+use std::collections::VecDeque;
 //use splay::SplayMap;
 use splay::SplaySet;
 //use std::thread;
@@ -236,9 +236,38 @@ impl Channel
       #[allow(dead_code)]
      pub fn new(config: ChannelConfiguration) -> Channel
      {
-          let mut data_obj = self::data::Information::new();
-          data_obj.setLimit(config.messageLimit);
-          return Channel { port: config.port, ip: config.ip, styles: config.stylet, limit: config.messageLimit, name: config.name, info: data_obj, ..Default::default() };
+
+          let data_obj;
+          println!("config style = {}", config.stylet.to_string());
+          if config.stylet == "BROADCAST"
+          {
+               
+               data_obj = self::data::Information { info: VecDeque::new(), limit: 1, _deleteOnPull: false};
+          }
+          else
+          {
+               
+               data_obj = self::data::Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
+          }
+          println!("data obj limit is = {}", data_obj.limit);
+
+          return Channel { port: config.port, ip: config.ip, styles: config.stylet.to_string(), limit: config.messageLimit, name: config.name, info: data_obj, mode: ChannelMode::STANDARD, protocol: String::from("tcp"), addressBook: HashMap::new() };
+
+               
+     }
+     #[allow(dead_code)]
+     pub fn getSupportedTypes() -> Vec<String>
+     {
+          let mut vec = Vec::new();
+          vec.push("FIFO".to_string());
+          vec.push("BROADCAST".to_string());
+
+          return vec;
+     }
+     #[allow(dead_code)]
+     pub fn getDefaultType() -> String
+     {
+          return "FIFO".to_string();
      }
     /**
      * adds ip address to addressbook with default port range 0-max
@@ -412,6 +441,8 @@ impl Channel
       *
       */
       #[allow(dead_code)]
+
+
      pub fn main(&mut self)
      {
           //set up the socket so we can connect to publishers and subscribers
@@ -546,7 +577,7 @@ mod data
      {
           pub info: self::VecDeque<String>,
           pub limit: u32,
-          pub deleteOnPull: bool,
+          pub _deleteOnPull: bool,
      }
      impl Information
      {
@@ -557,6 +588,10 @@ mod data
           *
           * return none
           */
+          pub fn setPull(&mut self, value: bool)
+          {
+               self._deleteOnPull = value;
+          }
           #[allow(dead_code)]
           pub fn add(&mut self, bytes: String)
           {
@@ -581,6 +616,7 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
+               println!("in get {}, {}", self._deleteOnPull, self.limit);
                //let mut retval = String::from("");
                /*
                for i in &self.info
@@ -597,8 +633,9 @@ mod data
               let x = self.info.pop_front();
               if x.is_some(){
                    let val = x.unwrap();
-                   if self.deleteOnPull == false
+                   if self._deleteOnPull == false
                    {
+                        println!("delete ON PULL WAS FALSE");
                          self.info.push_front(val.to_string());
                    }
                    return val;
@@ -618,7 +655,8 @@ mod data
           #[allow(dead_code)]
           pub fn new() -> Information
           {
-               return Information { info: VecDeque::new(), limit: 500, deleteOnPull: true};
+               //println!("info constructor");
+               return Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
           }
      }
 

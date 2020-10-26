@@ -5,6 +5,7 @@ use std::collections::HashMap;
 //use zmq::Socket;
 use std::clone::Clone;
 use port_scanner::request_open_port;
+//use port_scanner::local_port_available;
 use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
@@ -45,6 +46,10 @@ pub struct MasterProcess
    pub channels: HashMap<String, ChannelInfo>,
    pub ipAddress: String,
    pub port: u16,
+
+   pub portRange: (u16, u16),
+   pub nextPort: u16,
+   pub isCustomRange: bool,
 }
 
 impl MasterProcess
@@ -168,7 +173,7 @@ impl MasterProcess
                //get port .
                channel_port = request_open_port().unwrap_or(0);
                //make channel and insert it into hash map
-               let config = channel::ChannelConfiguration::new(self.ipAddress.to_string(), channel_port, msg.message.to_string(), String::from("default"), 500);
+               let config = channel::ChannelConfiguration::new(self.ipAddress.to_string(), channel_port, msg.message.to_string(), channel::Channel::getDefaultType() , 500);
                let mut chan_info = MasterProcess::newChannel(config);
                if msg.messageType == 'c'
                {
@@ -219,24 +224,55 @@ impl MasterProcess
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             
-            let channel_exists = self.channels.contains_key(&msg.message);
+            let chan_data = msg.message.as_str();
+            let chan_info = serde_json::from_str(chan_data);
+            let mut config: channel::ChannelConfiguration = chan_info.unwrap();
+
+
+            let channel_exists = self.channels.contains_key(&config.name);
             if channel_exists == false
             {
 
-               let chan_data = msg.message.as_str();
-               let chan_info = serde_json::from_str(chan_data);
+               let name_of_channel = config.name.to_string();
                //deserialize into message struct
-               let config: channel::ChannelConfiguration = chan_info.unwrap();
 
+               if channel::Channel::getSupportedTypes().contains(&config.stylet.to_string()) == false
+               {
+                  println!("\nERROR: Channel type \"{}\" not supported; using channel default \"{}\"\n", config.stylet.to_string(), channel::Channel::getDefaultType());
+                  config.stylet = channel::Channel::getDefaultType();
+               }
                
+               //println!{"CONFIGURATION = {:?}", &config.stylet.to_string()};
                let chan_info = MasterProcess::newChannel(config);
-               self.channels.insert(msg.message.to_string(), chan_info);
+               self.channels.insert(name_of_channel, chan_info);
             }
 
             repSocket.send(&serial_message, 0).unwrap();
 
          }
+         else if msg.messageType == 'P'
+         {
+            //message is port range to set
+            let mut lines = msg.message.split(':');
+            let first = (lines.next().unwrap()).parse::<u16>().unwrap();
+            let second = (lines.next().unwrap()).parse::<u16>().unwrap();
+            self.nextPort = first;
+            self.portRange = ( first, second );
 
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let res = serde_json::to_string(&m);
+            let serial_message: String = res.unwrap();
+            repSocket.send(&serial_message, 0).unwrap();
+         }
+         else if msg.messageType == 'O'
+         {
+            //print supported channel types
+            println!("{:?}", channel::Channel::getSupportedTypes());
+            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let res = serde_json::to_string(&m);
+            let serial_message: String = res.unwrap();
+            repSocket.send(&serial_message, 0).unwrap();
+         }
 
          /* if we want to exit, call break; */
       };
@@ -258,10 +294,28 @@ impl MasterProcess
          self.channels.remove(&name);
       }
    }
+
+   fn getPort(&mut self) -> u16
+   {
+      let port;
+      if self.nextPort <= self.portRange.1
+      {
+         port = self.nextPort;
+         self.nextPort = self.nextPort + 1;
+      }
+      else
+      {
+
+         port = self.portRange.0;
+         self.nextPort = self.portRange.0 + 1;
+      }
+
+      return port;
+   }
    /* Creates a new channel process */
    fn newChannel(config: channel::ChannelConfiguration) -> ChannelInfo
    {
-
+      println!("---launching newChannel");
       //pass assigned port into new channel
       let n = (config.name).to_string();
       let p = config.port;

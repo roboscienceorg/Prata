@@ -20,6 +20,9 @@ pub struct PositionText
    pub position: u32,
    pub text: String,
 }
+
+
+
 #[allow(dead_code)]
 pub fn JsonToTextPosition(json: String) -> PositionText
 {

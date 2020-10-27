@@ -238,7 +238,7 @@ impl Channel
      {
 
           let data_obj;
-          println!("config style = {}", config.stylet.to_string());
+          //println!("config style = {}", config.stylet.to_string());
           if config.stylet == "BROADCAST"
           {
                
@@ -249,7 +249,6 @@ impl Channel
                
                data_obj = self::data::Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
           }
-          println!("data obj limit is = {}", data_obj.limit);
 
           return Channel { port: config.port, ip: config.ip, styles: config.stylet.to_string(), limit: config.messageLimit, name: config.name, info: data_obj, mode: ChannelMode::STANDARD, protocol: String::from("tcp"), addressBook: HashMap::new() };
 
@@ -588,6 +587,7 @@ mod data
           *
           * return none
           */
+          #[allow(dead_code)]
           pub fn setPull(&mut self, value: bool)
           {
                self._deleteOnPull = value;
@@ -601,7 +601,7 @@ mod data
                }
                self.info.push_back(bytes);
           }
-
+          #[allow(dead_code)]
           pub fn setLimit(&mut self, lim: u32)
           {
                self.limit = lim;
@@ -616,7 +616,7 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
-               println!("in get {}, {}", self._deleteOnPull, self.limit);
+               
                //let mut retval = String::from("");
                /*
                for i in &self.info
@@ -635,7 +635,7 @@ mod data
                    let val = x.unwrap();
                    if self._deleteOnPull == false
                    {
-                        println!("delete ON PULL WAS FALSE");
+
                          self.info.push_front(val.to_string());
                    }
                    return val;
@@ -655,7 +655,7 @@ mod data
           #[allow(dead_code)]
           pub fn new() -> Information
           {
-               //println!("info constructor");
+
                return Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
           }
      }

@@ -71,8 +71,8 @@ impl MasterProcess
       let fail_status = panic::catch_unwind(|| {repSocket.bind( &(full_address) ).expect("fail");});
       match fail_status
       {
-         Ok(_fail_status) => println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
-         Err(_) => {println!("Invalid IP and Port combination, cannot host"); return;},
+         Ok(_fail_status) => {},//println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
+         Err(_) => {println!("---Invalid IP and Port combination, cannot host"); return;},
       }
       //println!("{:?}", repSocket.expect());
          //.connect("tcp://0.0.0.0:7000")
@@ -116,6 +116,13 @@ impl MasterProcess
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
 
+            for (_, value) in self.channels.iter()
+            {
+               //value.info.0;
+               let origination_port = request_open_port().unwrap_or(0);
+               let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: origination_port,  message: "".to_string() };
+               messaging::send(value.info.0.to_string(), value.info.1, m);
+            }
             //terminate by returning this thread
             return;
          }
@@ -294,7 +301,7 @@ impl MasterProcess
          self.channels.remove(&name);
       }
    }
-
+   #[allow(dead_code)]
    fn getPort(&mut self) -> u16
    {
       let port;
@@ -315,7 +322,7 @@ impl MasterProcess
    /* Creates a new channel process */
    fn newChannel(config: channel::ChannelConfiguration) -> ChannelInfo
    {
-      println!("---launching newChannel");
+      //println!("---launching newChannel");
       //pass assigned port into new channel
       let n = (config.name).to_string();
       let p = config.port;

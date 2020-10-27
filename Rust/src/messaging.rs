@@ -14,8 +14,25 @@ pub struct Message
    pub message: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct PositionText
+{
+   pub position: u32,
+   pub text: String,
+}
 
 
+
+#[allow(dead_code)]
+pub fn JsonToTextPosition(json: String) -> PositionText
+{
+   let msg_string = serde_json::from_str(&json);
+
+   //deserialize into message struct
+   let msg: PositionText = msg_string.unwrap();
+   return msg;
+}
+#[allow(dead_code)]
 pub fn send(toAddress: String, toPort: u16, message: Message) -> Message
 {
      let context = zmq::Context::new();

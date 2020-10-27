@@ -4,95 +4,143 @@
 //mod TEST_Channel;
 mod channel;
 mod master;
-
+use std::{thread, time};
 //use std::thread;
 
 //use port_scanner::request_open_port;
 
+const IPADDRESS: &str = "192.168.0.122";
+
 fn main() {
 
-    // Print the ip addresses and dns servers of all adapters:
-    //TEST_Channel::test();
+    run_tests();
+    //let mut line = String::new();
+    //let _b1 = std::io::stdin().read_line(&mut line).unwrap();
 
-
-    //println!("stuff = {:?}", x);
-    //let m = master::Master::new();
-    let m = master::Master {ipAddress: "192.168.0.122".to_string(), port: 25565, threading: true};
+}
+fn run_tests()
+{
+    test_fifo();
+    thread::sleep(time::Duration::from_millis(200));
+    test_custom_fifo();
+    thread::sleep(time::Duration::from_millis(200));
+    test_broadcast();
+    thread::sleep(time::Duration::from_millis(200));
+    test_FIFO_and_Broadcast();
+    thread::sleep(time::Duration::from_millis(200));
+    test_invalid_host_ip()
+    //thread::sleep(time::Duration::from_millis(200));
+    //test_set_port_range()
+}
+#[allow(dead_code)]
+fn test_set_port_range()
+{
+    //WIP
+    println!("TEST: set_port_range");
+    let m = master::Master {ipAddress: IPADDRESS.to_string(), port: 25565, threading: true};
     m.host();
+    thread::sleep(time::Duration::from_millis(200));
+
+
+    println!("TEST: set_port_range END");
+}
+#[allow(dead_code)]
+fn test_invalid_host_ip()
+{
+    println!("TEST: invalid_host_ip");
+    println!("---TEST: Expecting to see host fail error, If it prints, this tests passes. Consider boolean instead of print?");
+    let m = master::Master {ipAddress: "207.168.0.122".to_string(), port: 25565, threading: true};
+    m.host();
+    thread::sleep(time::Duration::from_millis(200));
+
+
+    println!("TEST: invalid_host_ip END");
+}
+#[allow(dead_code)]
+fn test_fifo()
+{
+    println!("TEST: test_fifo");
+    let m = master::Master {ipAddress: IPADDRESS.to_string(), port: 25565, threading: true};
+    m.host();
+    let mut sub_ = m.subscriber();
+    let mut pub_ = m.publisher();
+
+    pub_.publish("ChannelA".to_string(),"testingMessage".to_string());
+
+    assert!(sub_.listen("ChannelA".to_string()) == "testingMessage", "TEST: test_fifo failed case 1");
+    assert!(sub_.listen("ChannelA".to_string()) == "", "TEST: test_fifo failed case 2");
+    m.terminate();
+    println!("TEST: test_fifo END");
+}
+#[allow(dead_code)]
+fn test_custom_fifo()
+{
+
+    println!("TEST: test_custom_fifo");
+    let m = master::Master {ipAddress: IPADDRESS.to_string(), port: 25565, threading: true};
+    m.host();
+
+    m.createChannel(25566, "ChannelB".to_string(), "FIFO".to_string(), 500);
 
     let mut sub_ = m.subscriber();
     let mut pub_ = m.publisher();
-    println!("{}", sub_.to_string());
-    println!("{}", pub_.to_string());
-    let mut line = String::new();
-    let _b1 = std::io::stdin().read_line(&mut line).unwrap();
-    pub_.connect("test".to_string());
-    pub_.publish("test".to_string(),"testing message 1=======".to_string());
 
-    let _b1 = std::io::stdin().read_line(&mut line).unwrap();
-    sub_.connect("test".to_string());
-    println!("listen 1 {}", sub_.listen("test".to_string()));
-    //
-    
+    pub_.publish("ChannelB".to_string(),"testingMessage".to_string());
 
-        /*
-    //println!("ChannelTests");
+    assert_eq!(sub_.listen("ChannelB".to_string()),"testingMessage", "TEST: test_custom_fifo failed case 1");
+    assert_eq!(sub_.listen("ChannelB".to_string()),"".to_string(), "TEST: test_custom_fifo failed case 2");
+    m.terminate();
+    println!("TEST: test_custom_fifo END");
+}
+#[allow(dead_code)]
+fn test_broadcast()
+{
 
-    TEST_Channel::test();
-
-
-    //let m = master::Master::new();
-    //let m = master::Master {ipAddress: "127.0.0.1".to_string(), port: 10819};
-
-    let ip = "127.0.0.1".to_string();
-    let port = 25565;
-    let mut m = master::connect(ip.to_string(), port);
-
-    let mut line = String::new();
-
-    //m.setThreading(true);
+    println!("TEST: test_broadcast");
+    let m = master::Master {ipAddress: IPADDRESS.to_string(), port: 25565, threading: true};
     m.host();
 
-    std::io::stdin().read_line(&mut line).unwrap();
-
+    m.createChannel(25566, "ChannelC".to_string(), "BROADCAST".to_string(), 500);
 
     let mut sub_ = m.subscriber();
     let mut pub_ = m.publisher();
 
-    pub_.connect("test".to_string());
-    pub_.publish("test".to_string(),"testing message 1=======".to_string());
+    pub_.publish("ChannelC".to_string(),"testingMessage".to_string());
 
-
-    sub_.connect("test".to_string());
-    println!("listen 1 {}", sub_.listen("test".to_string()));
-    pub_.publish("test".to_string(),"testing message2 ==========".to_string());
-    println!("listen 2 {}", sub_.listen("test".to_string()));
-    println!("listen 3 {}", sub_.listen("test".to_string()));
-    //m.host(true);
-
-
-    println!("Back to main from hosting");
-
-    println!("{:?}", m.serialize());
-
-    println!("Break1:");
-    std::io::stdin().read_line(&mut line).unwrap();
-
+    assert!(sub_.listen("ChannelC".to_string()) == "testingMessage", "TEST: test_custom_fifo failed case 1");
+    assert!(sub_.listen("ChannelC".to_string()) == "testingMessage", "TEST: test_custom_fifo failed case 2");
 
     m.terminate();
+    println!("TEST: test_broadcast END");
+}
+#[allow(dead_code)]
+fn test_FIFO_and_Broadcast()
+{
 
-    println!("Finished mains");
+    println!("TEST: FIFO_and_Broadcast");
+    let m = master::Master {ipAddress: IPADDRESS.to_string(), port: 25565, threading: true};
+    m.host();
 
-    let mut publisher = m.publisher();
-    let channel = "X92.FM".to_string();
-    let message = "FirstMessage".to_string();
-    publisher.connect(channel);
-    publisher.publish(channel, message);
+    m.createChannel(25566, "ChannelC".to_string(), "BROADCAST".to_string(), 500);
 
-    let mut subscriber = m.subscriber();
-    let data = subscriber.listen(channel);
+    let mut sub_ = m.subscriber();
+    let mut pub_ = m.publisher();
 
-    println!("{} = FirstMessage",data.to_string());
-    */
+    pub_.publish("ChannelC".to_string(),"testingMessage".to_string());
+    assert!(sub_.listen("ChannelC".to_string()) == "testingMessage", "TEST: test_custom_fifo failed case 1");
+    assert!(sub_.listen("ChannelC".to_string()) == "testingMessage", "TEST: test_custom_fifo failed case 2");
+    pub_.publish("Channel".to_string(),"m1".to_string());
+    pub_.publish("Channel".to_string(),"m2".to_string());
+    pub_.publish("Channel".to_string(),"m3".to_string());
+    assert!(sub_.listen("Channel".to_string()) == "m1", "TEST: test_custom_fifo failed case 3");
+    assert!(sub_.listen("Channel".to_string()) == "m2", "TEST: test_custom_fifo failed case 4");
+    assert!(sub_.listen("Channel".to_string()) == "m3", "TEST: test_custom_fifo failed case 5");
+    assert!(sub_.listen("ChannelC".to_string()) == "testingMessage", "TEST: test_custom_fifo failed case 6");
+    assert!(sub_.listen("ChannelC".to_string()) == "testingMessage", "TEST: test_custom_fifo failed case 7");
+    pub_.publish("ChannelC".to_string(),"new message".to_string());
+    assert!(sub_.listen("ChannelC".to_string()) == "new message", "TEST: test_custom_fifo failed case 8");
+    assert!(sub_.listen("ChannelC".to_string()) == "new message", "TEST: test_custom_fifo failed case 9");
 
+    m.terminate();
+    println!("TEST: FIFO_and_Broadcast END");
 }

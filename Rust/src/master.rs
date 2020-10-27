@@ -1,16 +1,16 @@
 #[path = "master_process.rs"] mod master_process;
 #[path = "messaging.rs"] mod messaging;
+#[path = "channel.rs"] mod channel;
 //mod master_process::MasterProcess;
 use std::collections::HashMap;
 use pyo3::prelude::*;
 use serde_json;
-use serde;
+//use serde;
 //use serde_derive;
-use serde::{Deserialize, Serialize};
+//use serde::{Deserialize, Serialize};
 use std::net::Ipv4Addr;
 use port_scanner::request_open_port;
 use std::thread;
-extern crate ipconfig;
 extern crate get_if_addrs;
 extern crate local_ipaddress;
 #[path = "subscriber.rs"] mod subscriber;
@@ -26,15 +26,7 @@ pub struct Master
    pub threading: bool,
 }
 
-/* universal message format */
-#[derive(Serialize, Deserialize)]
-pub struct Message
-{
-   pub messageType: char,
-   pub ip: String,
-   pub port: u16,
-   pub message: String,
-}
+
 
 #[pymethods]
 impl Master
@@ -46,6 +38,30 @@ impl Master
       let m2 = messaging::send(self.ipAddress.to_string(), self.port, m);
       return m2.message;
 
+   }
+
+   pub fn setPortRanges(&self, lower: u16, upper: u16)
+   {
+      let m = messaging::Message { messageType: 'P', ip: self.ipAddress.to_string(), port: self.port,  message: [lower.to_string(), upper.to_string()].join(":") };
+      messaging::send(self.ipAddress.to_string(), self.port, m);
+   }
+   
+   pub fn createChannel(&self, port_: u16, name_: String, style_: String, messageLimit_: u32)
+   {
+      let config = channel::ChannelConfiguration::new(self.ipAddress.to_string(), port_, name_.to_string(), style_.to_string(), messageLimit_);
+      let res = serde_json::to_string(&config);
+      let serial_message: String = res.unwrap();
+
+      let m = messaging::Message { messageType: 'N', ip: self.ipAddress.to_string(), port: self.port,  message: serial_message.to_string() };
+      messaging::send(self.ipAddress.to_string(), self.port, m);
+
+   }
+
+   pub fn getChannelTypes(&self)
+   {
+      let m = messaging::Message { messageType: 'O', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string()};
+      messaging::send(self.ipAddress.to_string(), self.port, m);
+      //println!("{:?}", recieve.message);
    }
 
    pub fn removeChannel(&self, name: String)
@@ -90,13 +106,13 @@ impl Master
       //let p = self.port;
       if self.threading{
       thread::spawn( move || {
-         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
+         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p, nextPort: 0, portRange: (0,0), isCustomRange: false };
          mp.start();
       });
       }
       else
       {
-         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p  };
+         let mp = master_process::MasterProcess { channels: HashMap::new(), ipAddress: s, port: p, nextPort: 0, portRange: (0,0), isCustomRange: false };
          mp.start();
 
       }
@@ -105,25 +121,8 @@ impl Master
    }
    pub fn terminate(&self)
    {
-      let context = zmq::Context::new();
-      let responder = context.socket(zmq::REQ).unwrap();
-
-      let protocol = "tcp://".to_string();
-      let str1 = String::from(&self.ipAddress);
-      let str2 = String::from(":");
-      let str_with_port = self.port.to_string();
-      let address = [protocol, str1, str2, str_with_port].concat();
-
-      assert!(responder.connect(&address).is_ok());
-      let m = Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-
-      let res = serde_json::to_string(&m);
-      let serial_message: String = res.unwrap();
-      let mut msg = zmq::Message::new();
-
-      responder.send(&serial_message, 0).unwrap();
-      responder.recv(&mut msg, 0).unwrap();
-
+      let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string()};
+      messaging::send(self.ipAddress.to_string(), self.port, m);
    }
 
 

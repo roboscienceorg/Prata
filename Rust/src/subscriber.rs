@@ -35,6 +35,10 @@ pub struct Subscriber
     pub masterport: u16,
     pub ip: String,
     pub port:   u16,
+
+
+
+
 }
 #[pymethods]
 impl Subscriber {
@@ -47,6 +51,7 @@ impl Subscriber {
     pub fn add(&mut self, Name: String, IP: String, Port: u16)
     {
         self.channelInfo.insert(Name, (IP, Port));   //pass in the info about the channel to be stored in the pub
+        
     }
     //function for connecting to a channel
     pub fn connect(&mut self, Name: String)
@@ -104,9 +109,15 @@ impl Subscriber {
             self.connect(ChannelName.to_string());
         }
 
-        let chanInfo = self.channelInfo.get(&ChannelName).unwrap();
+        let chanInfo = self.channelInfo.get_mut(&ChannelName).unwrap();
         let m = messaging::Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
         let m2 = messaging::send(chanInfo.0.to_string(), chanInfo.1, m);
+
+        //ALL FIFO CHANCE
+        /*
+        let txtpos = messaging::JsonToTextPosition(m2.message);
+        chanInfo.2 = txtpos.position;
+        */
         return m2.message;
     }
 
@@ -118,7 +129,7 @@ impl Subscriber
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
     {
         
-        return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
+        return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port};
     }
 
 

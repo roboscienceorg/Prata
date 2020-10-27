@@ -1,9 +1,10 @@
 
+#[path = "messaging.rs"] mod messaging;
 #[allow(dead_code)]
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
-
+use std::collections::VecDeque;
 //use splay::SplayMap;
 use splay::SplaySet;
 //use std::thread;
@@ -147,6 +148,7 @@ pub struct Channel
 {
 
      pub mode: ChannelMode,
+     pub styles: String,
      pub name: String,
      pub ip: String,
      pub port: u16,
@@ -154,6 +156,7 @@ pub struct Channel
      pub protocol: String,
      //maps an ip to its port range
      pub addressBook : HashMap<String,Ports>,  //STRING
+     pub limit: u32,
 
 }
 impl Default for Channel
@@ -164,18 +167,52 @@ impl Default for Channel
         {
 
                mode: ChannelMode::STANDARD,
+               styles: String::from("fifo"),
                name: String::from("NoName"),
                ip: String::from("ImplementChannelIP"),
                port: 55555,
+               limit: 500,
                info: self::data::Information::new(),
                protocol: String::from("tcp"),
-               addressBook: HashMap::new()
+               addressBook: HashMap::new(),
+               
         }
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ChannelConfiguration
+{
+   pub ip: String,
+   pub port: u16,
+   pub name: String,
+   pub stylet: String,
+   pub messageLimit: u32,
+}
+impl Default for ChannelConfiguration
+{
+    fn default() -> ChannelConfiguration
+    {
+         ChannelConfiguration
+        {
 
+               ip: String::from("0.0.0.0"),
+               port: 0,
+               name: String::from("DEFAULT"),
+               stylet: String::from("fifo"),
+               messageLimit: 500,
+        }
+    }
+}
+impl ChannelConfiguration
+{
+     #[allow(dead_code)]
+     pub fn new(ip_: String, port_: u16, name_: String, style_: String, limit_: u32) -> ChannelConfiguration
+     {
+          return ChannelConfiguration{ip: ip_, port: port_, name: name_, stylet: style_, messageLimit: limit_};
+     }
 
+}
 /**
  * String override to:
  * "
@@ -197,9 +234,39 @@ impl Channel
       *
       */
       #[allow(dead_code)]
-     pub fn new(ip_: String, port_: u16) -> Channel
+     pub fn new(config: ChannelConfiguration) -> Channel
      {
-          return Channel { port: port_, ip: ip_, ..Default::default() };
+
+          let data_obj;
+          //println!("config style = {}", config.stylet.to_string());
+          if config.stylet == "BROADCAST"
+          {
+               
+               data_obj = self::data::Information { info: VecDeque::new(), limit: 1, _deleteOnPull: false};
+          }
+          else
+          {
+               
+               data_obj = self::data::Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
+          }
+
+          return Channel { port: config.port, ip: config.ip, styles: config.stylet.to_string(), limit: config.messageLimit, name: config.name, info: data_obj, mode: ChannelMode::STANDARD, protocol: String::from("tcp"), addressBook: HashMap::new() };
+
+               
+     }
+     #[allow(dead_code)]
+     pub fn getSupportedTypes() -> Vec<String>
+     {
+          let mut vec = Vec::new();
+          vec.push("FIFO".to_string());
+          vec.push("BROADCAST".to_string());
+
+          return vec;
+     }
+     #[allow(dead_code)]
+     pub fn getDefaultType() -> String
+     {
+          return "FIFO".to_string();
      }
     /**
      * adds ip address to addressbook with default port range 0-max
@@ -373,6 +440,8 @@ impl Channel
       *
       */
       #[allow(dead_code)]
+
+
      pub fn main(&mut self)
      {
           //set up the socket so we can connect to publishers and subscribers
@@ -436,8 +505,22 @@ impl Channel
                else if  inbound.messageType == 'R'
                {
                     //send data
-                    let temp = self.info.get();
-                    let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: temp };
+                    let mut temp = "".to_string();
+
+                    if self.styles == "allFIFO"
+                    {
+                         /*
+                         let retval = self.info.getBroadcast(inbound.message.parse::<u32>().unwrap());
+                         let x = messaging::PositionText{ position: retval.0, text: retval.1 };
+                         let res = serde_json::to_string(&m);
+                         temp = res.unwrap();
+                         */
+                    }
+                    else
+                    {
+                         temp = self.info.get();
+                    }
+                    let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: temp.to_string() };
 
                     let res = serde_json::to_string(&m);
                     let serial_message: String = res.unwrap();
@@ -492,6 +575,8 @@ mod data
      pub struct Information
      {
           pub info: self::VecDeque<String>,
+          pub limit: u32,
+          pub _deleteOnPull: bool,
      }
      impl Information
      {
@@ -503,9 +588,23 @@ mod data
           * return none
           */
           #[allow(dead_code)]
+          pub fn setPull(&mut self, value: bool)
+          {
+               self._deleteOnPull = value;
+          }
+          #[allow(dead_code)]
           pub fn add(&mut self, bytes: String)
           {
+               if (self.info.len() as u32) == self.limit
+               {
+                    self.info.pop_front();
+               }
                self.info.push_back(bytes);
+          }
+          #[allow(dead_code)]
+          pub fn setLimit(&mut self, lim: u32)
+          {
+               self.limit = lim;
           }
           /**
           * get a string to the fifo structure
@@ -517,6 +616,7 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
+               
                //let mut retval = String::from("");
                /*
                for i in &self.info
@@ -532,7 +632,13 @@ mod data
 
               let x = self.info.pop_front();
               if x.is_some(){
-                  return x.unwrap()
+                   let val = x.unwrap();
+                   if self._deleteOnPull == false
+                   {
+
+                         self.info.push_front(val.to_string());
+                   }
+                   return val;
               }else
               {
                   return "".to_string();
@@ -549,7 +655,8 @@ mod data
           #[allow(dead_code)]
           pub fn new() -> Information
           {
-               return Information { info: VecDeque::new()};
+
+               return Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
           }
      }
 

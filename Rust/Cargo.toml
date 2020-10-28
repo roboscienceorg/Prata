@@ -16,9 +16,7 @@ splay = "0.1"
 get_if_addrs = "0.5.3"
 local_ipaddress = "0.1.3"
 
-[lib]
-name = "TALA"
-crate-type = ["cdylib"]
+
 
 [features]
 # We must make this feature optional to build binaries such as the profiling crate

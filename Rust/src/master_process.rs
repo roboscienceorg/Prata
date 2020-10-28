@@ -116,10 +116,11 @@ impl MasterProcess
             let serial_message: String = res.unwrap();
             repSocket.send(&serial_message, 0).unwrap();
 
+            let origination_port = request_open_port().unwrap_or(0);
             for (_, value) in self.channels.iter()
             {
                //value.info.0;
-               let origination_port = request_open_port().unwrap_or(0);
+               
                let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: origination_port,  message: "".to_string() };
                messaging::send(value.info.0.to_string(), value.info.1, m);
             }
@@ -178,7 +179,7 @@ impl MasterProcess
             else
             {
                //get port .
-               channel_port = request_open_port().unwrap_or(0);
+               channel_port = self.getPort();
                //make channel and insert it into hash map
                let config = channel::ChannelConfiguration::new(self.ipAddress.to_string(), channel_port, msg.message.to_string(), channel::Channel::getDefaultType() , 500);
                let mut chan_info = MasterProcess::newChannel(config);
@@ -305,6 +306,11 @@ impl MasterProcess
    fn getPort(&mut self) -> u16
    {
       let port;
+      if self.isCustomRange == false
+      {
+         return request_open_port().unwrap_or(0);
+      }
+
       if self.nextPort <= self.portRange.1
       {
          port = self.nextPort;

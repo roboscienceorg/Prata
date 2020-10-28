@@ -2,10 +2,10 @@ import tkinter as tk
 from .graph import *
 from .resizingcanvas import *
 from os.path import split
+import socket
+
 loc = split(__file__)[0]
 
-ansuzPNG = loc + "\\ansuz.png"
-ansuzICO = loc + "\\ansuz.ico"
 
 
 LARGE_FONT= ("Verdana", 100)
@@ -16,7 +16,6 @@ class ManageFrames(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Tala")
-        tk.Tk.iconbitmap(self, default = ansuzICO)
         self.geometry("1300x800")
         frame_container = tk.Frame(self)
         self.frames = {}
@@ -59,13 +58,14 @@ class Window(tk.Frame):
     def createDisplay(self):
 
 
+
         create_label = tk.Label(self.canvas, text = "TALA", bg = "#1ecbe1",font = LARGE_FONT)
         create_label.place(relx = .5, rely = .2, relwidth = .5, relheight = .2 ,anchor = 'center')
 
         create_label = tk.Label(self.canvas, text = "Create new Host", bg = "white")
         create_label.place(relx = .5, rely = .45, relwidth = .1, relheight = .05 ,anchor = 'n')
 
-        create_bot = tk.Button(self.canvas, text = "Create")
+        create_bot = tk.Button(self.canvas, text = "Create", command=lambda: [self.createMaster()])
         create_bot.place(relx = .5, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
 
         ip_label = tk.Label(self.canvas, text = "IP of Host", bg = "white")
@@ -80,26 +80,45 @@ class Window(tk.Frame):
         port_entry = tk.Entry(self.canvas, bg = 'white', textvariable = self.port)
         port_entry.place(relx = .5, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
 
-        connect_bot = tk.Button(self.canvas, text = "Connect", command=lambda: [self.setMaster()])
+
+        connect_bot = tk.Button(self.canvas, text = "Connect", command=lambda: [self.getMaster()])
         connect_bot.place(relx = .5, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
 
+    def createMaster(self):
+        self.master_ip = socket.gethostbyname(socket.gethostname())
+        self.master_port = 25565
+        m = connect(str(self.master_ip), self.master_port )
+        m.host()
 
-    def setMaster(self):
+        self.setMaster()
+
+
+    def getMaster(self):
         self.master_ip = self.ip.get()
         self.master_port = self.port.get()
-
-        self.master_ip = "127.0.0.1"
-        self.master_port = 25565
+        self.setMaster()
 
 
-        frame = Graph(self.parent, self, self.master_ip, self.master_port)
+    # setMaster(self)
+    # Gets the master ip and port from the entry fields. It then trys to create a graph object i
+    def setMaster(self):
+
+
+
+        frame = Graph(self.parent, self,  self.master_ip, self.master_port)
+
+        try:
+            frame.connection.connectMaster( self.master_ip, self.master_port)
+
+        except:
+            tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
+            self.createDisplay()
+        frame.startGraph()
+
+
         self.controller.frames[Graph] = frame
         frame.grid(row=0, column=0, sticky="nsew")
         self.controller.topFrame(Graph)
-        # except:
-        #     print("Error")
-        #     tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
-        #     self.createDisplay()
 
 def gui():
     app = ManageFrames()

@@ -8,10 +8,7 @@ from .buttons import *
 from .resizingcanvas import *
 
 
-HEIGHT = 700
-WIDTH = 800
-MASTERIP = ""
-MASTERPORT = 0
+
 
 
 
@@ -21,8 +18,12 @@ class ConnectionData():
         self.jsondata = {}
         self.master_ip = ""
         self.master_port = 0
+        self.master = {}
 
+    # parseJson(self)
+    # Takes the json from master and converts it into a form for use in the GUI
     def parseJson(self):
+
         cords = [0,0]
         publishers = []
         subscribers = []
@@ -34,12 +35,17 @@ class ConnectionData():
             subscribers = self.jsondata["channels"][key]["subscribers"]
             self.channels[key] = [info, publishers,subscribers,cords]
 
-    def connectMaster(self):
-        self.master = connect(self.master_ip, self.master_port)
+    # connectMaster(self)
+    # Using the ip and port from the connection screen tries to connect to a given master        
+    def connectMaster(self,ip,port):
+        self.master = connect(ip,int(port))
 
+    # retrieveData(self)
+    # This function calls the serialize function to get the current networks information.
+    # It then loads this as json to be converted into a dictionary
     def retrieveData(self):
-        self.jsondata = json.loads(self.master.serialize())
 
+        self.jsondata = json.loads(self.master.serialize())
 
 class Graph(tk.Frame):
 
@@ -49,15 +55,11 @@ class Graph(tk.Frame):
         self.connection = ConnectionData()
         self.connection.master_ip = ip
         self.connection.master_port = int(port)
-        self.connection.connectMaster()
         self.parent = parent
         self.controller = controller
         self.publishers = {}
         self.subscribers = {}
         self.channels = {}
-        self.startGraph()
-
-
 
     #   createGraph(self,channels,canvas)
     #       Takes in a dictionary of channels and a canvas.It then
@@ -80,26 +82,31 @@ class Graph(tk.Frame):
             for subs in self.channels[channel][2]:
                 self.drawArrow(self.channels[channel][3],self.subscribers[subs[1]][1])
 
-
     #   drawArror(self,canvas,start,end)
     #   Takes in a canvas and the start and end points of the arror.
     #   Then draws an arrow from the starting point to the ending point.
     def drawArrow(self,start,end):
         self.canvas.create_line(start[0] + 10, start[1]+7, end[0] - 10, end[1]+7, arrow=tk.LAST)
 
-
+    # displayMasterInfo(self)
+    # Displays the master connection ip and port number to the top of the GUI
     def displayMasterInfo(self):
         FONT= ("Verdana", 20)
 
         master_ip = "Master IP: " + str(self.connection.master_ip)
         master_port = "Master Port: " + str(self.connection.master_port)
 
-        IP_label = tk.Label(self, text = master_ip, bg = "#7a7f85", font = FONT)
-        IP_label.place(relx = .5, rely = .05, relwidth = .25, relheight = .1 ,anchor = 'e')
+        master_info = master_ip + "  " + master_port
 
-        Port_label = tk.Label(self, text = master_port, bg = "#7a7f85", font = FONT)
-        Port_label.place(relx = .5, rely = .05, relwidth = .25, relheight = .1 ,anchor = 'w')
+        IP_label = tk.Label(self, text = master_info, bg = "#7a7f85", font = FONT)
+        IP_label.place(relx = .5, rely = .05, relwidth = .7, relheight = .1 ,anchor = 'center')
 
+
+
+    # parseChannels(self)
+    # Parses the dictionary of channels into arrays of unique publishers
+    # and subscribers. It also calulates and adds the coordinates 
+    # of where the channel nodes should go on the graph.
     def parseChannels(self):
         channel_count = 0
         x_channel = int(self.canvas.width / 2)
@@ -118,7 +125,11 @@ class Graph(tk.Frame):
             self.channels[channel][3] = [x_channel, y_channel * channel_count + 50]
             channel_count += 1
 
-
+    # plotChannel(self)
+    # Walks through the dictionary of channels, calculates there relative x and y
+    # position on the graph. It then plots the channel as a square button onto the graph.
+    # By clicking this button the user can display all information about that channel.
+    # It also plots the channels name, ip, and port around the node.
     def plotChannel(self):
 
         channel_count = 0
@@ -132,7 +143,6 @@ class Graph(tk.Frame):
 
             ip = "ip: " + str(self.channels[name][0][0])
             port = "port: " + str(self.channels[name][0][1])
-            print(name)
             channel_bot = tk.Button(self.canvas, bg="#1ecbe1", command=lambda i = name: self.buttons.displayChannel(i))
             channel_bot.place(relx = rel_coords[0],rely = rel_coords[1], width = 30, height = 30,anchor = 'n')
 
@@ -141,7 +151,11 @@ class Graph(tk.Frame):
             self.canvas.create_text(coords[0] , coords[1] + 35,  text=str(port), anchor='n')
             channel_count += 1
 
-
+    # plotPublishers(self)
+    # Calculates the actual and relative x and y values for each publisher.
+    # It then plots each publisher to a circular button. By clicking this button
+    # the user can display all information about the publisher.
+    # It then plots the publishers ip and port around the button
     def plotPublishers(self): 
 
         x_pub = int(1.5 * self.canvas.width / 6)
@@ -161,9 +175,6 @@ class Graph(tk.Frame):
             rel_coords[1] = (.9 / len(self.publishers)) * object_count + 50/self.canvas.height
 
             ip = self.publishers[port][0]
-
-            # self.canvas.create_oval(coords[0]-10, coords[1],coords[0]+10, coords[1]+20,\
-            #  fill="#d926b6")
   
             self.roundedbutton = tk.Button(self.canvas, image=self.loadimage, bg = "#7a7f85",borderwidth = 0,\
                 command=lambda i = port: self.buttons.displayPublishers(i))
@@ -173,7 +184,11 @@ class Graph(tk.Frame):
             self.canvas.create_text(coords[0] - 15, coords[1] + 10, text=str("ip: " + ip), anchor='e')
             object_count += 1
 
-
+    # plotSubscriber(self)
+    # Calculates the actual and relative x and y values for each subscriber.
+    # It then plots each subscriber to a circular button. By clicking this button
+    # the user can display all information about the subscriber.
+    # It then plots the subscriber ip and port around the button
     def plotSubscriber(self):
 
         x_sub = int(4.5 * self.canvas.width / 6)
@@ -181,7 +196,7 @@ class Graph(tk.Frame):
         object_count = 0
 
         if len(self.subscribers) != 0:
-            y_sub = int(HEIGHT / (len(self.subscribers)*2))
+            y_sub = int((self.canvas.height*.9) / (len(self.subscribers)))
         for port in self.subscribers:
             self.subscribers[port][1] = [x_sub,y_sub*object_count+50]
             coords = self.subscribers[port][1]
@@ -199,15 +214,15 @@ class Graph(tk.Frame):
             self.canvas.create_text(coords[0] + 15, coords[1] + 10, text=str("ip: " + ip), anchor='w')
             object_count += 1
 
-
-    def channelshow(self,port):
-        print(self.subscribers[port])
-
+    # refresh(self)
+    # Deletes the current canvas and then creates a new one. 
     def refresh(self):
         self.canvas.delete(all)
-        self.controller.createDisplay()
-
-
+        self.controller.setMaster()
+ 
+    # startGraph(self)
+    # Is a managing funtion. It creates a new canvas and then calls other functions to retrieve and
+    # fill in the canvas with the correct data.
     def startGraph(self):
 
         self.canvas = ResizingCanvas(self,width=850, height=400, bg="#7a7f85", highlightthickness=0)

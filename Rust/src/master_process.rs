@@ -266,6 +266,7 @@ impl MasterProcess
             let second = (lines.next().unwrap()).parse::<u16>().unwrap();
             self.nextPort = first;
             self.portRange = ( first, second );
+            self.isCustomRange = true;
 
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);

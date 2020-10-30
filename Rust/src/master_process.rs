@@ -33,7 +33,14 @@ type AddressPort = (String, u16);
      pub subTimestamps: HashMap<String, u128>,
  }
 
-/* struct to hold channel information */
+/**
+ * Struct to hold information about a specific channel.
+ * name (String) - name of the channel
+ * info (AddressPort) - a tuple that holds the address and port the channel is available at
+ * publishers (Vec<AddressPort>) - List of address port combinations for every publisher for this channel
+ * subscribers (Vec<AddressPort>) - List of address port combinations for every subscriber for this channel
+ * channelStatistics (ChannelStatistics) - Struct that holds statistics about the channel
+ */
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct ChannelInfo
@@ -55,6 +62,17 @@ pub struct Message
    pub message: String,
 }
 
+
+/**
+ * Struct defining the master process object.
+ * channels (HashMap<String, ChannelInfo>) - collection of information on every channel
+ * ipAddress (String) - IP address this process is available at
+ * port (u16) - port this process is available at
+ * portRange ( (u16, u16) ) - reserved range of ports for channels? not sure, please correct
+ * nextPort (u16) - idk
+ * isCustomRange (bool) - idk
+ * 
+ */
 #[derive(Serialize, Deserialize)]
 pub struct MasterProcess
 {
@@ -67,6 +85,9 @@ pub struct MasterProcess
    pub isCustomRange: bool,
 }
 
+/**
+ * Defines the functions for the master process object.
+ */
 impl MasterProcess
 {
    /* Start the master process. This will be the main loop */
@@ -281,7 +302,6 @@ impl MasterProcess
             {
 
                let name_of_channel = config.name.to_string();
-               //deserialize into message struct
 
                if channel::Channel::getSupportedTypes().contains(&config.stylet.to_string()) == false
                {
@@ -289,7 +309,6 @@ impl MasterProcess
                   config.stylet = channel::Channel::getDefaultType();
                }
                
-               //println!{"CONFIGURATION = {:?}", &config.stylet.to_string()};
                let chan_info = MasterProcess::newChannel(config);
                self.channels.insert(name_of_channel, chan_info);
             }
@@ -323,6 +342,10 @@ impl MasterProcess
    }
 
    /********************** PRIVATE ******************/
+
+   /*
+   *  Terminates a channel
+   */
    fn terminateChannel( &mut self, name: String)
    {
       if  self.channels.contains_key(&name)
@@ -335,7 +358,9 @@ impl MasterProcess
       }
    }
 
-   /* serializes and sends a reply to the requesting socket */
+   /* 
+   * serializes and sends a reply to the requesting socket 
+   */
    fn reply (&mut self, m: Message, repSocket: &zmq::Socket)
    {
       let res = serde_json::to_string(&m);
@@ -366,7 +391,9 @@ impl MasterProcess
 
       return port;
    }
-   /* Creates a new channel process */
+   /* 
+   * Creates a new channel process. Takes in a channelconfiguration object to determine channel behavior.
+   */
    fn newChannel(config: channel::ChannelConfiguration) -> ChannelInfo
    {
       //pass assigned port into new channel

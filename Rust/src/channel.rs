@@ -115,6 +115,7 @@ pub struct Message
  * Just a struct that holds the statistics about a particular channel.
  * numReceived (u32) - number of messages the channel has received from a publisher
  * numSent (u32) - number of messages the channel has sent to subscribers
+ * numStored (u32) - number of messages the channel has stored currently
  * pubTimestamps (HashMap<String, u128>) - saves the timestamp of the last message received from a publisher.
  *                                         The key is a string concatenated from the ip address and port.
  * subTimestamps (HashMap<String, u128>) - saves the timestamp of the last request received from a subscriber.
@@ -125,6 +126,7 @@ pub struct ChannelStatistics
 {
     pub numReceived: u32,
     pub numSent: u32,
+    pub numStored: u32,
     pub pubTimestamps: HashMap<String, u128>,
     pub subTimestamps: HashMap<String, u128>,
 }
@@ -182,7 +184,7 @@ impl Default for Channel
                info: self::data::Information::new(),
                protocol: String::from("tcp"),
                addressBook: HashMap::new(),
-               channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
+               channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, numStored: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
         }
     }
 }
@@ -264,7 +266,7 @@ impl Channel
                mode: ChannelMode::STANDARD,
                protocol: String::from("tcp"), 
                addressBook: HashMap::new(),
-               channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
+               channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, numStored: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
           };
    
      }
@@ -518,6 +520,7 @@ impl Channel
 
                     //record an incoming message
                     self.channelStatistics.numReceived += 1;
+                    self.channelStatistics.numStored = self.info.info.len() as u32;
 
                     //save timestamp of last message sent for that publisher
                     let start = SystemTime::now();

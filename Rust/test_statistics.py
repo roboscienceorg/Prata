@@ -19,9 +19,9 @@ print("receiving 2 messages from channel 1")
 uno = sub.listen("1")
 dos = sub.listen("1")
 
-print("sending 500 messages to channel 2")
+print("sending 501 messages to channel 2")
 i = 0
-while i < 500:
+while i < 501:
     pub.publish("2",str(i))
     i+=1
 
@@ -30,9 +30,8 @@ i = 0
 while i < 300:
     sub.listen("2")
     i+=1
-
+    
 jsondata = json.loads(m.serialize())
-
 print(jsondata["channels"]["1"]["channelStatistics"])
 print(jsondata["channels"]["2"]["channelStatistics"])
 

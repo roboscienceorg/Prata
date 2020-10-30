@@ -16,6 +16,7 @@ type AddressPort = (String, u16);
  * Just a struct that holds the statistics about a particular channel.
  * numReceived (u32) - number of messages the channel has received from a publisher
  * numSent (u32) - number of messages the channel has sent to subscribers
+ * numStored (u32) - number of messages the channel has stored currently
  * pubTimestamps (HashMap<String, u128>) - saves the timestamp of the last message received from a publisher.
  *                                         The key is a string concatenated from the ip address and port.
  * subTimestamps (HashMap<String, u128>) - saves the timestamp of the last request received from a subscriber.
@@ -27,6 +28,7 @@ type AddressPort = (String, u16);
  {
      pub numReceived: u32,
      pub numSent: u32,
+     pub numStored: u32,
      pub pubTimestamps: HashMap<String, u128>,
      pub subTimestamps: HashMap<String, u128>,
  }
@@ -204,13 +206,13 @@ impl MasterProcess
             //loop through all channels, and ping for status request
             let mut keys = Vec::new();
             let mut vecStats: Vec<ChannelStatistics> = Vec::new();
-            let context = zmq::Context::new();
-            let responder = context.socket(zmq::REQ).unwrap();
             for (key, val) in self.channels.iter_mut() {
                let address = &val.info.0;
                let port = &val.info.1;
                
                //bind socket to new address
+               let context = zmq::Context::new();
+               let responder = context.socket(zmq::REQ).unwrap();
                let protocol = "tcp://".to_string();
                let str1 = String::from(address);
                let str2 = String::from(":");
@@ -394,7 +396,7 @@ impl MasterProcess
          info: contactInfo, 
          publishers: Vec::new(), 
          subscribers: Vec::new(), 
-         channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
+         channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, numStored: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
       };
       return newChann;
    }

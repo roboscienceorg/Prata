@@ -204,14 +204,13 @@ impl MasterProcess
             //loop through all channels, and ping for status request
             let mut keys = Vec::new();
             let mut vecStats: Vec<ChannelStatistics> = Vec::new();
+            let context = zmq::Context::new();
+            let responder = context.socket(zmq::REQ).unwrap();
             for (key, val) in self.channels.iter_mut() {
                let address = &val.info.0;
                let port = &val.info.1;
-
-               /* this creates a new socket every time... could we do this with only one socket? */
-               //create and bind socket
-               let context = zmq::Context::new();
-               let responder = context.socket(zmq::REQ).unwrap();
+               
+               //bind socket to new address
                let protocol = "tcp://".to_string();
                let str1 = String::from(address);
                let str2 = String::from(":");

@@ -2,23 +2,45 @@
 mod channel;
 
 use std::collections::HashMap;
-//use zmq::Socket;
 use std::clone::Clone;
 use port_scanner::request_open_port;
-//use port_scanner::local_port_available;
 use std::thread;
-use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use std::panic;
 #[path = "messaging.rs"] mod messaging;
 
-//use serde_json::Result;
-//use serde_json::Value as JsonValue;
-
 /* tuple to hold the address as a string, port as a number */
 type AddressPort = (String, u16);
 
-/* struct to hold channel information */
+/**
+ * Just a struct that holds the statistics about a particular channel.
+ * numReceived (u32) - number of messages the channel has received from a publisher
+ * numSent (u32) - number of messages the channel has sent to subscribers
+ * numStored (u32) - number of messages the channel has stored currently
+ * pubTimestamps (HashMap<String, u128>) - saves the timestamp of the last message received from a publisher.
+ *                                         The key is a string concatenated from the ip address and port.
+ * subTimestamps (HashMap<String, u128>) - saves the timestamp of the last request received from a subscriber.
+ *                                         The key is a string concatenated from the ip address and port.
+ */
+ #[derive(Clone)]
+ #[derive(Serialize, Deserialize)]
+ pub struct ChannelStatistics
+ {
+     pub numReceived: u32,
+     pub numSent: u32,
+     pub numStored: u32,
+     pub pubTimestamps: HashMap<String, u128>,
+     pub subTimestamps: HashMap<String, u128>,
+ }
+
+/**
+ * Struct to hold information about a specific channel.
+ * name (String) - name of the channel
+ * info (AddressPort) - a tuple that holds the address and port the channel is available at
+ * publishers (Vec<AddressPort>) - List of address port combinations for every publisher for this channel
+ * subscribers (Vec<AddressPort>) - List of address port combinations for every subscriber for this channel
+ * channelStatistics (ChannelStatistics) - Struct that holds statistics about the channel
+ */
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct ChannelInfo
@@ -27,6 +49,7 @@ pub struct ChannelInfo
    info: AddressPort,
    publishers: Vec<AddressPort>,
    subscribers: Vec<AddressPort>,
+   channelStatistics: ChannelStatistics,
 }
 
 /* universal message format */
@@ -39,6 +62,17 @@ pub struct Message
    pub message: String,
 }
 
+
+/**
+ * Struct defining the master process object.
+ * channels (HashMap<String, ChannelInfo>) - collection of information on every channel
+ * ipAddress (String) - IP address this process is available at
+ * port (u16) - port this process is available at
+ * portRange ( (u16, u16) ) - reserved range of ports for channels? not sure, please correct
+ * nextPort (u16) - idk
+ * isCustomRange (bool) - idk
+ * 
+ */
 #[derive(Serialize, Deserialize)]
 pub struct MasterProcess
 {
@@ -46,12 +80,14 @@ pub struct MasterProcess
    pub channels: HashMap<String, ChannelInfo>,
    pub ipAddress: String,
    pub port: u16,
-
    pub portRange: (u16, u16),
    pub nextPort: u16,
    pub isCustomRange: bool,
 }
 
+/**
+ * Defines the functions for the master process object.
+ */
 impl MasterProcess
 {
    /* Start the master process. This will be the main loop */
@@ -64,20 +100,15 @@ impl MasterProcess
       full_address.push_str(&self.port.to_string());
       let context = zmq::Context::new();
       let repSocket = context.socket(zmq::REP).unwrap();
-      //let port = request_open_port().unwrap_or(0);
           panic::set_hook(Box::new(|_info| {
         // do nothing
     }));
       let fail_status = panic::catch_unwind(|| {repSocket.bind( &(full_address) ).expect("fail");});
       match fail_status
       {
-         Ok(_fail_status) => {},//println!("Construct host: Master({}, {})", self.ipAddress.to_string(), self.port),
+         Ok(_fail_status) => {},
          Err(_) => {println!("---Invalid IP and Port combination, cannot host"); return;},
       }
-      //println!("{:?}", repSocket.expect());
-         //.connect("tcp://0.0.0.0:7000")
-         //.expect("failed binding socket XXX");
-      thread::sleep(Duration::from_millis(1));
 
       //get the port that we are bound to
       let _lastEndpoint = match repSocket.get_last_endpoint()
@@ -106,24 +137,19 @@ impl MasterProcess
          //deserialize into message struct
          let msg: Message = msg_string.unwrap();
 
-      //   println!("mp: {}", msg.messageType);
-         //let reqType = msg.messageType;
          if  msg.messageType == 'T'
          {
             //terminate host
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-            let res = serde_json::to_string(&m);
-            let serial_message: String = res.unwrap();
-            repSocket.send(&serial_message, 0).unwrap();
+            self.reply(m,&repSocket);
 
             let origination_port = request_open_port().unwrap_or(0);
             for (_, value) in self.channels.iter()
             {
-               //value.info.0;
-               
                let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: origination_port,  message: "".to_string() };
                messaging::send(value.info.0.to_string(), value.info.1, m);
             }
+
             //terminate by returning this thread
             return;
          }
@@ -132,9 +158,7 @@ impl MasterProcess
             //publisher disconnect
             //d is for publisher D is for subscriber
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-            let res = serde_json::to_string(&m);
-            let serial_message: String = res.unwrap();
-            repSocket.send(&serial_message, 0).unwrap();
+            self.reply(m,&repSocket);
 
             //take off internal list
             //message is string of channel name
@@ -153,8 +177,6 @@ impl MasterProcess
                let index = chan_info.publishers.iter().position(|x| *x == addr_prt).unwrap();
                chan_info.publishers.remove(index);
             }
-
-
 
          }
          else if msg.messageType == 'C' || msg.messageType == 'c'
@@ -178,7 +200,7 @@ impl MasterProcess
             }
             else
             {
-               //get port .
+               //get port
                channel_port = self.getPort();
                //make channel and insert it into hash map
                let config = channel::ChannelConfiguration::new(self.ipAddress.to_string(), channel_port, msg.message.to_string(), channel::Channel::getDefaultType() , 500);
@@ -195,39 +217,77 @@ impl MasterProcess
 
             }
 
-
             //set correct addresses
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: channel_port,  message: "".to_string() };
-            let res = serde_json::to_string(&m);
-            let serial_message: String = res.unwrap();
-            repSocket.send(&serial_message, 0).unwrap();
+            self.reply(m,&repSocket);
          }
          else if msg.messageType == 'J'
          {
-            //handle returning a json in message
+            //returns the current state of the master process in a serialized json
+            //loop through all channels, and ping for status request
+            let mut keys = Vec::new();
+            let mut vecStats: Vec<ChannelStatistics> = Vec::new();
+            for (key, val) in self.channels.iter_mut() {
+               let address = &val.info.0;
+               let port = &val.info.1;
+               
+               //bind socket to new address
+               let context = zmq::Context::new();
+               let responder = context.socket(zmq::REQ).unwrap();
+               let protocol = "tcp://".to_string();
+               let str1 = String::from(address);
+               let str2 = String::from(":");
+               let str_with_port = port.to_string();
+               let address = [protocol, str1, str2, str_with_port].concat();
+               assert!(responder.connect(&address).is_ok());
+
+               //build message
+               let m = Message { messageType: 'S', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+               let res = serde_json::to_string(&m);
+               let serial_message: String = res.unwrap();
+               let mut msg = zmq::Message::new();
+
+               //send request and receive status report
+               responder.send(&serial_message, 0).expect("fail");
+               responder.recv(&mut msg, 0).unwrap();
+
+               //deserialize struct and get channel statistics struct
+               let data = msg.as_str().unwrap();
+               let res = serde_json::from_str(data);
+               let chanStats = res.unwrap();
+
+               keys.push(key);
+               vecStats.push(chanStats);  
+            }
+            
+            //update all of the channels statistics structs for each channel
+            let mut i = 0;
+            for channel in self.channels.values_mut()
+            {
+               channel.channelStatistics = vecStats[i].clone();
+               i+=1;
+            }
+            
+
+            //serialize master process and send back json
             let me = serde_json::to_string(&self);
             let meserl: String = me.unwrap();
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: meserl.to_string() };
-            let res = serde_json::to_string(&m);
-            let serial_message: String = res.unwrap();
-            repSocket.send(&serial_message, 0).unwrap();
+            self.reply(m,&repSocket);
          }
          else if msg.messageType == 'R'
          {
-            //Rmove a channel listed
-            //println!("mp: in R");
+            //Remove a channel listed
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             self.terminateChannel(msg.message);
             repSocket.send(&serial_message, 0).unwrap();
-            // println!("mp: sending ACK");
-            //
-            // println!("mp: sending ACK complete");
          }
          else if msg.messageType == 'N'
          {
-            //creates new channel of specified type if it exists do nothing
+            //creates new channel of specified type
+            //if it already exists, do nothing
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
@@ -242,7 +302,6 @@ impl MasterProcess
             {
 
                let name_of_channel = config.name.to_string();
-               //deserialize into message struct
 
                if channel::Channel::getSupportedTypes().contains(&config.stylet.to_string()) == false
                {
@@ -250,7 +309,6 @@ impl MasterProcess
                   config.stylet = channel::Channel::getDefaultType();
                }
                
-               //println!{"CONFIGURATION = {:?}", &config.stylet.to_string()};
                let chan_info = MasterProcess::newChannel(config);
                self.channels.insert(name_of_channel, chan_info);
             }
@@ -269,28 +327,25 @@ impl MasterProcess
             self.isCustomRange = true;
 
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-            let res = serde_json::to_string(&m);
-            let serial_message: String = res.unwrap();
-            repSocket.send(&serial_message, 0).unwrap();
+            self.reply(m,&repSocket);
          }
          else if msg.messageType == 'O'
          {
             //print supported channel types
             println!("{:?}", channel::Channel::getSupportedTypes());
             let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
-            let res = serde_json::to_string(&m);
-            let serial_message: String = res.unwrap();
-            repSocket.send(&serial_message, 0).unwrap();
+            self.reply(m,&repSocket);
          }
 
          /* if we want to exit, call break; */
       };
-
-
-
    }
 
    /********************** PRIVATE ******************/
+
+   /*
+   *  Terminates a channel
+   */
    fn terminateChannel( &mut self, name: String)
    {
       if  self.channels.contains_key(&name)
@@ -298,11 +353,21 @@ impl MasterProcess
          let chanInfo = self.channels.get(&name).unwrap();
          let p = self.port;
          let m = messaging::Message { messageType: 'T', ip: self.ipAddress.to_string(), port: p,  message: "".to_string() };
-         //println!("terminating channel {}: {}. {}", name, chanInfo.info.0.to_string(), chanInfo.info.1);
          messaging::send(chanInfo.info.0.to_string(), chanInfo.info.1, m);
          self.channels.remove(&name);
       }
    }
+
+   /* 
+   * serializes and sends a reply to the requesting socket 
+   */
+   fn reply (&mut self, m: Message, repSocket: &zmq::Socket)
+   {
+      let res = serde_json::to_string(&m);
+      let serial_message: String = res.unwrap();
+      repSocket.send(&serial_message, 0).unwrap();
+   }
+
    #[allow(dead_code)]
    fn getPort(&mut self) -> u16
    {
@@ -326,10 +391,11 @@ impl MasterProcess
 
       return port;
    }
-   /* Creates a new channel process */
+   /* 
+   * Creates a new channel process. Takes in a channelconfiguration object to determine channel behavior.
+   */
    fn newChannel(config: channel::ChannelConfiguration) -> ChannelInfo
    {
-      //println!("---launching newChannel");
       //pass assigned port into new channel
       let n = (config.name).to_string();
       let p = config.port;
@@ -352,49 +418,13 @@ impl MasterProcess
       });
 
       let contactInfo: AddressPort = ( ip.to_string(), p );
-      let newChann = ChannelInfo { name: n.to_string(), info: contactInfo, publishers: Vec::new(), subscribers: Vec::new(), };
+      let newChann = ChannelInfo { 
+         name: n.to_string(), 
+         info: contactInfo, 
+         publishers: Vec::new(), 
+         subscribers: Vec::new(), 
+         channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, numStored: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
+      };
       return newChann;
    }
-
-   /* takes in a message from a pub/sub and decodes it */
-    #[allow(dead_code)]
-   fn parseMessage(byte_msg: &Vec<u8>, ipString: &mut String, port: &mut u16, mode: &mut u8, channelName: &mut String)
-   {
-      //first 4 bytes are the sender ip address, so lets extract that
-      *ipString = [byte_msg[0].to_string(),
-                   byte_msg[1].to_string(),
-                   byte_msg[2].to_string(),
-                   byte_msg[3].to_string()]
-                   .join(".");
-
-      //next two bytes are the port
-      *port = ((byte_msg[4] as u16) << 8) | byte_msg[5] as u16;
-
-      //next byte is the mode
-      //0 for publisher, 1 for subscriber, 0 for node ping
-      *mode = byte_msg[6];
-
-      //next byte is reserved, do nothing
-
-      //the rest of the bytes are the channel name, so just go until the byte vector has ended
-      *channelName = String::from_utf8( byte_msg[7..].to_vec() ).unwrap();
-
-   }
-
-
 }
-
-/* example usage for parseMessage
-
-let v: Vec<u8> = vec![1, 2, 3, 4, 0, 4, 10, 0, 240, 159, 146, 150];
-let mut mode = 0;
-let mut channelName: String = "".to_string();
-let mut ipString: String = "".to_string();
-let mut port: u16 = 0;
-MasterProcess::parseMessage(&v, &mut ipString, &mut port, &mut mode, &mut channelName);
-println!("Mode: {}", mode);
-println!("IP: {}", ipString);
-println!("Port: {}", port);
-println!("Channel Name: {}", channelName);
-
-*/

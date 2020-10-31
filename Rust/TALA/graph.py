@@ -19,6 +19,8 @@ class ConnectionData():
         self.master_ip = ""
         self.master_port = 0
         self.master = {}
+        self.port_range = [0, 0]
+        self.custom_range = False
 
     # parseJson(self)
     # Takes the json from master and converts it into a form for use in the GUI
@@ -27,6 +29,9 @@ class ConnectionData():
         cords = [0,0]
         publishers = []
         subscribers = []
+        self.port_range = self.jsondata["portRange"]
+        self.custom_range = self.jsondata["isCustomRange"]
+
         for key in self.jsondata["channels"]:
             publishers = []
             subscribers = []
@@ -34,6 +39,7 @@ class ConnectionData():
             publishers = self.jsondata["channels"][key]["publishers"]
             subscribers = self.jsondata["channels"][key]["subscribers"]
             self.channels[key] = [info, publishers,subscribers,cords]
+
 
     # connectMaster(self)
     # Using the ip and port from the connection screen tries to connect to a given master        
@@ -44,7 +50,6 @@ class ConnectionData():
     # This function calls the serialize function to get the current networks information.
     # It then loads this as json to be converted into a dictionary
     def retrieveData(self):
-
         self.jsondata = json.loads(self.master.serialize())
 
 class Graph(tk.Frame):
@@ -204,7 +209,7 @@ class Graph(tk.Frame):
 
             rel_coords = [0,0]
             rel_coords[0] = .75
-            rel_coords[1] = (.9 / len(self.publishers)) * object_count + 50/self.canvas.height
+            rel_coords[1] = (.9 / len(self.subscribers)) * object_count + 50/self.canvas.height
 
             self.roundedbutton = tk.Button(self.canvas, image=self.loadimage, bg = "#7a7f85",borderwidth = 0,\
                 command=lambda i = port: self.buttons.displaySubscribers(i))

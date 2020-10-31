@@ -56,16 +56,19 @@ class Window(tk.Frame):
 
 
     def createDisplay(self):
-
+        new_port = tk.StringVar()
 
 
         create_label = tk.Label(self.canvas, text = "TALA", bg = "#1ecbe1",font = LARGE_FONT)
         create_label.place(relx = .5, rely = .2, relwidth = .5, relheight = .2 ,anchor = 'center')
 
-        create_label = tk.Label(self.canvas, text = "Create new Host", bg = "white")
-        create_label.place(relx = .5, rely = .45, relwidth = .1, relheight = .05 ,anchor = 'n')
+        port_label = tk.Label(self.canvas, text = "Port of Host", bg = "white")
+        port_label.place(relx = .5, rely = .45, relwidth = .1,  relheight = .05 ,anchor = 's')
 
-        create_bot = tk.Button(self.canvas, text = "Create", command=lambda: [self.createMaster()])
+        port_entry = tk.Entry(self.canvas, bg = 'white', textvariable = new_port)
+        port_entry.place(relx = .5, rely = .45, relwidth = .1, relheight = .05,anchor = 'n')
+
+        create_bot = tk.Button(self.canvas, text = "Create new Host", command=lambda: [self.createMaster(new_port)])
         create_bot.place(relx = .5, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
 
         ip_label = tk.Label(self.canvas, text = "IP of Host", bg = "white")
@@ -84,9 +87,9 @@ class Window(tk.Frame):
         connect_bot = tk.Button(self.canvas, text = "Connect", command=lambda: [self.getMaster()])
         connect_bot.place(relx = .5, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
 
-    def createMaster(self):
+    def createMaster(self,new_port):
         self.master_ip = socket.gethostbyname(socket.gethostname())
-        self.master_port = 25565
+        self.master_port = int(new_port.get())
         m = connect(str(self.master_ip), self.master_port )
         m.host()
 

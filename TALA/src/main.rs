@@ -9,7 +9,7 @@ use std::{thread, time};
 
 //use port_scanner::request_open_port;
 
-const IPADDRESS: &str = "192.168.0.122";
+const IPADDRESS: &str = "127.0.0.1";
 
 fn main() {
 

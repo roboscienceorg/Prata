@@ -1,14 +1,14 @@
 import tkinter as tk
-from PIL import Image, ImageTk
 from .graph import *
+from .resizingcanvas import *
 from os.path import split
+import socket
+
 loc = split(__file__)[0]
 
-ansuzPNG = loc + "\\ansuz.png"
-ansuzICO = loc + "\\ansuz.ico"
 
 
-LARGE_FONT= ("Verdana", 20)
+LARGE_FONT= ("Verdana", 100)
 
 
 class ManageFrames(tk.Tk):
@@ -16,7 +16,6 @@ class ManageFrames(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Tala")
-        tk.Tk.iconbitmap(self, default = ansuzICO)
         self.geometry("1300x800")
         frame_container = tk.Frame(self)
         self.frames = {}
@@ -47,7 +46,8 @@ class ManageFrames(tk.Tk):
 class Window(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-
+        self.canvas = ResizingCanvas(self,width=850, height=400, bg="#1ecbe1", highlightthickness=0)
+        self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
         self.ip = tk.StringVar()
         self.port = tk.StringVar()
         self.parent = parent
@@ -55,51 +55,73 @@ class Window(tk.Frame):
         self.createDisplay()
 
 
-    def createDisplay(self,):
-        img = ImageTk.PhotoImage(file=ansuzPNG)
-
-        canvas = tk.Canvas(self, width = img.width(), height = img.height())
-        canvas.place(relx = .5, rely = .45, relwidth = 1, relheight = 1,anchor = 'center')
-
-        self.parent.one = img
-        canvas.create_image(0,0, anchor='nw', image=img)
-        canvas.create_text(img.width()/2,100,fill="black",font=LARGE_FONT,text="TALA")
-
-        create_label = tk.Label(self, text = "Create new Host", bg = "white")
-        create_label.place(x = img.width()/2, rely = .45, relwidth = .1, relheight = .05 ,anchor = 'n')
-
-        create_bot = tk.Button(self, text = "Create")
-        create_bot.place(x = img.width()/2, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
-
-        ip_label = tk.Label(self, text = "IP of Host", bg = "white")
-        ip_label.place(x = img.width()/2, rely = .65, width = 100, height = 25 ,anchor = 's')
-
-        ip_entry = tk.Entry(self, bg = 'white', textvariable = self.ip)
-        ip_entry.place(x = img.width()/2, rely = .65, relwidth = .1, relheight = .05,anchor = 'n')
-
-        port_label = tk.Label(self, text = "Port of Host", bg = "white")
-        port_label.place(x = img.width()/2, rely = .75, width = 100, height = 25 ,anchor = 's')
-
-        port_entry = tk.Entry(self, bg = 'white', textvariable = self.port)
-        port_entry.place(x = img.width()/2, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
-
-        connect_bot = tk.Button(self, text = "Connect", command=lambda: [self.setMaster()])
-        connect_bot.place(x = img.width()/2, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
+    def createDisplay(self):
+        new_port = tk.StringVar()
 
 
-    def setMaster(self):
+        create_label = tk.Label(self.canvas, text = "TALA", bg = "#1ecbe1",font = LARGE_FONT)
+        create_label.place(relx = .5, rely = .2, relwidth = .5, relheight = .2 ,anchor = 'center')
+
+        port_label = tk.Label(self.canvas, text = "Port of Host", bg = "white")
+        port_label.place(relx = .5, rely = .45, relwidth = .1,  relheight = .05 ,anchor = 's')
+
+        port_entry = tk.Entry(self.canvas, bg = 'white', textvariable = new_port)
+        port_entry.place(relx = .5, rely = .45, relwidth = .1, relheight = .05,anchor = 'n')
+
+        create_bot = tk.Button(self.canvas, text = "Create new Host", command=lambda: [self.createMaster(new_port)])
+        create_bot.place(relx = .5, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
+
+        ip_label = tk.Label(self.canvas, text = "IP of Host", bg = "white")
+        ip_label.place(relx = .5, rely = .65, relwidth = .1,  relheight = .05 ,anchor = 's')
+
+        ip_entry = tk.Entry(self.canvas, bg = 'white', textvariable = self.ip)
+        ip_entry.place(relx = .5, rely = .65, relwidth = .1, relheight = .05,anchor = 'n')
+
+        port_label = tk.Label(self.canvas, text = "Port of Host", bg = "white")
+        port_label.place(relx = .5, rely = .75, relwidth = .1,  relheight = .05 ,anchor = 's')
+
+        port_entry = tk.Entry(self.canvas, bg = 'white', textvariable = self.port)
+        port_entry.place(relx = .5, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
+
+
+        connect_bot = tk.Button(self.canvas, text = "Connect", command=lambda: [self.getMaster()])
+        connect_bot.place(relx = .5, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
+
+    def createMaster(self,new_port):
+        self.master_ip = socket.gethostbyname(socket.gethostname())
+        self.master_port = int(new_port.get())
+        m = connect(str(self.master_ip), self.master_port )
+        m.host()
+
+        self.setMaster()
+
+
+    def getMaster(self):
         self.master_ip = self.ip.get()
         self.master_port = self.port.get()
+        self.setMaster()
+
+
+    # setMaster(self)
+    # Gets the master ip and port from the entry fields. It then trys to create a graph object i
+    def setMaster(self):
+
+
+
+        frame = Graph(self.parent, self,  self.master_ip, self.master_port)
 
         try:
-            frame = Graph(self.parent, self, self.master_ip, self.master_port)
-            self.controller.frames[Graph] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
-            self.controller.topFrame(Graph)
+            frame.connection.connectMaster( self.master_ip, self.master_port)
+
         except:
-            print("Error")
             tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
             self.createDisplay()
+        frame.startGraph()
+
+
+        self.controller.frames[Graph] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+        self.controller.topFrame(Graph)
 
 def gui():
     app = ManageFrames()

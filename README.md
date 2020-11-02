@@ -48,20 +48,13 @@ Windows/Linux \
 [How to use this should come soon]
 
 ### Core Developers
-
-timadcock
-
-Ayden-Drabek
-
-ES3580
-
-ryan-shell
-
-bhllamoreaux
+timadcock\
+Ayden-Drabek\
+ES3580\
+ryan-shell\
+bhllamoreaux\
 
 ### Additional Help
-
-jeffmcgough
-
-nibennett
+jeffmcgough\
+nibennett\
 

@@ -1,5 +1,4 @@
-# prata
-## Distributed Communications
+# prata (Distributed Communications)
 
 ### Goal
 The goal of prata is to have a fast and easy distributed communication system that that someone could use without deep knowledge of sockets or ZeroMQ.
@@ -41,13 +40,13 @@ Windows/Linux \
 - NEEDS UPDATE
 [How to use this should come soon]
 
-## Core Developers
+### Core Developers
 timadcock
 Ayden-Drabek
 ES3580
 ryan-shell
 bhllamoreaux
 
-## Additional Help
+### Additional Help
 jeffmcgough
 nibennett

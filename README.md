@@ -52,9 +52,9 @@ timadcock\
 Ayden-Drabek\
 ES3580\
 ryan-shell\
-bhllamoreaux\
+bhllamoreaux
 
 ### Additional Help
 jeffmcgough\
-nibennett\
+nibennett
 

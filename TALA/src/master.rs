@@ -1,8 +1,8 @@
 #[path = "master_process.rs"] mod master_process;
 #[path = "messaging.rs"] mod messaging;
 #[path = "channel.rs"] mod channel;
-#[path = "subscriber.rs"] mod subscriber;
-#[path = "publisher.rs"] mod publisher;
+#[path = "subscriber.rs"] pub mod subscriber;
+#[path = "publisher.rs"] pub mod publisher;
 
 use std::collections::HashMap;
 use pyo3::prelude::*;
@@ -38,7 +38,7 @@ pub struct Master
 impl Master
 {
    /**
-   * Requests a json serialized representation of the master process, 
+   * Requests a json serialized representation of the master process,
    * receives it, and returns it.
    */
    pub fn serialize(&self) -> String
@@ -56,7 +56,7 @@ impl Master
       let m = messaging::Message { messageType: 'P', ip: self.ipAddress.to_string(), port: self.port,  message: [lower.to_string(), upper.to_string()].join(":") };
       messaging::send(self.ipAddress.to_string(), self.port, m);
    }
-   
+
    /**
    * Requests master process to create a new custom channel.
    * port (u16) - port to create the channel at
@@ -117,8 +117,8 @@ impl Master
 
 
 
-   /* 
-   * Returns a new publisher object 
+   /*
+   * Returns a new publisher object
    */
    pub fn publisher( &self) -> publisher::Publisher
    {
@@ -127,7 +127,7 @@ impl Master
       return publisher::Publisher::new(self.ipAddress.to_string(), self.port, addr,port);
    }
 
-   /* 
+   /*
    * If multithreading is enables, creates a new master process on a separate thread.
    * If multithreading is not enabled, creates and hosts a new master process on this thread.
    */
@@ -159,7 +159,7 @@ impl Master
 }
 impl Master
 {
-   /* 
+   /*
    * Returns a new master object.
    */
    pub fn new() -> Master
@@ -169,7 +169,7 @@ impl Master
       return Master {ipAddress: addr, port: p, threading: true};
    }
 
-   /* 
+   /*
    * Gets the local ip address of this process/device.
    */
    pub fn getLocalIp( &self ) -> String
@@ -187,7 +187,7 @@ impl Master
    }
 }
 
-/* 
+/*
 * Saves credentials for Master and returns a new Master object.
 */
 #[allow(dead_code)]

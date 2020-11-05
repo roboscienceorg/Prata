@@ -4,7 +4,6 @@ extern crate serde_derive;
 
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
 
 use pyo3::prelude::*;
 #[path = "messaging.rs"] mod messaging;
@@ -12,16 +11,6 @@ use pyo3::prelude::*;
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
 
-//structure for messages that are going to be sent
-#[derive(Serialize, Deserialize)]
-pub struct Message
-{
-     pub messageType: char,
-
-     pub ip: String,
-     pub port: u16,
-     pub message: String,
-}
 
 //structure for all data that publisher needs to transmit data
 #[pyclass]
@@ -34,7 +23,6 @@ pub struct Publisher
     pub ip: String,
     pub port:   u16,
 
-    
 }
 
 impl Publisher
@@ -44,12 +32,9 @@ impl Publisher
     {
         return Publisher{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}
     }
-    pub fn to_string(&mut self) -> String
-    {
-        return format!("Construct Pub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
-    }
+
     //fn for adding a channel info to the map being used for data storage
-    pub fn add(&mut self, Name: String, IP: String, Port: u16)
+    fn add(&mut self, Name: String, IP: String, Port: u16)
     {
         self.channelInfo.insert(Name, (IP, Port));   //pass in the info about the channel to be stored in the pub
     }
@@ -59,6 +44,10 @@ impl Publisher
 
 #[pymethods]
 impl Publisher{
+    pub fn to_string(&mut self) -> String
+    {
+        return format!("Construct Pub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
+    }
     pub fn connect(&mut self, Name: String)
     {
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info

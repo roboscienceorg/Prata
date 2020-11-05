@@ -6,7 +6,7 @@ extern crate serde_derive;
 use std::collections::HashMap;
 //use std::thread;
 //use std::time::Duration;
-use serde::{Deserialize, Serialize};
+//use serde::{Deserialize, Serialize};
 //use serde_json::Result;
 //use serde_json::Value as JsonValue;
 use pyo3::prelude::*;
@@ -15,15 +15,7 @@ use pyo3::prelude::*;
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
 
-//structure for messages that are going to be sent
-#[derive(Serialize, Deserialize)]
-pub struct Message
-{
-     pub messageType: char,
-     pub ip: String,
-     pub port: u16,
-     pub message: String,
-}
+
 
 //structure for all data that publisher needs to transmit data
 #[pyclass]
@@ -35,11 +27,26 @@ pub struct Subscriber
     pub masterport: u16,
     pub ip: String,
     pub port:   u16,
+}
 
-
-
+impl Subscriber
+{
+    //constructor for Publisher Object
+    pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
+    {
+        
+        return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port};
+    }
+    //fn for adding a channel / master info to the map being used for data storage
+    fn add(&mut self, Name: String, IP: String, Port: u16)
+    {
+        self.channelInfo.insert(Name, (IP, Port));   //pass in the info about the channel to be stored in the pub
+        
+    }
 
 }
+
+
 #[pymethods]
 impl Subscriber {
 
@@ -47,12 +54,7 @@ impl Subscriber {
     {
         return format!("Construct Sub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
     }
-    //fn for adding a channel / master info to the map being used for data storage
-    pub fn add(&mut self, Name: String, IP: String, Port: u16)
-    {
-        self.channelInfo.insert(Name, (IP, Port));   //pass in the info about the channel to be stored in the pub
-        
-    }
+
     //function for connecting to a channel
     pub fn connect(&mut self, Name: String)
     {
@@ -76,7 +78,7 @@ impl Subscriber {
          let client = context.socket(zmq::REQ).unwrap();
 
          //serialize message for transmission
-         let messageSent = Message{messageType: 'D',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
+         let messageSent = messaging::Message{messageType: 'D',ip: self.ip.to_string(),port: self.port,message: Name.to_string()};         // create message object
          let serialMessage = serde_json::to_string(&messageSent).unwrap();   //serialize message object
 
          //concatenate "tcp://" "IP" ":" "PORT" together
@@ -113,25 +115,9 @@ impl Subscriber {
         let m = messaging::Message { messageType: 'R', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
         let m2 = messaging::send(chanInfo.0.to_string(), chanInfo.1, m);
 
-        //ALL FIFO CHANCE
-        /*
-        let txtpos = messaging::JsonToTextPosition(m2.message);
-        chanInfo.2 = txtpos.position;
-        */
+
         return m2.message;
     }
 
 }
 
-impl Subscriber
-{
-    //constructor for Publisher Object
-    pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
-    {
-        
-        return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port};
-    }
-
-
-
-}

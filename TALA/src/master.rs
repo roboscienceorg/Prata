@@ -172,7 +172,7 @@ impl Master
    /*
    * Gets the local ip address of this process/device.
    */
-   pub fn getLocalIp( &self ) -> String
+   fn getLocalIp( &self ) -> String
    {
       #[allow(unused_assignments)]
       let mut ip = "".to_string();

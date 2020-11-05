@@ -52,15 +52,6 @@ pub struct ChannelInfo
    channelStatistics: ChannelStatistics,
 }
 
-/* universal message format */
-#[derive(Serialize, Deserialize)]
-pub struct Message
-{
-   pub messageType: char,
-   pub ip: String,
-   pub port: u16,
-   pub message: String,
-}
 
 
 /**
@@ -135,12 +126,12 @@ impl MasterProcess
          let msg_string = serde_json::from_str(msg_data);
 
          //deserialize into message struct
-         let msg: Message = msg_string.unwrap();
+         let msg: messaging::Message = msg_string.unwrap();
 
          if  msg.messageType == 'T'
          {
             //terminate host
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             self.reply(m,&repSocket);
 
             let origination_port = request_open_port().unwrap_or(0);
@@ -157,7 +148,7 @@ impl MasterProcess
          {
             //publisher disconnect
             //d is for publisher D is for subscriber
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             self.reply(m,&repSocket);
 
             //take off internal list
@@ -218,7 +209,7 @@ impl MasterProcess
             }
 
             //set correct addresses
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: channel_port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: channel_port,  message: "".to_string() };
             self.reply(m,&repSocket);
          }
          else if msg.messageType == 'J'
@@ -242,7 +233,7 @@ impl MasterProcess
                assert!(responder.connect(&address).is_ok());
 
                //build message
-               let m = Message { messageType: 'S', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+               let m = messaging::Message { messageType: 'S', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
                let res = serde_json::to_string(&m);
                let serial_message: String = res.unwrap();
                let mut msg = zmq::Message::new();
@@ -272,13 +263,13 @@ impl MasterProcess
             //serialize master process and send back json
             let me = serde_json::to_string(&self);
             let meserl: String = me.unwrap();
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: meserl.to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: meserl.to_string() };
             self.reply(m,&repSocket);
          }
          else if msg.messageType == 'R'
          {
             //Remove a channel listed
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             self.terminateChannel(msg.message);
@@ -288,7 +279,7 @@ impl MasterProcess
          {
             //creates new channel of specified type
             //if it already exists, do nothing
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             let res = serde_json::to_string(&m);
             let serial_message: String = res.unwrap();
             
@@ -326,14 +317,14 @@ impl MasterProcess
             self.portRange = ( first, second );
             self.isCustomRange = true;
 
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             self.reply(m,&repSocket);
          }
          else if msg.messageType == 'O'
          {
             //print supported channel types
             println!("{:?}", channel::Channel::getSupportedTypes());
-            let m = Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
+            let m = messaging::Message { messageType: 'A', ip: self.ipAddress.to_string(), port: self.port,  message: "".to_string() };
             self.reply(m,&repSocket);
          }
 
@@ -361,7 +352,7 @@ impl MasterProcess
    /* 
    * serializes and sends a reply to the requesting socket 
    */
-   fn reply (&mut self, m: Message, repSocket: &zmq::Socket)
+   fn reply (&mut self, m: messaging::Message, repSocket: &zmq::Socket)
    {
       let res = serde_json::to_string(&m);
       let serial_message: String = res.unwrap();

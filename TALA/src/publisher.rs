@@ -75,17 +75,20 @@ impl Publisher{
     }
     pub fn publish(&mut self, ChannelName : String, Mess: String)
     {
-
+        
 
         if  self.channelInfo.contains_key(&ChannelName) == false
         {
+
             self.connect(ChannelName.to_string());
         }
 
 
         let chanInfo = self.channelInfo.get(&ChannelName).unwrap();
         let mx = messaging::Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: Mess.to_string() };
-        let _ = messaging::send(chanInfo.0.to_string(), chanInfo.1, mx);
+
+        messaging::send(chanInfo.0.to_string(), chanInfo.1, mx);
+
 
     }
 }

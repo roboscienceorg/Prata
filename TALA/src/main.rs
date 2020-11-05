@@ -20,6 +20,7 @@ fn main() {
 }
 fn run_tests()
 {
+    
     test_fifo();
     thread::sleep(time::Duration::from_millis(200));
     test_custom_fifo();
@@ -28,8 +29,14 @@ fn run_tests()
     thread::sleep(time::Duration::from_millis(200));
     test_FIFO_and_Broadcast();
     thread::sleep(time::Duration::from_millis(200));
-    test_invalid_host_ip()
-    //thread::sleep(time::Duration::from_millis(200));
+    test_invalid_host_ip();
+    thread::sleep(time::Duration::from_millis(200));
+    
+    //Error when publishing to channel, deleting channel then publishing
+    //to the same channel. Error occurs from hanging TCP socket as it never
+    //gets a reply from the deleted channel's original ip and port.
+    //test_delete_channel_after_pub();
+    
     //test_set_port_range()
 }
 #[allow(dead_code)]
@@ -71,6 +78,29 @@ fn test_fifo()
     assert!(sub_.listen("ChannelA".to_string()) == "", "TEST: test_fifo failed case 2");
     m.terminate();
     println!("TEST: test_fifo END");
+}
+#[allow(dead_code)]
+fn test_delete_channel_after_pub()
+{
+    println!("TEST: test_delete_channel_after_pub");
+    let m = master::Master {ipAddress: IPADDRESS.to_string(), port: 25565, threading: true};
+    m.host();
+    let mut sub_ = m.subscriber();
+    let mut pub_ = m.publisher();
+
+    pub_.publish("ChannelA".to_string(),"testingMessage".to_string());
+
+    assert!(sub_.listen("ChannelA".to_string()) == "testingMessage", "TEST: test_fifo failed case 1");
+    assert!(sub_.listen("ChannelA".to_string()) == "", "TEST: test_fifo failed case 2");
+
+    m.removeChannel("ChannelA".to_string());
+    thread::sleep(time::Duration::from_millis(200));
+    pub_.publish("ChannelA".to_string(),"testingMessage".to_string());
+    assert!(sub_.listen("ChannelA".to_string()) == "testingMessage", "TEST: test_fifo failed case 1");
+    assert!(sub_.listen("ChannelA".to_string()) == "", "TEST: test_fifo failed case 2");
+
+    m.terminate();
+    println!("TEST: test_delete_channel_after_pub END");
 }
 #[allow(dead_code)]
 fn test_custom_fifo()

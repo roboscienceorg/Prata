@@ -33,6 +33,9 @@ maturin build
 copy .\target\debug\TALA.dll .\Build\TALA.dll > NUL
 copy .\Build\TALA.dll .\Build\TALA.pyd > NUL
 copy .\target\wheels\* .\Build\wheels\ > NUL
+copy .\TALA\src\* .\Build\Julia\TALA.jl\src\* > NUL
+copy .\target\debug\TALA.dll .\Build\Julia\TALA.jl\src\TALA.dll > NUL
+copy .\TALA\Project.toml .\Build\Julia\TALA.jl > NUL
 
 pip uninstall -y TALA > NUL
 

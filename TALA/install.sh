@@ -24,21 +24,20 @@ if ! cmake --version 2>&1 >/dev/null; then
 fi
 
 if ! cargo --version 2>&1 >/dev/null; then
-    echo "Python3 needs to be installed"
+    echo "cargo needs to be installed"
 fi
 
 mkdir ./Build/ &>/dev/null
-mkdir ./Build/Julia/ &>/dev/null
-mkdir ./Build/Julia/TALA.jl/ &>/dev/null
 mkdir ./Build/Julia/TALA.jl/src/ &>/dev/null
 mkdir ./Build/Wheels/ &>/dev/null
 
-
-
 $maturin build
+
 pip uninstall -y TALA
-pip install ./Build/Wheels/*.whl
 
 cp ./target/debug/libTALA.so ./Build/TALA.so
 cp ./Build/TALA.so ./Build/TALA.pyd
 cp ./target/wheels/* ./Build/Wheels/
+cp .\TALA\src\* .\Build\Julia\TALA.jl\src\*
+cp .\target\debug\TALA.so .\Build\Julia\TALA.jl\src\TALA.so
+cp .\TALA\Project.toml .\Build\Julia\TALA.jl

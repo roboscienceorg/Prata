@@ -1,87 +1,88 @@
 Startup of network
 ##############
-Min: 509.3283
-Median: 521.26955
-Max: 556.1702
-Average: 522.35087
+Min: 28.6008
+Median: 527.3728
+Max: 760.2166
+Average: 524.44648
 ##############
 
 Channel creation
 ##############
-Min: 521.2068
-Median: 543.1745
-Max: 565.9018
-Average: 541.85402
+Min: 42.6323
+Median: 551.1531
+Max: 631.5054
+Average: 550.79769
 ##############
 
 Listen function call time without known channel
 ##############
-Min: 15.6849
-Median: 37.53365
-Max: 48.676
-Average: 35.5009
+Min: 24.0238
+Median: 42.03845
+Max: 72.5506
+Average: 42.48612
 ##############
 
 Listen function call time with known channel
 ##############
-Min: 7.436
-Median: 18.866
-Max: 27.9264
-Average: 17.95963
+Min: 8.7153
+Median: 21.1553
+Max: 39.011
+Average: 21.66584
 ##############
 
 Publish function call time without known channel
 ##############
-Min: 13.9818
-Median: 34.8133
-Max: 55.0244
-Average: 33.62406
+Min: 23.1957
+Median: 40.0662
+Max: 99.3136
+Average: 40.75533
 ##############
 
 Publish function call time with known channel
 ##############
-Min: 6.9182
-Median: 17.7019
-Max: 27.2819
-Average: 17.15704
+Min: 7.6894
+Median: 19.29825
+Max: 77.6084
+Average: 20.1691
 ##############
 
 Full run without known channel
 ##############
-Min: 23.7753
-Median: 69.46465
-Max: 85.0845
-Average: 67.16095
+Min: 38.5742
+Median: 80.1865
+Max: 137.7027
+Average: 79.56204
 ##############
 
 Full run with known channel
 ##############
-Min: 12.7197
-Median: 34.7573
-Max: 46.7974
-Average: 33.28454
+Min: 20.7759
+Median: 40.34365
+Max: 123.7257
+Average: 41.32812
 ##############
 
 Spam Publish
 ##############
-Min: 235.4907
-Median: 504.62
-Max: 603.0565
-Average: 489.17713
+Min: 387.5579
+Median: 682.03745
+Max: 919.3359
+Average: 672.30531
 ##############
 
 Spam Listen
 ##############
-Min: 312.4838
-Median: 483.108
-Max: 662.3228
-Average: 477.49163
+Min: 445.5185
+Median: 637.11845
+Max: 886.411
+Average: 635.47357
 ##############
 
 Spam Channel
 ##############
-Min: 273.5681
-Median: 757.84825
-Max: 1416.2449
-Average: 754.90451
+Min: 419.6076
+Median: 863.80745
+Max: 1128.2226
+Average: 859.09975
 ##############
+

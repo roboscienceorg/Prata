@@ -2,6 +2,9 @@ using Pkg
 Pkg.activate("..\\Build\\Julia\\TALA.jl")
 using TALA
 using Statistics
+using Dates
+
+start = now()
 
 REPEAT = 1000
 SLEEP = 2
@@ -221,3 +224,9 @@ end
 stats = getStats(times)
 printStats(stats,"Spam Channel")
 sleep(SLEEP)
+
+
+fin = now()
+
+println("Total Time: ", fin-start)
+println("Note: ", 12 , " sleeps are used for ", SLEEP ," seconds")

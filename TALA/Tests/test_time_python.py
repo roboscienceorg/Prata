@@ -3,6 +3,8 @@ import time
 import numpy as np
 import TALA
 
+start = time.time()
+
 REPEATS = 1000
 NUMBERS = 1 # will break if >1
 TIMEBETWEEN = 2
@@ -231,3 +233,9 @@ if DOSPAM:
     time.sleep(TIMEBETWEEN)
     printStats(getStats(timeit.Timer(stmt=spamChan).repeat(number=NUMBERS,repeat=(REPEATS))), "Spam Channel Creation")
     m.terminate()
+
+
+end = time.time()
+
+print("Total Time: ", (end-start))
+print("Note: ", 16 , " sleeps are used for ", TIMEBETWEEN ," seconds")

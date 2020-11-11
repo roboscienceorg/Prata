@@ -31,13 +31,13 @@ mkdir ./Build/ &>/dev/null
 mkdir ./Build/Julia/TALA.jl/src/ &>/dev/null
 mkdir ./Build/Wheels/ &>/dev/null
 
-$maturin build
+$maturin build --release
 
 pip uninstall -y TALA
 
-cp ./target/debug/libTALA.so ./Build/TALA.so
+cp ./target/release/libTALA.so ./Build/TALA.so
 cp ./Build/TALA.so ./Build/TALA.pyd
 cp ./target/wheels/* ./Build/Wheels/
 cp .\TALA\src\* .\Build\Julia\TALA.jl\src\*
-cp .\target\debug\TALA.so .\Build\Julia\TALA.jl\src\TALA.so
+cp .\target\release\TALA.so .\Build\Julia\TALA.jl\src\TALA.so
 cp .\TALA\Project.toml .\Build\Julia\TALA.jl

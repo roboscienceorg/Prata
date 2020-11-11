@@ -1,88 +1,88 @@
 Startup of network
 ###################
-Min: 36.1737
-Median: 522.05925
-Max: 550.0255
-Average: 519.42975
+Min: 508.356
+Median: 521.2835
+Max: 543.1113
+Average: 519.39347
 ###################
 
 Channel creation
 ###################
-Min: 18.4788
-Median: 537.17015
-Max: 1057.8639
-Average: 512.16839
+Min: 23.8813
+Median: 537.9799
+Max: 1046.97
+Average: 517.96792
 ###################
 
 Listen function call time without known channel
 ###################
-Min: 11.9939
-Median: 27.38755
-Max: 49.9918
-Average: 27.89663
+Min: 11.9695
+Median: 26.77355
+Max: 101.8918
+Average: 28.10932
 ###################
 
 Listen function call time with known channel
 ###################
-Min: 5.9389
-Median: 16.83775
-Max: 29.533
-Average: 14.7339
+Min: 5.3394
+Median: 16.8668
+Max: 28.8113
+Average: 15.61638
 ###################
 
 Publish function call time without known channel
 ###################
-Min: 12.1117
-Median: 27.3555
-Max: 71.4157
-Average: 27.63216
+Min: 11.5651
+Median: 32.88515
+Max: 51.6984
+Average: 30.24056
 ###################
 
 Publish function call time with known channel
 ###################
-Min: 5.9848
-Median: 12.8078
-Max: 67.763
-Average: 13.8624
+Min: 5.0345
+Median: 17.13575
+Max: 50.9382
+Average: 16.42637
 ###################
 
 Full run without known channel
 ###################
-Min: 27.57
-Median: 43.25265
-Max: 294.001
-Average: 49.60211
+Min: 21.4232
+Median: 66.4302
+Max: 108.0682
+Average: 62.95003
 ###################
 
 Full run with known channel
 ###################
-Min: 12.3267
-Median: 33.8178
-Max: 57.8744
-Average: 30.69542
+Min: 10.5396
+Median: 33.9112
+Max: 81.2366
+Average: 31.76683
 ###################
 
 Spam Publish
 ###################
-Min: 240.4052
-Median: 483.0436
-Max: 697.0647
-Average: 454.93986
+Min: 254.324
+Median: 509.4246
+Max: 574.7732
+Average: 499.66686
 ###################
 
 Spam Listen
 ###################
-Min: 223.256
-Median: 492.6941
-Max: 621.2471
-Average: 464.91311
+Min: 271.1921
+Median: 511.792
+Max: 579.0178
+Average: 501.74726
 ###################
 
 Spam Channel Creation
 ###################
-Min: 533.9526
-Median: 997.12675
-Max: 1822.5068
-Average: 969.76415
+Min: 427.3102
+Median: 1049.1859
+Max: 1768.8342
+Average: 1052.16347
 ###################
 

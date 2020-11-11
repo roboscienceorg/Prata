@@ -28,9 +28,9 @@ mkdir  Build > NUL
 mkdir .\Build\Wheels > NUL
 mkdir .\Build\Julia\TALA.jl\src > NUL
 
-maturin build
+maturin build --release
 
-copy .\target\debug\TALA.dll .\Build\TALA.dll > NUL
+copy .\target\release\TALA.dll .\Build\TALA.dll > NUL
 copy .\Build\TALA.dll .\Build\TALA.pyd > NUL
 copy .\target\wheels\* .\Build\wheels\ > NUL
 copy .\TALA\src\* .\Build\Julia\TALA.jl\src\* > NUL

@@ -118,6 +118,14 @@ impl Subscriber {
 
         return m2.message;
     }
+    pub  fn getIP(&mut self)->String
+    {
+        return self.ip.to_string();
+    }
 
+    pub  fn getPort(&mut self)->u16
+    {
+        return self.port;
+    }
 }
 

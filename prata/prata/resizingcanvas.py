@@ -1,5 +1,4 @@
 import tkinter as tk
-from .TALA import Master, connect
 
 
 # Resizingcanvas

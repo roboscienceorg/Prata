@@ -1,127 +1,342 @@
+from multiprocessing import Process
+from os.path import split
+from PIL import Image, ImageTk
 import tkinter as tk
+import tkinter as tk
+from tkinter import messagebox
 from .graph import *
 from .resizingcanvas import *
-from os.path import split
-import socket
-
-loc = split(__file__)[0]
-
-
-
-LARGE_FONT= ("Verdana", 100)
-
+from .prata import Master, connect
 
 class ManageFrames(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-        tk.Tk.wm_title(self, "Tala")
+        tk.Tk.wm_title(self, "Prata")
         self.geometry("1300x800")
-        frame_container = tk.Frame(self)
-        self.frames = {}
 
 
-        frame_container.grid_rowconfigure(0, weight=1)
-        frame_container.grid_columnconfigure(0, weight=1)
-        frame_container.place(relx = .5, rely = 0.5, relwidth = 1, relheight = 1,anchor = 'center')
-
-        frame = Window(frame_container, self)
-
-        self.frames[Window] = frame
-
-        frame.grid(row=0, column=0, sticky="nsew")
-
-        self.topFrame(Window)
-
-    def topFrame(self, cont):
-
-        frame = self.frames[cont]
-        frame.tkraise()
+        self.host = ConnectionData(self)
 
 
 
+        self.graph_frame = Graph(self)
+        self.graph_frame.startpage()
+        self.graph_frame.pack(fill="both", expand=True)
 
 
+        self.menu = filemenu(self)
+        self.menu.startMenu()
 
-class Window(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
-        self.canvas = ResizingCanvas(self,width=850, height=400, bg="#1ecbe1", highlightthickness=0)
-        self.canvas.place(relx = 0, rely = 0, relwidth = 1, relheight = 1,anchor = 'nw')
-        self.ip = tk.StringVar()
-        self.port = tk.StringVar()
+
+    def disconnect(self):
+        self.host.clear()
+
+        self.graph_frame.canvas.destroy()
+        self.graph_frame.startpage()
+        self.graph_frame.pack(fill="both", expand=True)
+
+        self.menu = filemenu(self)
+        self.menu.startMenu()
+
+    def startGraph(self):
+        self.host.retrieveData()
+        channel = self.host.parseJson()
+        self.graph_frame.title()   
+        self.graph_frame.showMasterInfo()
+        self.graph_frame.pack(fill="both", expand=True)
+     
+        self.graph_frame.channels = channel
+        self.graph_frame.buildGraph()
+
+
+class filemenu(tk.Frame):
+
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.controller = controller
-        self.createDisplay()
+
+    def startMenu(self):
+        self.menubar = tk.Menu(tearoff=False)
+        self.fileMenu = tk.Menu(tearoff=False)
+        self.editMenu = tk.Menu(tearoff=False)
+
+        self.menubar.add_cascade(label="File", menu=self.fileMenu)
+        self.menubar.add_cascade(label="Edit", menu=self.editMenu ,state="disabled")
+
+        self.fileMenu.add_command(label="Host", command=self.createMasterWin)
+        self.fileMenu.add_command(label="Connect", command=self.connectMasterWin)
+        self.fileMenu.add_command(label="Disconnect", command=self.parent.disconnect)
+        self.fileMenu.add_command(label="Exit", command=self.parent.host.exit)
+        self.fileMenu.entryconfig("Disconnect", state="disabled")
 
 
-    def createDisplay(self):
-        new_port = tk.StringVar()
+        channel = tk.Menu(self.editMenu,tearoff=False)
+        channel.add_command(label="New", command=self.createChanWin)
+        channel.add_command(label="Delete", command=self.deleteChanWindow)
+        channel.add_command(label="Show", command=self.parent.graph_frame.listChannel)
+        channel.add_command(label="Set Port Range", command=self.setPortRangeChanWindow)
 
 
-        create_label = tk.Label(self.canvas, text = "TALA", bg = "#1ecbe1",font = LARGE_FONT)
-        create_label.place(relx = .5, rely = .2, relwidth = .5, relheight = .2 ,anchor = 'center')
+        publisher = tk.Menu(self.editMenu,tearoff=False)
+        publisher.add_command(label="Create", command=self.createPubWin)
+        publisher.add_command(label="Send", command=self.sendMessWindow)
+        publisher.add_command(label="Show", command=self.parent.graph_frame.listPublishers)
 
-        port_label = tk.Label(self.canvas, text = "Port of Host", bg = "white")
-        port_label.place(relx = .5, rely = .45, relwidth = .1,  relheight = .05 ,anchor = 's')
+        subscriber = tk.Menu(self.editMenu,tearoff=False)
+        subscriber.add_command(label="Create", command=self.createSubWin)
+        subscriber.add_command(label="Listen", command=self.getMessageWin)
+        subscriber.add_command(label="Show", command=self.parent.graph_frame.listSubscribers)
 
-        port_entry = tk.Entry(self.canvas, bg = 'white', textvariable = new_port)
-        port_entry.place(relx = .5, rely = .45, relwidth = .1, relheight = .05,anchor = 'n')
+        self.editMenu.add_cascade(label='Channel', menu=channel, underline=0)
+        self.editMenu.add_cascade(label='Publisher', menu=publisher, underline=0)
+        self.editMenu.add_cascade(label='Subscriber', menu=subscriber, underline=0)
 
-        create_bot = tk.Button(self.canvas, text = "Create new Host", command=lambda: [self.createMaster(new_port)])
-        create_bot.place(relx = .5, rely = .5, relwidth = .1, relheight = .05,anchor = 'n')
+        self.parent.configure(menu=self.menubar)
 
-        ip_label = tk.Label(self.canvas, text = "IP of Host", bg = "white")
-        ip_label.place(relx = .5, rely = .65, relwidth = .1,  relheight = .05 ,anchor = 's')
+    def createMasterWin(self):
+        master_port = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Create Master") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("150x100") 
 
-        ip_entry = tk.Entry(self.canvas, bg = 'white', textvariable = self.ip)
-        ip_entry.place(relx = .5, rely = .65, relwidth = .1, relheight = .05,anchor = 'n')
+        port_label = tk.Label(new_window, text = "Enter Port of new Master")
+        port_label.place(relx = .5, rely = .3, relwidth = 1,  relheight = .2 ,anchor = 'center')
 
-        port_label = tk.Label(self.canvas, text = "Port of Host", bg = "white")
-        port_label.place(relx = .5, rely = .75, relwidth = .1,  relheight = .05 ,anchor = 's')
+        chan_entry = tk.Entry(new_window, bg = 'white', textvariable = master_port)
+        chan_entry.place(relx = .5, rely = .5, relwidth = .5, relheight = .2,anchor = 'center')
 
-        port_entry = tk.Entry(self.canvas, bg = 'white', textvariable = self.port)
-        port_entry.place(relx = .5, rely = .75, relwidth = .1, relheight = .05,anchor = 'n')
+        create_sub_bot = tk.Button(new_window, text = "Create Master",\
+         command=lambda: self.parent.host.createMaster(master_port,new_window))
+        create_sub_bot.place(relx = .5, rely = .75, relwidth = .5, relheight = .2,anchor = 'center')
 
+    def connectMasterWin(self):
+        master_port = tk.StringVar()
+        master_ip = tk.StringVar()
 
-        connect_bot = tk.Button(self.canvas, text = "Connect", command=lambda: [self.getMaster()])
-        connect_bot.place(relx = .5, rely = .85, relwidth = .1, relheight = .05,anchor = 'n')
-
-    def createMaster(self,new_port):
-        self.master_ip = socket.gethostbyname(socket.gethostname())
-        self.master_port = int(new_port.get())
-        m = connect(str(self.master_ip), self.master_port )
-        m.host()
-
-        self.setMaster()
-
-
-    def getMaster(self):
-        self.master_ip = self.ip.get()
-        self.master_port = self.port.get()
-        self.setMaster()
-
-
-    # setMaster(self)
-    # Gets the master ip and port from the entry fields. It then trys to create a graph object i
-    def setMaster(self):
-
-
-
-        frame = Graph(self.parent, self,  self.master_ip, self.master_port)
-
-        try:
-            frame.connection.connectMaster( self.master_ip, self.master_port)
-
-        except:
-            tk.messagebox.showerror("Error", "The combination IP and port are invalid. \nPlease Re-enter and try again")
-            self.createDisplay()
-        frame.startGraph()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Create Master") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("200x200") 
 
 
-        self.controller.frames[Graph] = frame
-        frame.grid(row=0, column=0, sticky="nsew")
-        self.controller.topFrame(Graph)
+        ip_label = tk.Label(new_window, text = "Enter IP\nof Master")
+        ip_label.place(relx = .25, rely = .2, relwidth = .4,  relheight = .2 ,anchor = 'center')
+
+        ip_entry = tk.Entry(new_window, bg = 'white', textvariable = master_ip)
+        ip_entry.place(relx = .25, rely = .4, relwidth = .4, relheight = .2,anchor = 'center')
+        
+        port_label = tk.Label(new_window, text = "Enter Port\nof Master")
+        port_label.place(relx = .75, rely = .2, relwidth = .4,  relheight = .2 ,anchor = 'center')
+
+        port_entry = tk.Entry(new_window, bg = 'white', textvariable = master_port)
+        port_entry.place(relx = .75, rely = .4, relwidth = .4, relheight = .2,anchor = 'center')
+
+        create_sub_bot = tk.Button(new_window, text = "Connect to Master", \
+            command=lambda: self.parent.host.connectMaster(master_ip,master_port,new_window))
+        create_sub_bot.place(relx = .5, rely = .6, relwidth = .5, relheight = .2,anchor = 'center')
+
+    def createChanWin(self):
+        chan_port = tk.StringVar()
+        chan_name = tk.StringVar()
+        chan_style = tk.StringVar()
+        chan_limit = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Create Subscriber") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("400x400") 
+
+        port_label = tk.Label(new_window, text = "Enter Channel port")
+        port_label.place(relx = .25, rely = .2, relwidth = .5,  relheight = .1 ,anchor = 'center')
+
+        port_entry = tk.Entry(new_window, bg = 'white', textvariable = chan_port)
+        port_entry.place(relx = .25, rely = .3, relwidth = .4, relheight = .1,anchor = 'center')
+
+        style_entry = tk.OptionMenu(new_window, chan_style, "FIFO", "BROADCAST")
+        style_entry.place(relx = .75, rely = .3, relwidth = .4, relheight = .1,anchor = 'center')
+
+        name_label = tk.Label(new_window, text = "Enter Channel name")
+        name_label.place(relx = .25, rely = .4, relwidth = .5,  relheight = .1 ,anchor = 'center')
+
+        name_entry = tk.Entry(new_window, bg = 'white', textvariable = chan_name)
+        name_entry.place(relx = .25, rely = .5, relwidth = .4, relheight = .1,anchor = 'center')
+
+        limit_label = tk.Label(new_window, text = "Enter Channel limit")
+        limit_label.place(relx = .75, rely = .4, relwidth = .5,  relheight = .1 ,anchor = 'center')
+
+        limit_entry = tk.Entry(new_window, bg = 'white', textvariable = chan_limit)
+        limit_entry.place(relx = .75, rely = .5, relwidth = .4, relheight = .1,anchor = 'center')
+
+        create_chan_bot = tk.Button(new_window, text = "Create Channel", \
+            command=lambda: self.parent.host.createChannel(chan_port,chan_name,chan_style,chan_limit,new_window))
+        create_chan_bot.place(relx = .5, rely = .8, relwidth = .5, relheight = .2,anchor = 'center')
+
+    def deleteChanWindow(self):
+        remove = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Remove Channel") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("150x150") 
+
+        chan_label = tk.Label(new_window, text = "Enter Channel name \nto be removed")
+        chan_label.place(relx = .5, rely = .3, relwidth = 1,  relheight = .2 ,anchor = 'center')
+
+        chan_entry = tk.Entry(new_window, bg = 'white', textvariable = remove)
+        chan_entry.place(relx = .5, rely = .5, relwidth = .4, relheight = .2,anchor = 'center')
+
+        delete_chan_bot = tk.Button(new_window, text = "Remove Channel", command=lambda: self.parent.host.deleteChan(remove,new_window))
+        delete_chan_bot.place(relx = .5, rely = .8, relwidth = .6, relheight = .2,anchor = 'center')
+
+    def createPubWin(self):
+        channel_name = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Create Publisher") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("200x200") 
+
+        chan_label = tk.Label(new_window, text = "Enter Channel names to \nconnect Publisher to.")
+        chan_label.place(relx = .5, rely = .2, relwidth = 1,  relheight = .2 ,anchor = 'center')
+
+        chan_entry = tk.Entry(new_window, bg = 'white', textvariable = channel_name)
+        chan_entry.place(relx = .5, rely = .4, relwidth = .4, relheight = .2,anchor = 'center')
+
+        create_pub_bot = tk.Button(new_window, text = "Create Publisher",\
+         command=lambda: self.parent.host.createPublisher(channel_name,new_window))
+        create_pub_bot.place(relx = .5, rely = .6, relwidth = .5, relheight = .2,anchor = 'center')
+
+    def createSubWin(self):
+        channel_name = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Create Subscriber") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("200x200") 
+
+        port_label = tk.Label(new_window, text = "Enter Channel name to \nconnect Subscriber to ")
+        port_label.place(relx = .5, rely = .2, relwidth = 1,  relheight = .2 ,anchor = 'center')
+
+        chan_entry = tk.Entry(new_window, bg = 'white', textvariable = channel_name)
+        chan_entry.place(relx = .5, rely = .4, relwidth = .4, relheight = .2,anchor = 'center')
+
+        create_sub_bot = tk.Button(new_window, text = "Create Subscriber",\
+         command=lambda: self.parent.host.createSubscriber(channel_name,new_window))
+        create_sub_bot.place(relx = .5, rely = .6, relwidth = .5, relheight = .2,anchor = 'center')
+
+    def sendMessWindow(self):
+        channel_name = tk.StringVar()
+        pub_port = tk.StringVar()
+        message = tk.StringVar()     
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Send message") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("200x200") 
+
+        chan_label = tk.Label(new_window, text = "Channel name \nto publish to")
+        chan_label.place(relx = .25, rely = .1, relwidth = .5,  relheight = .2 ,anchor = 'center')
+
+        chan_entry = tk.Entry(new_window, bg = 'white', textvariable = channel_name)
+        chan_entry.place(relx = .25, rely = .3, relwidth = .4, relheight = .2,anchor = 'center')
+
+        port_label = tk.Label(new_window, text = "Enter port \nof publisher")
+        port_label.place(relx = .75, rely = .1, relwidth = .5,  relheight = .2 ,anchor = 'center')
+
+        port_entry = tk.Entry(new_window, bg = 'white', textvariable = pub_port)
+        port_entry.place(relx = .75, rely = .3, relwidth = .4, relheight = .2,anchor = 'center')
+
+        message_label = tk.Label(new_window, text = "Enter Message")
+        message_label.place(relx = .5, rely = .5, relwidth = 1,  relheight = .2 ,anchor = 'center')
+
+        message_entry = tk.Entry(new_window, bg = 'white', textvariable = message)
+        message_entry.place(relx = .5, rely = .7, relwidth = .4, relheight = .2,anchor = 'center')
+
+        send_message_bot = tk.Button(new_window, text = "Send message", command=lambda:self.parent.host.sendMessage(pub_port,channel_name,message,new_window))
+        send_message_bot.place(relx = .5, rely = .9, relwidth = .5, relheight = .2,anchor = 'center')
+
+    def getMessageWin(self):
+        channel_name = tk.StringVar()
+        sub_port = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Get message") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("200x200") 
+
+        chan_label = tk.Label(new_window, text = "Channel name \nto listen to")
+        chan_label.place(relx = .25, rely = .1, relwidth = .5,  relheight = .2 ,anchor = 'center')
+
+        chan_entry = tk.Entry(new_window, bg = 'white', textvariable = channel_name)
+        chan_entry.place(relx = .25, rely = .3, relwidth = .4, relheight = .2,anchor = 'center')
+
+        port_label = tk.Label(new_window, text = "Enter port \nof subscriber")
+        port_label.place(relx = .75, rely = .1, relwidth = .5,  relheight = .2 ,anchor = 'center')
+
+        port_entry = tk.Entry(new_window, bg = 'white', textvariable = sub_port)
+        port_entry.place(relx = .75, rely = .3, relwidth = .4, relheight = .2,anchor = 'center')
+
+        get_message_bot = tk.Button(new_window, text = "Get message", \
+            command=lambda: self.parent.host.getMessage(sub_port,channel_name,new_window))
+        get_message_bot.place(relx = .5, rely = .9, relwidth = .5, relheight = .2,anchor = 'center')
+
+    def destroyWin(self,window):
+        window.destroy()
+
+    def setPortRangeChanWindow(self):
+        min_port = tk.StringVar()
+        max_port = tk.StringVar()
+        new_window = tk.Toplevel() 
+  
+        # sets the title of the 
+        # Toplevel widget 
+        new_window.title("Set Port Range") 
+      
+        # sets the geometry of toplevel 
+        new_window.geometry("200x200") 
+
+        min_label = tk.Label(new_window, text = "Min")
+        min_label.place(relx = .5, rely = .2, relwidth = .5, relheight = .2,anchor = 'e')
+
+        max_label = tk.Label(new_window, text = "Max")
+        max_label.place(relx = 1, rely = .2, relwidth = .5, relheight = .2,anchor = 'e')
+
+        min_port_entry = tk.Entry(new_window, bg = 'white', textvariable = min_port )
+        min_port_entry.place(relx = .5, rely = .4, relwidth = .5, relheight = .2,anchor = 'e')
+
+        max_port_entry = tk.Entry(new_window, bg = 'white', textvariable = max_port )
+        max_port_entry.place(relx = 1, rely = .4, relwidth = .5, relheight = .2,anchor = 'e')
+
+        set_port_bot = tk.Button(new_window, text = "Set Range", command=lambda: [self.parent.host.setPortRange(min_port,max_port,new_window)])
+        set_port_bot.place(relx = 1, rely = .7, relwidth = 1, relheight = .2,anchor = 'e')
 
 def gui():
     app = ManageFrames()

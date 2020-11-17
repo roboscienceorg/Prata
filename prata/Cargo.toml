@@ -1,5 +1,5 @@
 [package]
-name = "TALA"
+name = "prata"
 version = "0.1.0"
 edition = "2018"
 authors = ["Ayden Drabek <Ayden.Drabek@mines.sdsmt.edu>", "Brennen Lamoreaux <Brennen.Lamoreaux@mines.sdsmt.edu>", "Ethan Steidl <Ethan.Steidl@mines.sdsmt.edu>", "Ryan Shell <Ryan.Shell@mines.sdsmt.edu>", "Timothy Adcock <Timothy.Adcock@mines.sdsmt.edu>"]
@@ -17,7 +17,7 @@ get_if_addrs = "0.5.3"
 local_ipaddress = "0.1.3"
 
 [lib]
-name = "TALA"
+name = "prata"
 crate-type = ["cdylib"]
 
 [features]

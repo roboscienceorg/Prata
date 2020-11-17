@@ -28,16 +28,16 @@ if ! cargo --version 2>&1 >/dev/null; then
 fi
 
 mkdir ./Build/ &>/dev/null
-mkdir ./Build/Julia/TALA.jl/src/ &>/dev/null
+mkdir ./Build/Julia/prata.jl/src/ &>/dev/null
 mkdir ./Build/Wheels/ &>/dev/null
 
 $maturin build --release
 
-pip uninstall -y TALA
+pip uninstall -y prata
 
-cp ./target/release/libTALA.so ./Build/TALA.so
-cp ./Build/TALA.so ./Build/TALA.pyd
+cp ./target/release/libprata.so ./Build/prata.so
+cp ./Build/prata.so ./Build/prata.pyd
 cp ./target/wheels/* ./Build/Wheels/
-cp .\TALA\src\* .\Build\Julia\TALA.jl\src\*
-cp .\target\release\TALA.so .\Build\Julia\TALA.jl\src\TALA.so
-cp .\TALA\Project.toml .\Build\Julia\TALA.jl
+cp .\prata\src\* .\Build\Julia\prata.jl\src\*
+cp .\target\release\prata.so .\Build\Julia\prata.jl\src\prata.so
+cp .\prata\Project.toml .\Build\Julia\prata.jl

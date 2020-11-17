@@ -1,6 +1,6 @@
 using Pkg
-Pkg.activate("..\\Build\\Julia\\TALA.jl")
-using TALA
+Pkg.activate("..\\Build\\Julia\\prata.jl")
+using prata
 using Statistics
 using Dates
 
@@ -38,9 +38,9 @@ println("Startup of Network")
 times = []
 for i in 1:REPEAT
      tmp = @elapsed begin
-        m = TALA.connect("127.0.0.1", 25565)
-        TALA.host(m)
-        TALA.terminate(m)
+        m = prata.connect("127.0.0.1", 25565)
+        prata.host(m)
+        prata.terminate(m)
     end
     push!(times, tmp)
 end
@@ -52,12 +52,12 @@ sleep(SLEEP)
 
 println("Channel creation")
 times = []
-m = TALA.connect("127.0.0.1", 25565)
-TALA.host(m)
-s = TALA.subscriber(m)
+m = prata.connect("127.0.0.1", 25565)
+prata.host(m)
+s = prata.subscriber(m)
 for i in 1:REPEAT
      tmp = @elapsed begin
-        TALA.listen(s,string(rand(Int)))
+        prata.listen(s,string(rand(Int)))
     end
     push!(times, tmp)
 end
@@ -68,11 +68,11 @@ sleep(SLEEP)
 
 println("Listen function call time without known channel")
 times = []
-TALA.createChannel(m,25566, "NK", "BROADCAST", 1);
+prata.createChannel(m,25566, "NK", "BROADCAST", 1);
 for i in 1:REPEAT
-    local s = TALA.subscriber(m)
+    local s = prata.subscriber(m)
      tmp = @elapsed begin
-        TALA.listen(s,"NK")
+        prata.listen(s,"NK")
     end
     push!(times, tmp)
 end
@@ -83,12 +83,12 @@ sleep(SLEEP)
 
 println("Listen function call time with known channel")
 times = []
-s = TALA.subscriber(m)
-TALA.createChannel(m,25567, "K", "BROADCAST", 1);
-TALA.subscriberConnect(s,"K")
+s = prata.subscriber(m)
+prata.createChannel(m,25567, "K", "BROADCAST", 1);
+prata.subscriberConnect(s,"K")
 for i in 1:REPEAT
      tmp = @elapsed begin
-        TALA.listen(s,"K")
+        prata.listen(s,"K")
     end
     push!(times, tmp)
 end
@@ -100,9 +100,9 @@ sleep(SLEEP)
 println("Publish function call time without known channel")
 times = []
 for i in 1:REPEAT
-    local p = TALA.publisher(m)
+    local p = prata.publisher(m)
      tmp = @elapsed begin
-        TALA.publish(p,"NK","yes")
+        prata.publish(p,"NK","yes")
     end
     push!(times, tmp)
 end
@@ -113,11 +113,11 @@ sleep(SLEEP)
 
 println("Publish function call time with known channel")
 times = []
-p = TALA.publisher(m)
-TALA.publisherConnect(p,"K")
+p = prata.publisher(m)
+prata.publisherConnect(p,"K")
 for i in 1:REPEAT
      tmp = @elapsed begin
-        TALA.publish(p,"K","yes")
+        prata.publish(p,"K","yes")
     end
     push!(times, tmp)
 end
@@ -128,15 +128,15 @@ sleep(SLEEP)
 
 println("Full run without known channel")
 times = []
-m = TALA.connect("127.0.0.1", 25568)
-TALA.host(m)
-TALA.subscriberConnect(TALA.subscriber(m),"NK")
+m = prata.connect("127.0.0.1", 25568)
+prata.host(m)
+prata.subscriberConnect(prata.subscriber(m),"NK")
 for i in 1:REPEAT
-    local p = TALA.publisher(m)
-    local s = TALA.subscriber(m)
+    local p = prata.publisher(m)
+    local s = prata.subscriber(m)
     tmp = @elapsed begin
-        TALA.publish(p,"NK","yes")
-        TALA.listen(s,"NK")
+        prata.publish(p,"NK","yes")
+        prata.listen(s,"NK")
     end
     push!(times, tmp)
 end
@@ -148,16 +148,16 @@ sleep(SLEEP)
 
 println("Full run with known channel")
 times = []
-m = TALA.connect("127.0.0.1", 25569)
-TALA.host(m)
-p = TALA.publisher(m)
-s = TALA.subscriber(m)
-TALA.subscriberConnect(s,"K")
-TALA.publisherConnect(p,"K")
+m = prata.connect("127.0.0.1", 25569)
+prata.host(m)
+p = prata.publisher(m)
+s = prata.subscriber(m)
+prata.subscriberConnect(s,"K")
+prata.publisherConnect(p,"K")
 for i in 1:REPEAT
      tmp = @elapsed begin
-        TALA.publish(p,"K","yes")
-        TALA.listen(s,"K")
+        prata.publish(p,"K","yes")
+        prata.listen(s,"K")
     end
     push!(times, tmp)
 end
@@ -169,14 +169,14 @@ sleep(SLEEP)
 
 println("Spam Publish")
 times = []
-m = TALA.connect("127.0.0.1", 25570)
-TALA.host(m)
-p = TALA.publisher(m)
-TALA.publisherConnect(p,"K")
+m = prata.connect("127.0.0.1", 25570)
+prata.host(m)
+p = prata.publisher(m)
+prata.publisherConnect(p,"K")
 for j in 1:REPEAT
     tmp = @elapsed Threads.@threads for i in 1:SPAM
-        local p = TALA.publisher(m)
-            TALA.publish(p,"K","yes")
+        local p = prata.publisher(m)
+            prata.publish(p,"K","yes")
     end
         push!(times, tmp)
 end
@@ -188,13 +188,13 @@ sleep(SLEEP)
 
 println("Spam Listen")
 times = []
-m = TALA.connect("127.0.0.1", 25570)
-s = TALA.subscriber(m)
-TALA.subscriberConnect(s,"K")
+m = prata.connect("127.0.0.1", 25570)
+s = prata.subscriber(m)
+prata.subscriberConnect(s,"K")
 for j in 1:REPEAT
     tmp = @elapsed Threads.@threads for i in 1:SPAM
-        local s = TALA.subscriber(m)
-            TALA.listen(s,"K")
+        local s = prata.subscriber(m)
+            prata.listen(s,"K")
     end
         push!(times, tmp)
 end
@@ -210,13 +210,13 @@ times = []
 
 
 for j in 1:REPEAT
-    m = TALA.connect("127.0.0.1", cnt)
-    TALA.host(m)
-    s = TALA.subscriber(m)
+    m = prata.connect("127.0.0.1", cnt)
+    prata.host(m)
+    s = prata.subscriber(m)
     tmp = @elapsed Threads.@threads for i in 1:SPAM
-        TALA.subscriberConnect(s,string(rand(Int)))
+        prata.subscriberConnect(s,string(rand(Int)))
     end
-    TALA.terminate(m)
+    prata.terminate(m)
     global cnt += 1
     push!(times, tmp)
 end

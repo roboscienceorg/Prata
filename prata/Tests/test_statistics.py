@@ -1,4 +1,4 @@
-import TALA as tl
+import prata as tl
 import time
 import json
 
@@ -30,7 +30,7 @@ i = 0
 while i < 300:
     sub.listen("2")
     i+=1
-    
+
 jsondata = json.loads(m.serialize())
 print(jsondata["channels"]["1"]["channelStatistics"])
 print(jsondata["channels"]["2"]["channelStatistics"])

@@ -1,4 +1,4 @@
-import TALA
+import prata
 import time
 import timeit
 import numpy as np
@@ -59,7 +59,7 @@ def getStats(times):
 f = open("pythonThrouput.txt","w")
 f.close()
 
-m = TALA.connect("127.0.0.1",25565)
+m = prata.connect("127.0.0.1",25565)
 m.host()
 m.createChannel(25566, "test", "FIFO", 500)
 
@@ -71,8 +71,8 @@ t = s.listen("test")
 obj = getString(SIZE)
 setupTestListen = """
 STRING =  \""""+obj+"""\"
-import TALA
-m = TALA.connect(\"127.0.0.1\",25565)
+import prata
+m = prata.connect(\"127.0.0.1\",25565)
 s = m.subscriber()
 p = m.publisher()
 s.connect(\"test\")
@@ -93,8 +93,8 @@ obj = getString(SIZE)
 
 setupTestListen = """
 STRING =  \""""+obj+"""\"
-import TALA
-m = TALA.connect(\"127.0.0.1\",25565)
+import prata
+m = prata.connect(\"127.0.0.1\",25565)
 s = m.subscriber()
 p = m.publisher()
 s.connect(\"test\")
@@ -115,8 +115,8 @@ obj = getString(SIZE)
 
 setupTestListen = """
 STRING =  \""""+obj+"""\"
-import TALA
-m = TALA.connect(\"127.0.0.1\",25565)
+import prata
+m = prata.connect(\"127.0.0.1\",25565)
 s = m.subscriber()
 p = m.publisher()
 s.connect(\"test\")
@@ -137,8 +137,8 @@ obj = getString(SIZE)
 
 setupTestListen = """
 STRING =  \""""+obj+"""\"
-import TALA
-m = TALA.connect(\"127.0.0.1\",25565)
+import prata
+m = prata.connect(\"127.0.0.1\",25565)
 s = m.subscriber()
 p = m.publisher()
 s.connect(\"test\")
@@ -166,8 +166,8 @@ t = s.listen("test")
 
         setupTestListen = """
 STRING =  \""""+obj+"""\"
-import TALA
-m = TALA.connect(\"127.0.0.1\",25565)
+import prata
+m = prata.connect(\"127.0.0.1\",25565)
 s = m.subscriber()
 p = m.publisher()
 s.connect(\"test\")
@@ -194,8 +194,8 @@ for i in range('''+str(R)+'''):
 
             setupTestListen = """
 STRING =  \""""+obj+"""\"
-import TALA
-m = TALA.connect(\"127.0.0.1\",25565)
+import prata
+m = prata.connect(\"127.0.0.1\",25565)
 s = m.subscriber()
 p = m.publisher()
 s.connect(\"test\")

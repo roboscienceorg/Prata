@@ -23,7 +23,7 @@ use subscriber::Subscriber;
 
 
 #[pymodule]
-fn TALA(_py: Python, m: &PyModule) -> PyResult<()> {
+fn prata(_py: Python, m: &PyModule) -> PyResult<()> {
 
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
 

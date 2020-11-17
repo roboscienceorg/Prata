@@ -1,6 +1,6 @@
-module TALA
+module prata
 
-LIBRARY = string(@__DIR__,"\\TALA")
+LIBRARY = string(@__DIR__,"\\prata")
 
 function connect(IP, Port)
 
@@ -94,7 +94,7 @@ function setPortRanges(m, lower, upper)
         $m, $lower, $upper); #input
 end
 
-function create Channel(m, port, name, style, messageLimit)
+function createChannel(m, port, name, style, messageLimit)
      @eval ccall(
         (:createChannelJ, #function
         $LIBRARY), #lib

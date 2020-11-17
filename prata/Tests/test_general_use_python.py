@@ -1,8 +1,8 @@
 # Import the library
-import TALA
+import prata
 
 # Connect to a host, this could be run running or one you plan on running
-connection = TALA.connect("127.0.0.1", 25565)
+connection = prata.connect("127.0.0.1", 25565)
 
 # This is used to launch a host
 connection.host()
@@ -36,7 +36,7 @@ data = subscriber.listen("My Channel")
 print(data)
 
 
-# Terminate the entire TALA network, stopping all channels.
+# Terminate the entire prata network, stopping all channels.
 connection.terminate()
 
 '''

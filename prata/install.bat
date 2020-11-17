@@ -26,17 +26,17 @@ maturin --version >nul 2>&1 || (
 
 mkdir  Build > NUL
 mkdir .\Build\Wheels > NUL
-mkdir .\Build\Julia\TALA.jl\src > NUL
+mkdir .\Build\Julia\prata.jl\src > NUL
 
 maturin build --release
 
-copy .\target\release\TALA.dll .\Build\TALA.dll > NUL
-copy .\Build\TALA.dll .\Build\TALA.pyd > NUL
+copy .\target\release\prata.dll .\Build\prata.dll > NUL
+copy .\Build\prata.dll .\Build\prata.pyd > NUL
 copy .\target\wheels\* .\Build\wheels\ > NUL
-copy .\TALA\src\* .\Build\Julia\TALA.jl\src\* > NUL
-copy .\target\debug\TALA.dll .\Build\Julia\TALA.jl\src\TALA.dll > NUL
-copy .\TALA\Project.toml .\Build\Julia\TALA.jl > NUL
+copy .\prata\src\* .\Build\Julia\prata.jl\src\* > NUL
+copy .\target\release\prata.dll .\Build\Julia\prata.jl\src\prata.dll > NUL
+copy .\prata\Project.toml .\Build\Julia\prata.jl > NUL
 
-pip uninstall -y TALA > NUL
+pip uninstall -y prata > NUL
 
-echo [1;34m Please install TALA by installing the wheel file in Build/Wheels[0m
+echo [1;34m Please install prata by installing the wheel file in Build/Wheels[0m

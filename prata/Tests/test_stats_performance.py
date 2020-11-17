@@ -1,4 +1,4 @@
-import TALA as tl
+import prata as tl
 import time
 import json
 

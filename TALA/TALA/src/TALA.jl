@@ -1,5 +1,6 @@
 module TALA
 
+LIBRARY = string(@__DIR__,"\\TALA")
 
 function connect(IP, Port)
 
@@ -10,167 +11,167 @@ function connect(IP, Port)
     tmp4 = parse(UInt32,tmp[4])
     ip = (tmp1 << 24) + (tmp2 << 16) + (tmp3 << 8) + (tmp4)
 
-    return ccall(
+    return @eval ccall(
         (:connectJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Ptr{Cvoid}, #return
         (UInt32, UInt16), #input type
-        ip,Port); #input
+        $ip,$Port); #input
 
 end
 
 function setThreading(m, thread)
-    return ccall(
+    return @eval ccall(
         (:setThread, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, Bool), #input type
-        m,thread); #input
+        $m,$thread); #input
 end
 
 function subscriber(m)
-    return ccall(
+    return @eval ccall(
         (:subscriberJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Ptr{Cvoid}, #return
         (Ptr{Cvoid},), #input type
-        m) #input
+        $m) #input
 end
 
 function publisher(m)
-    return ccall(
+    return @eval ccall(
         (:publisherJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Ptr{Cvoid}, #return
         (Ptr{Cvoid},), #input type
-        m) #input
+        $m) #input
 end
 
 function host(m)
-    ccall(
+    @eval ccall(
         (:hostJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid},), #input type
-        m); #input
+        $m); #input
 end
 
 function terminate(m)
-    ccall(
+    @eval ccall(
         (:terminateJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid},), #input type
-        m); #input
+        $m); #input
 end
 
 function serialize(m)
-    tmp = ccall(
+    tmp = @eval ccall(
         (:serializeJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cstring, #return
         (Ptr{Cvoid},), #input type
-        m);
+        $m);
 
     ret = unsafe_string(deepcopy(tmp))
 
-    ccall(
+    @eval ccall(
         (:freeString, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Cstring,), #input type
-        tmp);
+        $tmp);
 
     return ret #input
 end
 
 function setPortRanges(m, lower, upper)
-    return ccall(
+    return @eval ccall(
         (:setThread, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, UInt16, UInt16), #input type
-        m, lower, upper); #input
+        $m, $lower, $upper); #input
 end
 
-function createChannel(m, port, name, style, messageLimit)
-     ccall(
+function create Channel(m, port, name, style, messageLimit)
+     @eval ccall(
         (:createChannelJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, UInt16, Cstring, Cstring, UInt32), #input type
-        m, port, name, style, messageLimit); #input
+        $m, $port, $name, $style, $messageLimit); #input
 end
 
 function getChannelTypes(m)
-     ccall(
+     @eval ccall(
         (:getChannelTypesJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid},), #input type
-        m); #input
+        $m); #input
 end
 
 function publisherConnect(p, name)
-     ccall(
+     @eval ccall(
         (:connectPJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, Cstring), #input type
-        p, name); #input
+        $p, $name); #input
 end
 
 function subscriberConnect(s, name)
-     ccall(
+     @eval ccall(
         (:connectSJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, Cstring), #input type
-        s, name); #input
+        $s, $name); #input
 end
 
 function publisherDisconnect(p, name)
-     ccall(
+     @eval ccall(
         (:connectPJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, Cstring), #input type
-        p, name); #input
+        $p, $name); #input
 end
 
 function subscriberDisconnect(s, name)
-     ccall(
+     @eval ccall(
         (:connectSJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, Cstring), #input type
-        s, name); #input
+        $s, $name); #input
 end
 
 function publish(p, chan, msg)
-     ccall(
+     @eval ccall(
         (:publishJ, #function
-        "TALA.dll"), #lib
+        $LIBRARY), #lib
         Cvoid, #return
         (Ptr{Cvoid}, Cstring, Cstring), #input type
-        p, chan, msg); #input
+        $p, $chan, $msg); #input
 end
 
 function listen(s, chan)
-        tmp = ccall(
+        tmp = @eval ccall(
             (:listenJ, #function
-            "TALA.dll"), #lib
+            $LIBRARY), #lib
             Cstring, #return
             (Ptr{Cvoid}, Cstring), #input type
-            s, chan);
+            $s, $chan);
 
         ret = unsafe_string(deepcopy(tmp))
-        ccall(
+        @eval ccall(
             (:freeString, #function
-            "TALA.dll"), #lib
+            $LIBRARY), #lib
             Cvoid, #return
             (Cstring,), #input type
-            tmp);
+            $tmp);
 
         return ret #input
 

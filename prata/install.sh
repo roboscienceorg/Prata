@@ -1,6 +1,7 @@
 #!/bin/bash
 
 maturin=maturin
+pip=pip
 
 if ! command -v $maturin &> /dev/null
 then
@@ -12,6 +13,19 @@ then
 		exit
 	else
 		echo "Using local Maturin"
+	fi
+fi
+
+if ! command -V $pip &> /dev/null
+then
+	echo "pip not found, Checking for pip3"
+	pip=pip3
+	if ! command -V $pip &> /dev/null
+	then
+		echo "pip3 not installed"
+		exit
+	else
+		echo "Using pip3"
 	fi
 fi
 
@@ -28,16 +42,18 @@ if ! cargo --version 2>&1 >/dev/null; then
 fi
 
 mkdir ./Build/ &>/dev/null
+mkdir ./Build/Julia/ &>/dev/null
+mkdir ./Build/Julia/prata.jl &>/dev/null
 mkdir ./Build/Julia/prata.jl/src/ &>/dev/null
 mkdir ./Build/Wheels/ &>/dev/null
 
 $maturin build --release
 
-pip uninstall -y prata
+$pip uninstall -y prata
 
 cp ./target/release/libprata.so ./Build/prata.so
 cp ./Build/prata.so ./Build/prata.pyd
 cp ./target/wheels/* ./Build/Wheels/
-cp .\prata\src\* .\Build\Julia\prata.jl\src\*
-cp .\target\release\prata.so .\Build\Julia\prata.jl\src\prata.so
-cp .\prata\Project.toml .\Build\Julia\prata.jl
+cp ./prata/src/prata.jl ./Build/Julia/prata.jl/src/prata.jl
+cp ./target/release/libprata.so ./Build/Julia/prata.jl/src/prata.so
+cp ./prata/Project.toml ./Build/Julia/prata.jl

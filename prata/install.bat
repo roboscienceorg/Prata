@@ -1,8 +1,21 @@
 @echo off
-python --version >nul 2>&1 || (
-    echo Python must be installed, please install it
-    pause
-    exit
+
+set python=python.exe
+
+echo checking for %python%
+%python% --version >nul 2>&1 || (
+    echo checking for py
+    set python=py.exe
+    %python% --version >nul 2>&1 || (
+        echo checking for py3
+        set python=py3.exe
+        %python% --version >nul 2>&1 || (
+            echo Python must be installed, please install it
+            echo Alias must be python, py or py3
+            pause
+            exit
+        )
+    )
 )
 
 cmake --version >nul 2>&1 || (
@@ -40,3 +53,5 @@ copy .\prata\Project.toml .\Build\Julia\prata.jl > NUL
 pip uninstall -y prata > NUL
 
 echo [1;34m Please install prata by installing the wheel file in Build/Wheels[0m
+
+pause

@@ -1,4 +1,3 @@
-from multiprocessing import Process
 from os.path import split
 from PIL import Image, ImageTk
 import tkinter as tk
@@ -13,6 +12,8 @@ class ManageFrames(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Prata")
+        tk.Tk.iconbitmap(self, default = "Icon.ico")
+        print("Icon")
         self.geometry("1300x800")
 
 
@@ -339,5 +340,7 @@ class filemenu(tk.Frame):
         set_port_bot.place(relx = 1, rely = .7, relwidth = 1, relheight = .2,anchor = 'e')
 
 def gui():
+    print("Icon")
+
     app = ManageFrames()
     app.mainloop()

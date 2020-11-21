@@ -98,7 +98,10 @@ class ConnectionData():
         except:
             port = self.next_port
         name = str(chan_name.get())
-        style = str(chan_style.get())
+        try:
+            style = str(chan_style.get())
+        except:
+            style = "FIFO"
         try:
             limit = int(chan_limit.get())
         except:
@@ -146,6 +149,8 @@ class ConnectionData():
     def createSubscriber(self,channel_name,new_window):
         channel = str(channel_name.get())
         channel = channel.split(",")
+        new_window.destroy()
+
         try:
             sub = self.master.subscriber()
             sub_port = str(sub.getPort())
@@ -154,7 +159,6 @@ class ConnectionData():
 
             for chan in channel:
                 sub.connect(str(chan))
-            new_window.destroy()
 
             self.parent.startGraph()
         except:

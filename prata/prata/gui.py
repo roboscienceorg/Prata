@@ -7,13 +7,18 @@ from .graph import *
 from .resizingcanvas import *
 from .prata import Master, connect
 
+from os.path import split
+loc = split(__file__)[0]
+
+ICO = loc + "\\Icon.ico"
+
 class ManageFrames(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Prata")
-        tk.Tk.iconbitmap(self, default = "Icon.ico")
-        print("Icon")
+        tk.Tk.iconbitmap(self, default = ICO)
+        #print("Icon")
         self.geometry("1300x800")
 
 
@@ -43,10 +48,10 @@ class ManageFrames(tk.Tk):
     def startGraph(self):
         self.host.retrieveData()
         channel = self.host.parseJson()
-        self.graph_frame.title()   
+        self.graph_frame.title()
         self.graph_frame.showMasterInfo()
         self.graph_frame.pack(fill="both", expand=True)
-     
+
         self.graph_frame.channels = channel
         self.graph_frame.buildGraph()
 
@@ -97,14 +102,14 @@ class filemenu(tk.Frame):
 
     def createMasterWin(self):
         master_port = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Create Master") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("150x100") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Create Master")
+
+        # sets the geometry of toplevel
+        new_window.geometry("150x100")
 
         port_label = tk.Label(new_window, text = "Enter Port of new Master")
         port_label.place(relx = .5, rely = .3, relwidth = 1,  relheight = .2 ,anchor = 'center')
@@ -120,14 +125,14 @@ class filemenu(tk.Frame):
         master_port = tk.StringVar()
         master_ip = tk.StringVar()
 
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Create Master") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("200x200") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Create Master")
+
+        # sets the geometry of toplevel
+        new_window.geometry("200x200")
 
 
         ip_label = tk.Label(new_window, text = "Enter IP\nof Master")
@@ -135,7 +140,7 @@ class filemenu(tk.Frame):
 
         ip_entry = tk.Entry(new_window, bg = 'white', textvariable = master_ip)
         ip_entry.place(relx = .25, rely = .4, relwidth = .4, relheight = .2,anchor = 'center')
-        
+
         port_label = tk.Label(new_window, text = "Enter Port\nof Master")
         port_label.place(relx = .75, rely = .2, relwidth = .4,  relheight = .2 ,anchor = 'center')
 
@@ -151,14 +156,14 @@ class filemenu(tk.Frame):
         chan_name = tk.StringVar()
         chan_style = tk.StringVar()
         chan_limit = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Create Subscriber") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("400x400") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Create Subscriber")
+
+        # sets the geometry of toplevel
+        new_window.geometry("400x400")
 
         port_label = tk.Label(new_window, text = "Enter Channel port")
         port_label.place(relx = .25, rely = .2, relwidth = .5,  relheight = .1 ,anchor = 'center')
@@ -187,14 +192,14 @@ class filemenu(tk.Frame):
 
     def deleteChanWindow(self):
         remove = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Remove Channel") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("150x150") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Remove Channel")
+
+        # sets the geometry of toplevel
+        new_window.geometry("150x150")
 
         chan_label = tk.Label(new_window, text = "Enter Channel name \nto be removed")
         chan_label.place(relx = .5, rely = .3, relwidth = 1,  relheight = .2 ,anchor = 'center')
@@ -207,14 +212,14 @@ class filemenu(tk.Frame):
 
     def createPubWin(self):
         channel_name = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Create Publisher") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("200x200") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Create Publisher")
+
+        # sets the geometry of toplevel
+        new_window.geometry("200x200")
 
         chan_label = tk.Label(new_window, text = "Enter Channel names to \nconnect Publisher to.")
         chan_label.place(relx = .5, rely = .2, relwidth = 1,  relheight = .2 ,anchor = 'center')
@@ -228,14 +233,14 @@ class filemenu(tk.Frame):
 
     def createSubWin(self):
         channel_name = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Create Subscriber") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("200x200") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Create Subscriber")
+
+        # sets the geometry of toplevel
+        new_window.geometry("200x200")
 
         port_label = tk.Label(new_window, text = "Enter Channel name to \nconnect Subscriber to ")
         port_label.place(relx = .5, rely = .2, relwidth = 1,  relheight = .2 ,anchor = 'center')
@@ -250,15 +255,15 @@ class filemenu(tk.Frame):
     def sendMessWindow(self):
         channel_name = tk.StringVar()
         pub_port = tk.StringVar()
-        message = tk.StringVar()     
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Send message") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("200x200") 
+        message = tk.StringVar()
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Send message")
+
+        # sets the geometry of toplevel
+        new_window.geometry("200x200")
 
         chan_label = tk.Label(new_window, text = "Channel name \nto publish to")
         chan_label.place(relx = .25, rely = .1, relwidth = .5,  relheight = .2 ,anchor = 'center')
@@ -284,14 +289,14 @@ class filemenu(tk.Frame):
     def getMessageWin(self):
         channel_name = tk.StringVar()
         sub_port = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Get message") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("200x200") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Get message")
+
+        # sets the geometry of toplevel
+        new_window.geometry("200x200")
 
         chan_label = tk.Label(new_window, text = "Channel name \nto listen to")
         chan_label.place(relx = .25, rely = .1, relwidth = .5,  relheight = .2 ,anchor = 'center')
@@ -315,14 +320,14 @@ class filemenu(tk.Frame):
     def setPortRangeChanWindow(self):
         min_port = tk.StringVar()
         max_port = tk.StringVar()
-        new_window = tk.Toplevel() 
-  
-        # sets the title of the 
-        # Toplevel widget 
-        new_window.title("Set Port Range") 
-      
-        # sets the geometry of toplevel 
-        new_window.geometry("200x200") 
+        new_window = tk.Toplevel()
+
+        # sets the title of the
+        # Toplevel widget
+        new_window.title("Set Port Range")
+
+        # sets the geometry of toplevel
+        new_window.geometry("200x200")
 
         min_label = tk.Label(new_window, text = "Min")
         min_label.place(relx = .5, rely = .2, relwidth = .5, relheight = .2,anchor = 'e')
@@ -340,7 +345,7 @@ class filemenu(tk.Frame):
         set_port_bot.place(relx = 1, rely = .7, relwidth = 1, relheight = .2,anchor = 'e')
 
 def gui():
-    print("Icon")
+    #print("Icon")
 
     app = ManageFrames()
     app.mainloop()

@@ -35,7 +35,7 @@ Python Deps: \
 #### Steps for Building and Installing from Source
 ```diff
 
-```
+
 ##### Python
 1. Clone TALA through `git clone https://github.com/roboscienceorg/tala.git`.
 2. cd into the `tala/TALA` folder.
@@ -50,10 +50,10 @@ Python Deps: \
 4. In your Julia script import Pkg, activate the `Build/Julia/TALA.jl` folder  through `Pkg.activate([Path to Build/Julia/TALA.jl])` and then import TALA (See example below). The TALA.dll (Windows) or TALA.so (Linux) must be in the same directory as the Julia script.
 
 
+
 ### Using TALA
 ```diff
 
-```
 Simple script that will start TALA on IP 127.0.0.1 and port 25565, publish data
 to a channel called "My Channel", then print that same data after listening from
 that channel. Then terminating the TALA.
@@ -145,6 +145,7 @@ println(data)
 # Terminate the entire TALA network, stopping all channels.
 TALA.terminate(connection)
 ```
+
 
 ### Core Developers
 timadcock\

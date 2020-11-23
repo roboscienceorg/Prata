@@ -1,21 +1,17 @@
 
+#[path = "messaging.rs"] mod messaging;
 #[allow(dead_code)]
 extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
-
-//use splay::SplayMap;
+use std::collections::VecDeque;
 use splay::SplaySet;
-//use std::thread;
-//use std::time::Duration;
 use serde::{Deserialize, Serialize};
-//use serde_json::Result;
-//use serde_json::Value as JsonValue;
 use std::collections::HashMap;
+use std::time::{SystemTime, UNIX_EPOCH};
+
 
 #[derive(Debug)]
-
-
 
 /**
  * Represents Channel mode
@@ -37,8 +33,6 @@ impl Default for ChannelMode
 {
      fn default() -> Self {ChannelMode::STANDARD}
 }
-
-
 
 /**
  * Represents ports for an ip address
@@ -93,7 +87,7 @@ impl Ports
 
 
 /**
- * Represents an imbound message recieved from Publisher and Subscriber objs
+ * Represents an inbound message received from Publisher and Subscriber objs
  * messageType (char) - what request is made to the channel
  *                       D for data push
  *                       S for status pull
@@ -117,6 +111,25 @@ pub struct Message
 }
 
 
+/**
+ * Just a struct that holds the statistics about a particular channel.
+ * numReceived (u32) - number of messages the channel has received from a publisher
+ * numSent (u32) - number of messages the channel has sent to subscribers
+ * numStored (u32) - number of messages the channel has stored currently
+ * pubTimestamps (HashMap<String, u128>) - saves the timestamp of the last message received from a publisher.
+ *                                         The key is a string concatenated from the ip address and port.
+ * subTimestamps (HashMap<String, u128>) - saves the timestamp of the last request received from a subscriber.
+ *                                         The key is a string concatenated from the ip address and port.
+ */
+#[derive(Serialize, Deserialize)]
+pub struct ChannelStatistics
+{
+    pub numReceived: u32,
+    pub numSent: u32,
+    pub numStored: u32,
+    pub pubTimestamps: HashMap<String, u128>,
+    pub subTimestamps: HashMap<String, u128>,
+}
 
 
 /**
@@ -136,17 +149,16 @@ pub struct Message
  * Defaults to protocol = "tcp"
  * Defaults to addressBook = {empty}
  *
- * Note the addressbook could be implemented with a traditinal map
+ * Note the addressbook could be implemented with a traditional map
  *        if the speed measured is slow on larger scales
  *
  *
  *
  */
-
 pub struct Channel
 {
-
      pub mode: ChannelMode,
+     pub styles: String,
      pub name: String,
      pub ip: String,
      pub port: u16,
@@ -154,7 +166,8 @@ pub struct Channel
      pub protocol: String,
      //maps an ip to its port range
      pub addressBook : HashMap<String,Ports>,  //STRING
-
+     pub limit: u32,
+     pub channelStatistics: ChannelStatistics,
 }
 impl Default for Channel
 {
@@ -162,20 +175,53 @@ impl Default for Channel
     {
         Channel
         {
-
                mode: ChannelMode::STANDARD,
+               styles: String::from("fifo"),
                name: String::from("NoName"),
                ip: String::from("ImplementChannelIP"),
                port: 55555,
+               limit: 500,
                info: self::data::Information::new(),
                protocol: String::from("tcp"),
-               addressBook: HashMap::new()
+               addressBook: HashMap::new(),
+               channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, numStored: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
         }
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ChannelConfiguration
+{
+   pub ip: String,
+   pub port: u16,
+   pub name: String,
+   pub stylet: String,
+   pub messageLimit: u32,
+}
+impl Default for ChannelConfiguration
+{
+    fn default() -> ChannelConfiguration
+    {
+         ChannelConfiguration
+        {
 
+               ip: String::from("0.0.0.0"),
+               port: 0,
+               name: String::from("DEFAULT"),
+               stylet: String::from("fifo"),
+               messageLimit: 500,
+        }
+    }
+}
+impl ChannelConfiguration
+{
+     #[allow(dead_code)]
+     pub fn new(ip_: String, port_: u16, name_: String, style_: String, limit_: u32) -> ChannelConfiguration
+     {
+          return ChannelConfiguration{ip: ip_, port: port_, name: name_, stylet: style_, messageLimit: limit_};
+     }
 
+}
 /**
  * String override to:
  * "
@@ -197,9 +243,46 @@ impl Channel
       *
       */
       #[allow(dead_code)]
-     pub fn new(ip_: String, port_: u16) -> Channel
+     pub fn new(config: ChannelConfiguration) -> Channel
      {
-          return Channel { port: port_, ip: ip_, ..Default::default() };
+
+          let data_obj;
+          if config.stylet == "BROADCAST"
+          {
+               data_obj = self::data::Information { info: VecDeque::new(), limit: 1, _deleteOnPull: false};
+          }
+          else
+          {
+               data_obj = self::data::Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
+          }
+
+          return Channel { 
+               port: config.port, 
+               ip: config.ip, 
+               styles: config.stylet.to_string(), 
+               limit: config.messageLimit, 
+               name: config.name, 
+               info: data_obj, 
+               mode: ChannelMode::STANDARD,
+               protocol: String::from("tcp"), 
+               addressBook: HashMap::new(),
+               channelStatistics: ChannelStatistics {numReceived: 0, numSent: 0, numStored: 0, pubTimestamps: HashMap::new(), subTimestamps: HashMap::new()},
+          };
+   
+     }
+     #[allow(dead_code)]
+     pub fn getSupportedTypes() -> Vec<String>
+     {
+          let mut vec = Vec::new();
+          vec.push("FIFO".to_string());
+          vec.push("BROADCAST".to_string());
+
+          return vec;
+     }
+     #[allow(dead_code)]
+     pub fn getDefaultType() -> String
+     {
+          return "FIFO".to_string();
      }
     /**
      * adds ip address to addressbook with default port range 0-max
@@ -373,6 +456,8 @@ impl Channel
       *
       */
       #[allow(dead_code)]
+
+
      pub fn main(&mut self)
      {
           //set up the socket so we can connect to publishers and subscribers
@@ -384,18 +469,16 @@ impl Channel
           let responder = context.socket(zmq::REP).unwrap();
           responder
                .bind( &(full_address) )
-               //.connect("tcp://0.0.0.0:7000")
                .expect("failed binding socket");
-          //thread::sleep(Duration::from_millis(1));
 
           //get the port that we are bound to
           let _lastEndpoint = match responder.get_last_endpoint()
           {
                Ok(lastEndpoint) => {
-               match lastEndpoint {
-               Ok(lastEndpoint) => lastEndpoint,
-               Err(_e) => String::new(),
-               }
+                    match lastEndpoint {
+                         Ok(lastEndpoint) => lastEndpoint,
+                         Err(_e) => String::new(),
+                    }
                },
                Err(_e) => "failed".to_string(),
           };
@@ -417,12 +500,14 @@ impl Channel
 
                //json deserialized stored inside p value
                let inbound: Message = res.unwrap();
+               let ip = inbound.ip.clone();
+
                //white/black list check for valid credentials
                if self.validAddress(inbound.ip, inbound.port) == false
                {
                     //do nothing if invalid
                }
-               else if  inbound.messageType == 'D'
+               else if inbound.messageType == 'D'
                {
                     //add data
                     //use CLASS ADD FUNCTION
@@ -432,31 +517,85 @@ impl Channel
                     let res = serde_json::to_string(&m);
                     let serial_message: String = res.unwrap();
                     responder.send(&serial_message, 0).unwrap();
+
+                    //record an incoming message
+                    self.channelStatistics.numReceived += 1;
+                    self.channelStatistics.numStored = self.info.info.len() as u32;
+
+                    //save timestamp of last message sent for that publisher
+                    let start = SystemTime::now();
+                    let since_the_epoch = start
+                         .duration_since(UNIX_EPOCH)
+                         .expect("Time went backwards");
+                    let in_ms = since_the_epoch.as_millis();
+                    let key = format!("{}:{}", ip, inbound.port);
+                    if self.channelStatistics.pubTimestamps.contains_key(&key)
+                    {
+                         let timestamp = self.channelStatistics.pubTimestamps.get_mut(&key).unwrap();
+                         *timestamp = in_ms;
+                    }
+                    else
+                    {
+                         self.channelStatistics.pubTimestamps.insert(key, in_ms);
+                    }
                }
                else if  inbound.messageType == 'R'
                {
                     //send data
-                    let temp = self.info.get();
-                    let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: temp };
+                    let mut temp = "".to_string();
+
+                    if self.styles == "allFIFO"
+                    {
+                         /*
+                         let retval = self.info.getBroadcast(inbound.message.parse::<u32>().unwrap());
+                         let x = messaging::PositionText{ position: retval.0, text: retval.1 };
+                         let res = serde_json::to_string(&m);
+                         temp = res.unwrap();
+                         */
+                    }
+                    else
+                    {
+                         temp = self.info.get();
+                    }
+                    let m = Message { messageType: 'D', ip: self.ip.to_string(), port: self.port,  message: temp.to_string() };
 
                     let res = serde_json::to_string(&m);
                     let serial_message: String = res.unwrap();
                     responder.send(&serial_message, 0).unwrap();
+
+                    //record an outgoing message - only counts one for each subscriber request
+                    self.channelStatistics.numSent += 1;
+                    
+                    //save timestamp of the last request from that subscriber
+                    let start = SystemTime::now();
+                    let since_the_epoch = start
+                         .duration_since(UNIX_EPOCH)
+                         .expect("Time went backwards");
+                    let in_ms = since_the_epoch.as_millis();
+                    let key = format!("{}:{}", ip, inbound.port);
+                    if self.channelStatistics.subTimestamps.contains_key(&key)
+                    {
+                         let timestamp = self.channelStatistics.subTimestamps.get_mut(&key).unwrap();
+                         *timestamp = in_ms;
+                    }
+                    else
+                    {
+                         self.channelStatistics.subTimestamps.insert(key, in_ms);
+                    }
                }
                else if  inbound.messageType == 'S'
                {
                     //send status
-                    let temp = String::from("STATUS REQUEST: Not Avalilible");
-                    let m = Message { messageType: 'S', ip: self.ip.to_string(), port: self.port,  message: temp };
-
-                    let res = serde_json::to_string(&m);
-                    //let res = serde_json::to_string(&self.status);
+                    /*let temp = String::from("STATUS REQUEST: Not Available");
+                    let m = Message { messageType: 'S', ip: self.ip.to_string(), port: self.port,  message: temp }; */
+                    
+                    //serialize the channel statistics struct and send that back to the master process
+                    let res = serde_json::to_string(&self.channelStatistics);
                     let serial_message: String = res.unwrap();
                     responder.send(&serial_message, 0).unwrap();
                }
                else if inbound.messageType == 'T'
                {
-
                     //terminate channel listening and return to caller
                     let m = Message { messageType: 'A', ip: self.ip.to_string(), port: self.port,  message: "".to_string() };
 
@@ -467,9 +606,6 @@ impl Channel
                     //println!("channel closed");
                     return;
                }
-
-               //thread::sleep(Duration::from_millis(1000));
-
           }
      }
 
@@ -492,6 +628,8 @@ mod data
      pub struct Information
      {
           pub info: self::VecDeque<String>,
+          pub limit: u32,
+          pub _deleteOnPull: bool,
      }
      impl Information
      {
@@ -503,9 +641,23 @@ mod data
           * return none
           */
           #[allow(dead_code)]
+          pub fn setPull(&mut self, value: bool)
+          {
+               self._deleteOnPull = value;
+          }
+          #[allow(dead_code)]
           pub fn add(&mut self, bytes: String)
           {
+               if (self.info.len() as u32) == self.limit
+               {
+                    self.info.pop_front();
+               }
                self.info.push_back(bytes);
+          }
+          #[allow(dead_code)]
+          pub fn setLimit(&mut self, lim: u32)
+          {
+               self.limit = lim;
           }
           /**
           * get a string to the fifo structure
@@ -517,6 +669,7 @@ mod data
           #[allow(dead_code)]
           pub fn get(&mut self) -> String
           {
+               
                //let mut retval = String::from("");
                /*
                for i in &self.info
@@ -532,7 +685,13 @@ mod data
 
               let x = self.info.pop_front();
               if x.is_some(){
-                  return x.unwrap()
+                   let val = x.unwrap();
+                   if self._deleteOnPull == false
+                   {
+
+                         self.info.push_front(val.to_string());
+                   }
+                   return val;
               }else
               {
                   return "".to_string();
@@ -549,7 +708,8 @@ mod data
           #[allow(dead_code)]
           pub fn new() -> Information
           {
-               return Information { info: VecDeque::new()};
+
+               return Information { info: VecDeque::new(), limit: 500, _deleteOnPull: true};
           }
      }
 

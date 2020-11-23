@@ -1,0 +1,48 @@
+Round Trip 50 bytes
+###################
+Min: 0.02403s
+Min B/s: 2080.73242
+Median: 0.03008s
+Median B/s: 1662.23404
+Max: 0.03798s
+Max B/s: 1316.48236
+Average: 0.0309s
+Average B/s: 1618.12298
+###################
+
+Round Trip 1 KiloByte
+###################
+Min: 0.01677s
+Min B/s: 59630.29219
+Median: 0.01784s
+Median B/s: 56053.81166
+Max: 0.0285s
+Max B/s: 35087.7193
+Average: 0.01972s
+Average B/s: 50709.93915
+###################
+
+Round Trip 1 MegaByte
+###################
+Min: 0.02371s
+Min KB/s: 42176.29692
+Median: 0.02991s
+Median KB/s: 33433.63424
+Max: 0.05017s
+Max KB/s: 19932.23042
+Average: 0.03304s
+Average KB/s: 30266.34383
+###################
+
+Round Trip 35 MegaBytes
+###################
+Min: 0.55711s
+Min MB/s: 62.82422
+Median: 0.67729s
+Median MB/s: 51.67653
+Max: 0.78115s
+Max MB/s: 44.80574
+Average: 0.66838s
+Average MB/s: 52.36542
+###################
+

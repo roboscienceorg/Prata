@@ -20,32 +20,132 @@ Channels will handle the storage of data independently from Publishers and Subsc
 
 ### Requirements/Building/Installation
 
-##### Requirements
+#### Requirements
 Cargo \
 Maturin  \
 Python 3.X \
 pip \
 Julia \
-Python Deps:
-    1. Pillow \
-    2. NumPy \
 Windows/Linux \
+Python Deps: \
+    1. Pillow \
+    2. NumPy
 
-##### Steps for Building and Installing from Source
+
+#### Steps for Building and Installing from Source
 ```diff
-- NEEDS UPDATE
-```
-1. On Windows run install.bat, on Linux run install.sh they are located in the tala/Rust folder. This should take some time since it is installing and building everything. They will also tell you if you are missing any requirements.
-2. Go to Build for direct libraries, Build/Wheel for Python wheels. <br>
-3. If you want to use the direct libraries move the TALA.pyd into the location of the Python script and import TALA as usual. If you want to install TALA go into the Build/Wheels folder and run `pip install [Wheel Name].whl`. The wheel name will changed based on your system and Python Version. <br>
-4. For Julia, go into the Build/Julia folder, launch the Julia REPL press `]`, then type `activate TALA.jl`, backspace until Julia is seen again and do `using TALA` then TALA should be installed.
+
+
+##### Python
+1. Clone TALA through `git clone https://github.com/roboscienceorg/tala.git`.
+2. cd into the `tala/TALA` folder.
+3. Run install.bat (Windows) or install.sh (Linux) depending on your OS.
+4. After building is finished, install the wheel file through `pip install Build/Wheels/[Wheel name]`. Depending on your system it may be `pip3`.
+5. Import TALA into your python script to use TALA (See example below).
+
+##### Julia
+1. Clone TALA through `git clone https://github.com/roboscienceorg/tala.git`.
+2. cd into the `tala/TALA` folder.
+3. Run install.bat (Windows) or install.sh (Linux) depending on your OS.
+4. In your Julia script import Pkg, activate the `Build/Julia/TALA.jl` folder  through `Pkg.activate([Path to Build/Julia/TALA.jl])` and then import TALA (See example below). The TALA.dll (Windows) or TALA.so (Linux) must be in the same directory as the Julia script.
+
 
 
 ### Using TALA
 ```diff
-- NEEDS UPDATE
+
+Simple script that will start TALA on IP 127.0.0.1 and port 25565, publish data
+to a channel called "My Channel", then print that same data after listening from
+that channel. Then terminating the TALA.
+#### Python
+```python
+# Import the library
+import TALA
+
+# Connect to a host, this could be run running or one you plan on running
+connection = TALA.connect("127.0.0.1", 25565)
+
+# This is used to launch a host
+connection.host()
+
+'''
+PUBLISHER
+'''
+
+# Create a publisher
+publisher = connection.publisher()
+
+# Connect to a channel, if this channel does not exist it will be created
+publisher.connect("My Channel")
+
+# Publish string to the channel
+publisher.publish("My Channel", "Information")
+
+'''
+SUBSCRIBER
+'''
+
+# Create a subscriber
+subscriber = connection.subscriber()
+
+# Connect to a channel, if this channel does not exist it will be created
+subscriber.connect("My Channel")
+
+# Listen from the channel
+data = subscriber.listen("My Channel")
+
+print(data)
+
+
+# Terminate the entire TALA network, stopping all channels.
+connection.terminate()
+
+'''
+    publishers and susbcribers do not need to connect to a channel initially,
+    publish and listen will connect to a channel if it is not alreay known.
+'''
 ```
-[How to use this should come soon]
+
+#### Julia
+```Julia
+# Import the TALA package
+using Pkg
+Pkg.activate("Path to Build/Julia/TALA.jl")
+`Make sure TALA.dll/so is in the same directory as this file.`
+using TALA
+
+# Connect to a host, this could be run running or one you plan on running
+connection = TALA.connect("127.0.0.1",25565)
+
+# This is used to launch a host
+TALA.host(connection)
+
+`
+PUBLISHER
+`
+
+# Create a publisher
+publisher = TALA.publisher(connection)
+
+# publish to a channel, if this channel does not exist it will be created
+TALA.publish(publisher, "My Channel", "Information")
+
+`
+SUBSCRIBER
+`
+
+# Create a subscriber
+subscriber = TALA.subscriber(connection)
+
+# Listen from the channel
+data = TALA.listen(subscriber, "My Channel")
+
+println(data)
+
+# Terminate the entire TALA network, stopping all channels.
+TALA.terminate(connection)
+```
+
 
 ### Core Developers
 timadcock\
@@ -57,4 +157,3 @@ bhllamoreaux
 ### Additional Help
 jeffmcgough\
 nibennett
-

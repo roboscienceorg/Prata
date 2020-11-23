@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os.path
 
 setup (
-    name='TALA',
+    name='prata',
     version = "1",
     author='Ayden Drabek, Brennan Lamoreaux, Ethan Steidl, Ryan Shell, Timothy Adcock  ',
     author_email='ayden.drabek@mines.sdsmt.edu, brennan.lamoreaux@mines.sdsmt.edu, ethan.steidl@mines.sdsmt.edu, ryan.shell@mines.sdsmt.edu, timothy.adcock@mines.sdsmt.edu',

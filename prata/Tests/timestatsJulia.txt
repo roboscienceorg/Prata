@@ -1,0 +1,88 @@
+Startup of network
+##############
+Min: 28.6008
+Median: 527.3728
+Max: 760.2166
+Average: 524.44648
+##############
+
+Channel creation
+##############
+Min: 42.6323
+Median: 551.1531
+Max: 631.5054
+Average: 550.79769
+##############
+
+Listen function call time without known channel
+##############
+Min: 24.0238
+Median: 42.03845
+Max: 72.5506
+Average: 42.48612
+##############
+
+Listen function call time with known channel
+##############
+Min: 8.7153
+Median: 21.1553
+Max: 39.011
+Average: 21.66584
+##############
+
+Publish function call time without known channel
+##############
+Min: 23.1957
+Median: 40.0662
+Max: 99.3136
+Average: 40.75533
+##############
+
+Publish function call time with known channel
+##############
+Min: 7.6894
+Median: 19.29825
+Max: 77.6084
+Average: 20.1691
+##############
+
+Full run without known channel
+##############
+Min: 38.5742
+Median: 80.1865
+Max: 137.7027
+Average: 79.56204
+##############
+
+Full run with known channel
+##############
+Min: 20.7759
+Median: 40.34365
+Max: 123.7257
+Average: 41.32812
+##############
+
+Spam Publish
+##############
+Min: 387.5579
+Median: 682.03745
+Max: 919.3359
+Average: 672.30531
+##############
+
+Spam Listen
+##############
+Min: 445.5185
+Median: 637.11845
+Max: 886.411
+Average: 635.47357
+##############
+
+Spam Channel
+##############
+Min: 419.6076
+Median: 863.80745
+Max: 1128.2226
+Average: 859.09975
+##############
+

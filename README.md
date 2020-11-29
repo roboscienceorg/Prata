@@ -31,7 +31,7 @@ Python Deps: \
     1. Pillow \
     2. NumPy \
     3. NetworkX \
-    4. Tkinter \ 
+    4. Tkinter \
     5. Matplotlib
 
 

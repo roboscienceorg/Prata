@@ -1,6 +1,6 @@
 # Import the prata package
 using Pkg
-Pkg.activate("..\\Build\\Julia\\prata.jl")
+Pkg.activate("../Build/Julia/prata.jl")
 using prata
 
 # Connect to a host, this could be run running or one you plan on running

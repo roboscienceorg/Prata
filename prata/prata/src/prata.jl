@@ -1,7 +1,7 @@
 module prata
 
 # File Path to this file.
-LIBRARY = string(@__DIR__,"\\prata")
+LIBRARY = string(@__DIR__,"/prata")
 
 ```
 This connect to a master on IP and Port,

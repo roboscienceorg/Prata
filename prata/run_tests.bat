@@ -1,6 +1,6 @@
-#!/bin/bash
-bash install.sh
-cp Build/prata.dll Tests/
+call ./install.bat
+set "dir1=Build/Wheels"
+for %%X in ("%dir1%\*.whl") DO pip install %%~dpnfX
 
 echo "Running Python tests..."
 python Tests/test_general_use_python.py

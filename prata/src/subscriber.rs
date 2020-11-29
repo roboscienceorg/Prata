@@ -2,22 +2,21 @@ extern crate serde_json;
 extern crate serde;
 extern crate serde_derive;
 
-//use std::collections::HashMap;
 use std::collections::HashMap;
-//use std::thread;
-//use std::time::Duration;
-//use serde::{Deserialize, Serialize};
-//use serde_json::Result;
-//use serde_json::Value as JsonValue;
 use pyo3::prelude::*;
 #[path = "messaging.rs"] mod messaging;
-//#[derive(Debug)]
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
 
 
-
-//structure for all data that publisher needs to transmit data
+/**
+ * Subscribers recieve data from channels
+ * channelInfo (HashMap<String, IPPort>) - Channel names maped to their addresses
+ * masterip (String) - IP of Mster Process
+ * masterport (u16) - port of Master Process
+ * ip (String) - Publisher's IP address
+ * port (u16) - Publisher's port
+ */
 #[pyclass]
 #[derive(Clone)]
 pub struct Subscriber
@@ -31,13 +30,22 @@ pub struct Subscriber
 
 impl Subscriber
 {
-    //constructor for Publisher Object
+    /**
+     * constructor for Subscriber Object
+     * MasterIP (String) - Ip of Master Process
+     * MasterPort (u16) - Port of Master Process
+     * IP (String) - IP to host Subscriber on
+     * Port (u16) - Port to host Subscriber on
+     */
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Subscriber
     {
         
         return Subscriber{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port};
     }
-    //fn for adding a channel / master info to the map being used for data storage
+    
+    /**
+     * Adds a new Channel IP and port to the lookup table
+     */
     fn add(&mut self, Name: String, IP: String, Port: u16)
     {
         self.channelInfo.insert(Name, (IP, Port));   //pass in the info about the channel to be stored in the pub
@@ -50,24 +58,35 @@ impl Subscriber
 #[pymethods]
 impl Subscriber {
 
+    /**
+     * Represents a Subscriber in a string format
+     * Returns (String) - Representation of Subscriber
+     */
     pub fn to_string(&mut self) -> String
     {
         return format!("Construct Sub: Master({}, {}) Self({}, {})", self.masterip, self.masterport, self.ip, self.port);
     }
 
-    //function for connecting to a channel
+    /**
+     * Connects a Subscriber to a Channel
+     * Name (String) - Channel to connect to
+     */
     pub fn connect(&mut self, Name: String)
     {
         //if it is not stored in the list open up a req socket and send a request to master asking for channel info
         if  self.channelInfo.contains_key(&Name) == false
         {
-        let mx = messaging::Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
-        let m2 = messaging::send(self.masterip.to_string(), self.masterport, mx);
+        let message_ = messaging::Message { messageType: 'C', ip: self.ip.to_string(), port: self.port,  message: Name.to_string() };
+        let m2 = messaging::send(self.masterip.to_string(), self.masterport, message_);
         //add the information to the channelInfo Object
         self.add(Name, m2.ip, m2.port);
         }
     }
-    //adds ip address to addressbook with default port range 0-max
+    
+    /**
+     * Disconnects a Subscriber from a specific Channel
+     * Name (String) - Channel to disconnect from
+     */
     pub fn disconnect(&mut self, Name: String)
     {
         //Check if channel is stored in hashmap
@@ -104,6 +123,12 @@ impl Subscriber {
         {
         }
     }
+
+    /**
+     * Recieves data from a Channel
+     * ChannelName (String) - Channel to recieve from
+     * Returns (String) - Data recieved from the Channel
+     */
     pub fn listen(&mut self, ChannelName : String) -> String
     {
         if  self.channelInfo.contains_key(&ChannelName) == false
@@ -118,11 +143,20 @@ impl Subscriber {
 
         return m2.message;
     }
+
+    /**
+     * Gets the IP of the Subscriber
+     * Returns (String) - IP of Subscriber
+     */
     pub  fn getIP(&mut self)->String
     {
         return self.ip.to_string();
     }
 
+    /**
+     * Gets the port of the Subscriber
+     * Returns (u16) - Port of Subscriber
+     */
     pub  fn getPort(&mut self)->u16
     {
         return self.port;

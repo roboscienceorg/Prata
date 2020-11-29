@@ -81,7 +81,24 @@ pub struct MasterProcess
  */
 impl MasterProcess
 {
-   /* Start the master process. This will be the main loop */
+   /**
+    * Starts an infinite loop for MasterProcess. A listening socket will
+    * be created that handels communication from Master, Publisher, and
+    * Subscriber. The messages recieved must be JSON representations of
+    * the messaging::Message struct. Each message is encoded with a 
+    * message type to denote how it must be handled when recieved
+    * T - Terminates all channels being hosted. Then retuns out of infite
+    *     loop and shuts down hosting
+    * d - Publisher disconnecting
+    * D - Subscriber disconnecting
+    * c - Publisher requesting connection to a Channel
+    * C - Subscriber requesting connection to a Channel
+    * J - Request for JSON representation of this MasterProcess
+    * R - Removes a Channel and terminates it
+    * N - Creates a new Channel
+    * P - Sets custom port range
+    * O - Prints out supported channel types
+    */
    pub fn start(mut self)
    {
       //set up the socket so we can connect to publishers and subscribers
@@ -359,6 +376,9 @@ impl MasterProcess
       repSocket.send(&serial_message, 0).unwrap();
    }
 
+   /**
+    * Retrieves the next port to host a channel on
+    */
    #[allow(dead_code)]
    fn getPort(&mut self) -> u16
    {

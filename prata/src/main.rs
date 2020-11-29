@@ -1,23 +1,23 @@
 
 #![allow(non_snake_case)]
 
-//mod TEST_Channel;
 mod channel;
 mod master;
 use std::{thread, time};
-//use std::thread;
 
-//use port_scanner::request_open_port;
-
+//IP address to use for testing
 const IPADDRESS: &str = "127.0.0.1";
 
+//Main initiates rust test cases
 fn main() {
 
     run_tests();
-    //let mut line = String::new();
-    //let _b1 = std::io::stdin().read_line(&mut line).unwrap();
 
 }
+
+/**
+ * Runs Rust test cases
+ */
 fn run_tests()
 {
     
@@ -39,6 +39,10 @@ fn run_tests()
     
     //test_set_port_range()
 }
+
+/**
+ * Tests setting port ranges for Channel
+ */
 #[allow(dead_code)]
 fn test_set_port_range()
 {
@@ -51,6 +55,10 @@ fn test_set_port_range()
 
     println!("TEST: set_port_range END");
 }
+
+/**
+ * tests using an invalid IP address for Master
+ */
 #[allow(dead_code)]
 fn test_invalid_host_ip()
 {
@@ -63,6 +71,10 @@ fn test_invalid_host_ip()
 
     println!("TEST: invalid_host_ip END");
 }
+
+/**
+ * Tests FIFO functionality of Channel
+ */
 #[allow(dead_code)]
 fn test_fifo()
 {
@@ -79,6 +91,11 @@ fn test_fifo()
     m.terminate();
     println!("TEST: test_fifo END");
 }
+
+/**
+ * Tests publishing to a deleted channel after a Publisher
+ * has already send data to it once
+ */
 #[allow(dead_code)]
 fn test_delete_channel_after_pub()
 {
@@ -102,6 +119,10 @@ fn test_delete_channel_after_pub()
     m.terminate();
     println!("TEST: test_delete_channel_after_pub END");
 }
+
+/**
+ * Tests creating a custom FIFO channel
+ */
 #[allow(dead_code)]
 fn test_custom_fifo()
 {
@@ -122,6 +143,10 @@ fn test_custom_fifo()
     m.terminate();
     println!("TEST: test_custom_fifo END");
 }
+
+/**
+ * Tests broadcast functionality
+ */
 #[allow(dead_code)]
 fn test_broadcast()
 {
@@ -143,6 +168,10 @@ fn test_broadcast()
     m.terminate();
     println!("TEST: test_broadcast END");
 }
+
+/**
+ * Tests FIFO and Broadcast functionality
+ */
 #[allow(dead_code)]
 fn test_FIFO_and_Broadcast()
 {

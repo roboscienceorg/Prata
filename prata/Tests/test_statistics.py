@@ -1,7 +1,7 @@
 import prata as tl
 import time
 import json
-
+print("TEST: Testing for Statistics")
 m = tl.connect("127.0.0.1", 25565)
 
 m.host()

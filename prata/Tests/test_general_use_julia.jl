@@ -1,9 +1,10 @@
 # Import the prata package
 using Pkg
-Pkg.activate("../Build/Julia/prata.jl")
+Pkg.activate("Build/Julia/prata.jl")
 using prata
 
 # Connect to a host, this could be run running or one you plan on running
+println("TEST: Basic pulbish/subscribe")
 m = prata.connect("127.0.0.1",25565)
 
 # This is used to launch a host

@@ -29,7 +29,10 @@ Julia \
 Windows/Linux \
 Python Deps: \
     1. Pillow \
-    2. NumPy
+    2. NumPy \
+    3. NetworkX \
+    4. Tkinter \ 
+    5. Matplotlib
 
 
 #### Steps for Building and Installing from Source

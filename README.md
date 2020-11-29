@@ -1,5 +1,5 @@
 
-# prata (Distributed Communications)
+# Prata (Distributed Communications)
 
 ### Goal
 The goal of prata is to have a fast and easy distributed communication system that that someone could use without deep knowledge of sockets or ZeroMQ.

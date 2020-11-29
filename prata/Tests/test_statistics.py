@@ -13,7 +13,6 @@ pub = m.publisher()
 pub.publish("1","message1")
 pub.publish("1","message2")
 
-print("receiving 2 messages from channel 1")
 if("message1" != sub.listen("1")):
     print("---TEST: failure in statistics listen uno")
 

@@ -1,6 +1,8 @@
 # Import the library
 import prata
 
+print("TEST: Basic pulbish/subscribe")
+
 # Connect to a host, this could be run running or one you plan on running
 connection = prata.connect("127.0.0.1", 25565)
 
@@ -31,9 +33,9 @@ subscriber = connection.subscriber()
 subscriber.connect("My Channel")
 
 # Listen from the channel
-data = subscriber.listen("My Channel")
+if("Information" != subscriber.listen("My Channel")):
+    print("---ERROR:  Publish/Subscribe FAIL")
 
-print(data)
 
 
 # Terminate the entire prata network, stopping all channels.

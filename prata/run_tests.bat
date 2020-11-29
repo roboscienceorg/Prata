@@ -9,4 +9,3 @@ python Tests/test_stats_performance.py
 
 echo "Running Julia tests..."
 julia Tests/test_general_use_julia.jl
-julia Tests/test_time_julia.jl

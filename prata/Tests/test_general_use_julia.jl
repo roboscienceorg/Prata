@@ -1,9 +1,10 @@
 # Import the prata package
 using Pkg
-Pkg.activate("../Build/Julia/prata.jl")
+Pkg.activate("Build/Julia/prata.jl")
 using prata
 
 # Connect to a host, this could be run running or one you plan on running
+println("TEST: Basic pulbish/subscribe")
 m = prata.connect("127.0.0.1",25565)
 
 # This is used to launch a host
@@ -29,7 +30,9 @@ subscriber = prata.subscriber(m)
 # Listen from the channel
 data = prata.listen(subscriber, "My Channel")
 
-println(data)
+if data != "Information"
+    println("Failure in Julia. Got: ", data, " Needed Information")
+end
 
 # Terminate the entire prata network, stopping all channels.
 prata.terminate(m)

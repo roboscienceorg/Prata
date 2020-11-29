@@ -33,8 +33,8 @@ subscriber = connection.subscriber()
 subscriber.connect("My Channel")
 
 # Listen from the channel
-if("Information" != subscriber.listen("My Channel"))
-    print("---ERROR:  Publish/Subscribe FAIL)
+if("Information" != subscriber.listen("My Channel")):
+    print("---ERROR:  Publish/Subscribe FAIL")
 
 
 

@@ -29,7 +29,9 @@ subscriber = prata.subscriber(m)
 # Listen from the channel
 data = prata.listen(subscriber, "My Channel")
 
-println(data)
+if data != "Information"
+    println("Failure in Julia. Got: ", data, " Needed Information")
+end
 
 # Terminate the entire prata network, stopping all channels.
 prata.terminate(m)

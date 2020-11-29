@@ -1,4 +1,6 @@
 use super::channel;
+
+//Outdated tests for channel
 pub fn test()
 {
     basic_test();

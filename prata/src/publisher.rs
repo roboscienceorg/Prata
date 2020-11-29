@@ -3,16 +3,21 @@ extern crate serde;
 extern crate serde_derive;
 
 use std::collections::HashMap;
-
-
 use pyo3::prelude::*;
 #[path = "messaging.rs"] mod messaging;
-//#[derive(Debug)]
+
 
 type IPPort = (String, u16);        //tuple that holds (IP, Port)
 
 
-//structure for all data that publisher needs to transmit data
+/**
+ * Publishers send data to channels
+ * channelInfo (HashMap<String, IPPort>) - Channel names maped to their addresses
+ * masterip (String) - IP of Mster Process
+ * masterport (u16) - port of Master Process
+ * ip (String) - Publisher's IP address
+ * port (u16) - Publisher's port
+ */
 #[pyclass]
 #[derive(Clone)]
 pub struct Publisher
@@ -27,7 +32,9 @@ pub struct Publisher
 
 impl Publisher
 {
-    //constructor for Publisher Object
+    /**
+     * constructor for Publisher Object
+     */
     pub fn new(MasterIP: String, MasterPort: u16, IP: String, Port: u16) -> Publisher
     {
         return Publisher{channelInfo: HashMap::new(), masterip: MasterIP, masterport: MasterPort, ip : IP, port : Port}

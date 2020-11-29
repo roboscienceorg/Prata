@@ -624,7 +624,7 @@ impl Channel
                else if inbound.messageType == 'D'
                {
                     //add data
-                    \//Add data to queue
+                    //Add data to queue
                     self.info.add(inbound.message);
 
                     //Create reuturn message with Acknowledgement and serializes into JSON
@@ -661,7 +661,7 @@ impl Channel
                     //send data to requestor
 
                     //Gets data from queue
-                    let mut temp = "".to_string();
+                    let temp;
                     temp = self.info.get();
 
                     //Builds return message and serializes into JSON
@@ -805,7 +805,7 @@ mod data
               }
 
           }
-          
+
           /**
           * New call to return new object
           *
